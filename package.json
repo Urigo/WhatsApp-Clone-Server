@@ -2,7 +2,17 @@
   "name": "whatsapp-server-koa",
   "description": "A newly created Tortilla project",
   "private": true,
+  "scripts": {
+    "start": "npm run build:live",
+    "build:live": "nodemon --exec ./node_modules/.bin/ts-node -- ./index.ts"
+  },
   "dependencies": {
     "koa": "^2.4.1"
+  },
+  "devDependencies": {
+    "@types/node": "^8.0.49",
+    "nodemon": "^1.12.1",
+    "ts-node": "^3.3.0",
+    "typescript": "^2.6.1"
   }
 }
