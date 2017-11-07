@@ -1,5 +1,8 @@
 {
   "name": "whatsapp-server-koa",
   "description": "A newly created Tortilla project",
-  "private": true
+  "private": true,
+  "dependencies": {
+    "koa": "^2.4.1"
+  }
 }
