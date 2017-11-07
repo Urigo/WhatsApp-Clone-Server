@@ -1,0 +1,15 @@
+{
+  "name": "whatsapp-server-express",
+  "description": "A newly created Tortilla project",
+  "private": true,
+  "scripts": {
+    "start": "npm run build:live",
+    "build:live": "nodemon --exec ./node_modules/.bin/ts-node -- ./index.ts"
+  },
+  "devDependencies": {
+    "@types/node": "10.0.6",
+    "nodemon": "1.17.4",
+    "ts-node": "6.0.3",
+    "typescript": "2.8.3"
+  }
+}
