@@ -1,0 +1,309 @@
+import * as moment from "moment";
+import { Chat, db, Message, MessageType, Recipient } from "./db";
+import { IResolvers } from "graphql-tools/dist/Interfaces";
+import {
+  AddChatMutationArgs, AddMessageMutationArgs, ChatQueryArgs, RemoveChatMutationArgs,
+  RemoveMessagesMutationArgs
+} from "../types";
+
+let users = db.users;
+let chats = db.chats;
+const currentUser = 0;
+
+export const resolvers: IResolvers = {
+  Query: {
+    // Show all other contacts for the moment.
+    contacts: () => users.filter(user => user.id !== currentUser),
+    chats: () => chats.filter(chat => chat.listingIds.includes(currentUser)),
+    chat: (obj: any, {chatId}: ChatQueryArgs) => chats.find(chat => chat.id === chatId),
+  },
+  Mutation: {
+    addChat: (obj: any, {recipientIds, groupName}: AddChatMutationArgs) => {
+      recipientIds.forEach(recipientId => {
+        if (!users.find(user => user.id === recipientId)) {
+          throw new Error(`Recipient ${recipientId} doesn't exist.`);
+        }
+      });
+
+      if (!groupName) {
+        if (!recipientIds || recipientIds.length !== 1) {
+          // Ambiguous request: is it a chat or a group?
+          throw new Error(`Chats expect recipientIds to be of length 1. Groups expect groupName to be non-null.`);
+        }
+        // Chat
+        const recipientId = recipientIds[0];
+        const chat = chats.find(chat => !chat.name && chat.userIds.includes(currentUser) && chat.userIds.includes(recipientId));
+        if (chat) {
+          // Chat already exists. Both users are already in the userIds array
+          const chatId = chat.id;
+          if (!chat.listingIds.includes(currentUser)) {
+            // The chat isn't listed for the current user. Add him to the memberIds
+            chats.find(chat => chat.id === chatId)!.listingIds.push(currentUser);
+          }
+          return chatId;
+        } else {
+          // Create the chat
+          const id = chats[chats.length - 1].id + 1;
+          const chat: Chat = {
+            id,
+            name: null,
+            picture: null,
+            adminIds: null,
+            ownerId: null,
+            userIds: [currentUser, recipientId],
+            // Chat will not be listed to the other user until the first message gets written
+            listingIds: [currentUser],
+            memberIds: null,
+            messages: [],
+          };
+          chats.push(chat);
+          return id;
+        }
+      } else {
+        // Group
+        if (!recipientIds || !(recipientIds.length >= 1)) {
+          throw new Error(`recipientIds must be an array of 1 or more elements.`);
+        }
+        // Create the group
+        const id = chats[chats.length - 1].id + 1;
+        const chat: Chat = {
+          id,
+          name: groupName,
+          picture: null,
+          adminIds: [currentUser],
+          ownerId: currentUser,
+          userIds: [currentUser, ...recipientIds],
+          listingIds: [currentUser, ...recipientIds],
+          memberIds: [currentUser, ...recipientIds],
+          messages: [],
+        };
+        chats.push(chat);
+        return id;
+      }
+    },
+    removeChat: (obj: any, {chatId}: RemoveChatMutationArgs) => {
+      const chat = chats.find(chat => chat.id === chatId);
+
+      if (!chat) {
+        throw new Error(`The chat ${chatId} doesn't exist.`);
+      }
+
+      if (!chat.name) {
+        // Chat
+        if (!chat.listingIds.includes(currentUser)) {
+          throw new Error(`The user is not a member of the chat ${chatId}.`);
+        }
+
+        // Instead of chaining map and filter we can loop once using reduce
+        const messages = chat.messages.reduce<Message[]>((filtered, message) => {
+          // Remove the current user from the message holders
+          message.holderIds = message.holderIds.filter(holderId => holderId !== currentUser);
+
+          if (message.holderIds.length !== 0) {
+            filtered.push(message);
+          } // else discard the message
+
+          return filtered;
+        }, []);
+
+        // Remove the current user from who gets the chat listed. The chat will no longer appear in his list
+        const listingIds = chat.listingIds.filter(listingId => listingId !== currentUser);
+
+        // Check how many members are left
+        if (listingIds.length === 0) {
+          // Delete the chat
+          chats = chats.filter(chat => chat.id !== chatId);
+        } else {
+          // Update the chat
+          chats = chats.map(chat => {
+            if (chat.id === chatId) {
+              chat = {...chat, listingIds, messages};
+            }
+            return chat;
+          });
+        }
+        return true;
+      } else {
+        // Group
+        if (chat.ownerId !== currentUser) {
+          throw new Error(`Group ${chatId} is not owned by the user.`);
+        }
+
+        // Instead of chaining map and filter we can loop once using reduce
+        const messages = chat.messages.reduce<Message[]>((filtered, message) => {
+          // Remove the current user from the message holders
+          message.holderIds = message.holderIds.filter(holderId => holderId !== currentUser);
+
+          if (message.holderIds.length !== 0) {
+            filtered.push(message);
+          } // else discard the message
+
+          return filtered;
+        }, []);
+
+        // Remove the current user from who gets the group listed. The group will no longer appear in his list
+        const listingIds = chat.listingIds.filter(listingId => listingId !== currentUser);
+
+        // Check how many members (including previous ones who can still access old messages) are left
+        if (listingIds.length === 0) {
+          // Remove the group
+          chats = chats.filter(chat => chat.id !== chatId);
+        } else {
+          // Update the group
+
+          // Remove the current user from the chat members. He is no longer a member of the group
+          const memberIds = chat.memberIds!.filter(memberId => memberId !== currentUser);
+          // Remove the current user from the chat admins
+          const adminIds = chat.adminIds!.filter(memberId => memberId !== currentUser);
+          // Set the owner id to be null. A null owner means the group is read-only
+          let ownerId: number | null = null;
+
+          // Check if there is any admin left
+          if (adminIds!.length >= 1) {
+            // Pick an admin as the new owner. The group is no longer read-only
+            ownerId = chat.adminIds![0];
+          }
+
+          chats = chats.map(chat => {
+            if (chat.id === chatId) {
+              chat = {...chat, messages, listingIds, memberIds, adminIds, ownerId};
+            }
+            return chat;
+          });
+        }
+        return true;
+      }
+    },
+    addMessage: (obj: any, {chatId, content}: AddMessageMutationArgs) => {
+      if (content === null || content === '') {
+        throw new Error(`Cannot add empty or null messages.`);
+      }
+
+      let chat = chats.find(chat => chat.id === chatId);
+
+      if (!chat) {
+        throw new Error(`Cannot find chat ${chatId}.`);
+      }
+
+      let holderIds: number[] = [];
+
+      if (!chat.name) {
+        // Chat
+        if (!chat.listingIds.find(listingId => listingId === currentUser)) {
+          throw new Error(`The chat ${chatId} must be listed for the current user before adding a message.`);
+        }
+
+        const recipientId = chat.userIds.filter(userId => userId !== currentUser)[0];
+
+        if (!chat.listingIds.find(listingId => listingId === recipientId)) {
+          // Chat is not listed for the recipient. Add him to the listingIds
+          const listingIds = chat.listingIds.concat(recipientId);
+
+          chats = chats.map(chat => {
+            if (chat.id === chatId) {
+              chat = {...chat, listingIds}
+            }
+            return chat;
+          });
+
+          holderIds = listingIds;
+        }
+      } else {
+        // Group
+        if (!chat.memberIds!.find(memberId => memberId === currentUser)) {
+          throw new Error(`The user is not a member of the group ${chatId}. Cannot add message.`);
+        }
+
+        holderIds = chat.memberIds!;
+      }
+
+      const id = chat.messages[chat.messages.length - 1].id + 1;
+
+      let recipients: Recipient[] = [];
+
+      holderIds.forEach(holderId => {
+        recipients.push({
+          id: holderId,
+          receivedAt: null,
+          readAt: null,
+        })
+      });
+
+      const message: Message = {
+        id,
+        senderId: currentUser,
+        content,
+        createdAt: moment().unix(),
+        type: MessageType.TEXT,
+        recipients,
+        holderIds,
+      };
+
+      chats = chats.map(chat => {
+        if (chat.id === chatId) {
+          chat = {...chat, messages: chat.messages.concat(message)}
+        }
+        return chat;
+      });
+
+      return id;
+    },
+    removeMessages: (obj: any, {chatId, messageIds, all}: RemoveMessagesMutationArgs) => {
+      const chat = chats.find(chat => chat.id === chatId);
+
+      if (!chat) {
+        throw new Error(`Cannot find chat ${chatId}.`);
+      }
+
+      if (!chat.listingIds.find(listingId => listingId === currentUser)) {
+        throw new Error(`The chat/group ${chatId} is not listed for the current user, so there is nothing to delete.`);
+      }
+
+      if (all && messageIds) {
+        throw new Error(`Cannot specify both 'all' and 'messageIds'.`);
+      }
+
+      chats = chats.map(chat => {
+        if (chat.id === chatId) {
+          // Instead of chaining map and filter we can loop once using reduce
+          const messages = chat.messages.reduce<Message[]>((filtered, message) => {
+            if (all || messageIds!.includes(message.id)) {
+              // Remove the current user from the message holders
+              message.holderIds = message.holderIds.filter(holderId => holderId !== currentUser);
+            }
+
+            if (message.holderIds.length !== 0) {
+              filtered.push(message);
+            } // else discard the message
+
+            return filtered;
+          }, []);
+          chat = {...chat, messages};
+        }
+        return chat;
+      });
+      return true;
+    },
+  },
+  Chat: {
+    name: (chat: Chat) => chat.name ? chat.name : users
+      .find(user => user.id === chat.userIds.find(userId => userId !== currentUser))!.name,
+    picture: (chat: Chat) => chat.name ? chat.picture : users
+        .find(user => user.id === chat.userIds.find(userId => userId !== currentUser))!.picture,
+    messages: (chat: Chat) => chat.messages
+        .filter(message => message.holderIds.includes(currentUser))
+        .sort((a, b) => a.createdAt - b.createdAt) || [],
+    lastMessage: (chat: Chat) => chat.messages
+        .filter(message => message.holderIds.includes(currentUser))
+        .sort((a, b) => b.createdAt - a.createdAt)[0] || null,
+    unreadMessages: (chat: Chat) => chat.messages
+      .filter(message => message.holderIds.includes(currentUser) &&
+        message.recipients.find(recipient => recipient.id === currentUser && !recipient.readAt))
+      .length,
+    isGroup: (chat: Chat) => !!chat.name,
+  },
+  Message: {
+    sender: (message: Message) => users.find(user => user.id === message.senderId),
+    ownership: (message: Message) => message.senderId === currentUser,
+  },
+};
