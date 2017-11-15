@@ -2,7 +2,7 @@ import { ITypeDefinitions } from "graphql-tools/dist/Interfaces";
 
 export const typeDefs: ITypeDefinitions = `
   type Query {
-    contacts: [User!]
+    users: [User!]
     chats: [Chat!]
     chat(chatId: Int!): Chat
   }
@@ -70,9 +70,9 @@ export const typeDefs: ITypeDefinitions = `
   }
 
   type Mutation {
-    addChat(recipientIds: [Int!]!, groupName: String): Int
+    addChat(recipientIds: [Int!]!, groupName: String): Chat
     removeChat(chatId: Int!): Boolean
-    addMessage(chatId: Int!, content: String!): Int
+    addMessage(chatId: Int!, content: String!): Message
     removeMessages(chatId: Int!, messageIds: [Int!], all: Boolean): Boolean
     addMembers(groupId: Int!, userIds: [Int!]!): Boolean
     removeMembers(groupId: Int!, userIds: [Int!]!): Boolean

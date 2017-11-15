@@ -1,7 +1,7 @@
 /* tslint:disable */
 
 export interface Query {
-  contacts: User[]; 
+  users: User[]; 
   chats: Chat[]; 
   chat?: Chat | null; 
 }
@@ -47,9 +47,9 @@ export interface Recipient {
 }
 
 export interface Mutation {
-  addChat?: number | null; 
+  addChat?: Chat | null; 
   removeChat?: boolean | null; 
-  addMessage?: number | null; 
+  addMessage?: Message | null; 
   removeMessages?: boolean | null; 
   addMembers?: boolean | null; 
   removeMembers?: boolean | null; 

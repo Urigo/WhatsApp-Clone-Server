@@ -8,12 +8,12 @@ import {
 
 let users = db.users;
 let chats = db.chats;
-const currentUser = 0;
+const currentUser = 1;
 
 export const resolvers: IResolvers = {
   Query: {
-    // Show all other contacts for the moment.
-    contacts: () => users.filter(user => user.id !== currentUser),
+    // Show all users for the moment.
+    users: () => users.filter(user => user.id !== currentUser),
     chats: () => chats.filter(chat => chat.listingIds.includes(currentUser)),
     chat: (obj: any, {chatId}: ChatQueryArgs) => chats.find(chat => chat.id === chatId),
   },
@@ -38,12 +38,13 @@ export const resolvers: IResolvers = {
           const chatId = chat.id;
           if (!chat.listingIds.includes(currentUser)) {
             // The chat isn't listed for the current user. Add him to the memberIds
+            chat.listingIds.push(currentUser);
             chats.find(chat => chat.id === chatId)!.listingIds.push(currentUser);
           }
-          return chatId;
+          return chat;
         } else {
           // Create the chat
-          const id = chats[chats.length - 1].id + 1;
+          const id = (chats.length && chats[chats.length - 1].id + 1) || 1;
           const chat: Chat = {
             id,
             name: null,
@@ -57,15 +58,15 @@ export const resolvers: IResolvers = {
             messages: [],
           };
           chats.push(chat);
-          return id;
+          return chat;
         }
       } else {
         // Group
-        if (!recipientIds || !(recipientIds.length >= 1)) {
+        if (!recipientIds || !(recipientIds.length)) {
           throw new Error(`recipientIds must be an array of 1 or more elements.`);
         }
         // Create the group
-        const id = chats[chats.length - 1].id + 1;
+        const id = (chats.length && chats[chats.length - 1].id + 1) || 1;
         const chat: Chat = {
           id,
           name: groupName,
@@ -78,7 +79,7 @@ export const resolvers: IResolvers = {
           messages: [],
         };
         chats.push(chat);
-        return id;
+        return chat;
       }
     },
     removeChat: (obj: any, {chatId}: RemoveChatMutationArgs) => {
@@ -159,7 +160,7 @@ export const resolvers: IResolvers = {
           let ownerId: number | null = null;
 
           // Check if there is any admin left
-          if (adminIds!.length >= 1) {
+          if (adminIds!.length) {
             // Pick an admin as the new owner. The group is no longer read-only
             ownerId = chat.adminIds![0];
           }
@@ -185,7 +186,7 @@ export const resolvers: IResolvers = {
         throw new Error(`Cannot find chat ${chatId}.`);
       }
 
-      let holderIds: number[] = [];
+      let holderIds = chat.listingIds;
 
       if (!chat.name) {
         // Chat
@@ -201,7 +202,7 @@ export const resolvers: IResolvers = {
 
           chats = chats.map(chat => {
             if (chat.id === chatId) {
-              chat = {...chat, listingIds}
+              chat = {...chat, listingIds};
             }
             return chat;
           });
@@ -217,16 +218,18 @@ export const resolvers: IResolvers = {
         holderIds = chat.memberIds!;
       }
 
-      const id = chat.messages[chat.messages.length - 1].id + 1;
+      const id = (chat.messages.length && chat.messages[chat.messages.length - 1].id + 1) || 1;
 
       let recipients: Recipient[] = [];
 
       holderIds.forEach(holderId => {
-        recipients.push({
-          id: holderId,
-          receivedAt: null,
-          readAt: null,
-        })
+        if (holderId !== currentUser) {
+          recipients.push({
+            id: holderId,
+            receivedAt: null,
+            readAt: null,
+          });
+        }
       });
 
       const message: Message = {
@@ -246,7 +249,7 @@ export const resolvers: IResolvers = {
         return chat;
       });
 
-      return id;
+      return message;
     },
     removeMessages: (obj: any, {chatId, messageIds, all}: RemoveMessagesMutationArgs) => {
       const chat = chats.find(chat => chat.id === chatId);
