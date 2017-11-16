@@ -8,7 +8,7 @@ import {
 
 let users = db.users;
 let chats = db.chats;
-const currentUser = 1;
+const currentUser = '1';
 
 export const resolvers: IResolvers = {
   Query: {
@@ -44,7 +44,7 @@ export const resolvers: IResolvers = {
           return chat;
         } else {
           // Create the chat
-          const id = (chats.length && chats[chats.length - 1].id + 1) || 1;
+          const id = (chats.length && String(Number(chats[chats.length - 1].id) + 1)) || '1';
           const chat: Chat = {
             id,
             name: null,
@@ -66,7 +66,7 @@ export const resolvers: IResolvers = {
           throw new Error(`recipientIds must be an array of 1 or more elements.`);
         }
         // Create the group
-        const id = (chats.length && chats[chats.length - 1].id + 1) || 1;
+        const id = (chats.length && String(Number(chats[chats.length - 1].id) + 1)) || '1';
         const chat: Chat = {
           id,
           name: groupName,
@@ -157,7 +157,7 @@ export const resolvers: IResolvers = {
           // Remove the current user from the chat admins
           const adminIds = chat.adminIds!.filter(memberId => memberId !== currentUser);
           // Set the owner id to be null. A null owner means the group is read-only
-          let ownerId: number | null = null;
+          let ownerId: string | null = null;
 
           // Check if there is any admin left
           if (adminIds!.length) {
@@ -218,7 +218,7 @@ export const resolvers: IResolvers = {
         holderIds = chat.memberIds!;
       }
 
-      const id = (chat.messages.length && chat.messages[chat.messages.length - 1].id + 1) || 1;
+      const id = (chat.messages.length && String(Number(chat.messages[chat.messages.length - 1].id) + 1)) || '1';
 
       let recipients: Recipient[] = [];
 

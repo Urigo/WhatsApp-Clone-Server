@@ -4,7 +4,7 @@ export const typeDefs: ITypeDefinitions = `
   type Query {
     users: [User!]
     chats: [Chat!]
-    chat(chatId: Int!): Chat
+    chat(chatId: ID!): Chat
   }
 
   enum MessageType {
@@ -15,21 +15,21 @@ export const typeDefs: ITypeDefinitions = `
   
   type Chat {
     #May be a chat or a group
-    id: Int!
+    id: ID!
     #Computed for chats
     name: String
     #Computed for chats
     picture: String
     #All members, current and past ones.
-    userIds: [Int!]!
+    userIds: [ID!]!
     #Whoever gets the chat listed. For groups includes past members who still didn't delete the group.
-    listingIds: [Int!]!
+    listingIds: [ID!]!
     #Actual members of the group (they are not the only ones who get the group listed). Null for chats.
-    memberIds: [Int!]!
+    memberIds: [ID!]!
     #Null for chats
-    adminIds: [Int!]
+    adminIds: [ID!]
     #If null the group is read-only. Null for chats.
-    ownerId: Int!
+    ownerId: ID!
     messages: [Message]!
     #Computed property
     lastMessage: Message
@@ -40,8 +40,8 @@ export const typeDefs: ITypeDefinitions = `
   }
 
   type Message {
-    id: Int!
-    senderId: Int!
+    id: ID!
+    senderId: ID!
     sender: User!
     content: String!
     createdAt: Int
@@ -50,37 +50,37 @@ export const typeDefs: ITypeDefinitions = `
     #Whoever received the message
     recipients: [Recipient!]!
     #Whoever still holds a copy of the message. Cannot be null because the message gets deleted otherwise
-    holderIds: [Int!]!
+    holderIds: [ID!]!
     #Computed property
     ownership: Boolean!
   }
   
   type Recipient {
     #The user id
-    id: Int!
+    id: ID!
     receivedAt: Int
     readAt: Int
   }
 
   type User {
-    id: Int!
+    id: ID!
     name: String
     picture: String
     phone: String
   }
 
   type Mutation {
-    addChat(recipientIds: [Int!]!, groupName: String): Chat
-    removeChat(chatId: Int!): Boolean
-    addMessage(chatId: Int!, content: String!): Message
-    removeMessages(chatId: Int!, messageIds: [Int!], all: Boolean): Boolean
-    addMembers(groupId: Int!, userIds: [Int!]!): Boolean
-    removeMembers(groupId: Int!, userIds: [Int!]!): Boolean
-    addAdmins(groupId: Int!, userIds: [Int!]!): Boolean
-    removeAdmins(groupId: Int!, userIds: [Int!]!): Boolean
-    setGroupName(groupId: Int!): Boolean
-    setGroupPicture(groupId: Int!): String
-    markAsReceived(chatId: Int!): Boolean
-    markAsRead(chatId: Int!): Boolean
+    addChat(recipientIds: [ID!]!, groupName: String): Chat
+    removeChat(chatId: ID!): Boolean
+    addMessage(chatId: ID!, content: String!): Message
+    removeMessages(chatId: ID!, messageIds: [ID!], all: Boolean): Boolean
+    addMembers(groupId: ID!, userIds: [ID!]!): Boolean
+    removeMembers(groupId: ID!, userIds: [ID!]!): Boolean
+    addAdmins(groupId: ID!, userIds: [ID!]!): Boolean
+    removeAdmins(groupId: ID!, userIds: [ID!]!): Boolean
+    setGroupName(groupId: ID!): Boolean
+    setGroupPicture(groupId: ID!): String
+    markAsReceived(chatId: ID!): Boolean
+    markAsRead(chatId: ID!): Boolean
   }
 `;

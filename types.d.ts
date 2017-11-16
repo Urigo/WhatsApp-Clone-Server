@@ -7,21 +7,21 @@ export interface Query {
 }
 
 export interface User {
-  id: number; 
+  id: string; 
   name?: string | null; 
   picture?: string | null; 
   phone?: string | null; 
 }
 
 export interface Chat {
-  id: number; /* May be a chat or a group */
+  id: string; /* May be a chat or a group */
   name?: string | null; /* Computed for chats */
   picture?: string | null; /* Computed for chats */
-  userIds: number[]; /* All members, current and past ones. */
-  listingIds: number[]; /* Whoever gets the chat listed. For groups includes past members who still didn&#x27;t delete the group. */
-  memberIds: number[]; /* Actual members of the group (they are not the only ones who get the group listed). Null for chats. */
-  adminIds: number[]; /* Null for chats */
-  ownerId: number; /* If null the group is read-only. Null for chats. */
+  userIds: string[]; /* All members, current and past ones. */
+  listingIds: string[]; /* Whoever gets the chat listed. For groups includes past members who still didn&#x27;t delete the group. */
+  memberIds: string[]; /* Actual members of the group (they are not the only ones who get the group listed). Null for chats. */
+  adminIds: string[]; /* Null for chats */
+  ownerId: string; /* If null the group is read-only. Null for chats. */
   messages: Message[]; 
   lastMessage?: Message | null; /* Computed property */
   unreadMessages: number; /* Computed property */
@@ -29,19 +29,19 @@ export interface Chat {
 }
 
 export interface Message {
-  id: number; 
-  senderId: number; 
+  id: string; 
+  senderId: string; 
   sender: User; 
   content: string; 
   createdAt?: number | null; 
   type: number; /* FIXME: should return MessageType */
   recipients: Recipient[]; /* Whoever received the message */
-  holderIds: number[]; /* Whoever still holds a copy of the message. Cannot be null because the message gets deleted otherwise */
+  holderIds: string[]; /* Whoever still holds a copy of the message. Cannot be null because the message gets deleted otherwise */
   ownership: boolean; /* Computed property */
 }
 
 export interface Recipient {
-  id: number; /* The user id */
+  id: string; /* The user id */
   receivedAt?: number | null; 
   readAt?: number | null; 
 }
@@ -61,51 +61,51 @@ export interface Mutation {
   markAsRead?: boolean | null; 
 }
 export interface ChatQueryArgs {
-  chatId: number; 
+  chatId: string; 
 }
 export interface AddChatMutationArgs {
-  recipientIds: number[]; 
+  recipientIds: string[]; 
   groupName?: string | null; 
 }
 export interface RemoveChatMutationArgs {
-  chatId: number; 
+  chatId: string; 
 }
 export interface AddMessageMutationArgs {
-  chatId: number; 
+  chatId: string; 
   content: string; 
 }
 export interface RemoveMessagesMutationArgs {
-  chatId: number; 
-  messageIds: number[]; 
+  chatId: string; 
+  messageIds: string[]; 
   all?: boolean | null; 
 }
 export interface AddMembersMutationArgs {
-  groupId: number; 
-  userIds: number[]; 
+  groupId: string; 
+  userIds: string[]; 
 }
 export interface RemoveMembersMutationArgs {
-  groupId: number; 
-  userIds: number[]; 
+  groupId: string; 
+  userIds: string[]; 
 }
 export interface AddAdminsMutationArgs {
-  groupId: number; 
-  userIds: number[]; 
+  groupId: string; 
+  userIds: string[]; 
 }
 export interface RemoveAdminsMutationArgs {
-  groupId: number; 
-  userIds: number[]; 
+  groupId: string; 
+  userIds: string[]; 
 }
 export interface SetGroupNameMutationArgs {
-  groupId: number; 
+  groupId: string; 
 }
 export interface SetGroupPictureMutationArgs {
-  groupId: number; 
+  groupId: string; 
 }
 export interface MarkAsReceivedMutationArgs {
-  chatId: number; 
+  chatId: string; 
 }
 export interface MarkAsReadMutationArgs {
-  chatId: number; 
+  chatId: string; 
 }
 
 export type MessageType = "TEXT" | "LOCATION" | "PICTURE";
