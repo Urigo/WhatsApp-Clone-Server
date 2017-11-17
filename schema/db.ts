@@ -1,5 +1,11 @@
 import * as moment from "moment";
 
+export const random = true;
+
+export function getRandomId() {
+  return String(Math.round(Math.random() * 1000000000000));
+}
+
 export enum MessageType {
   TEXT,
   LOCATION,
@@ -97,7 +103,7 @@ const chats: Chat[] = [
     ownerId: null,
     messages: [
       {
-        id: '1',
+        id: random? getRandomId() : '1',
         senderId: '1',
         content: 'You on your way?',
         createdAt: moment().subtract(1, 'hours').unix(),
@@ -112,7 +118,7 @@ const chats: Chat[] = [
         holderIds: ['1', '3'],
       },
       {
-        id: '2',
+        id: random? getRandomId() : '2',
         senderId: '3',
         content: 'Yep!',
         createdAt: moment().subtract(1, 'hours').add(5, 'minutes').unix(),
@@ -138,7 +144,7 @@ const chats: Chat[] = [
     ownerId: null,
     messages: [
       {
-        id: '1',
+        id: random? getRandomId() : '1',
         senderId: '1',
         content: 'Hey, it\'s me',
         createdAt: moment().subtract(2, 'hours').unix(),
@@ -164,7 +170,7 @@ const chats: Chat[] = [
     ownerId: null,
     messages: [
       {
-        id: '1',
+        id: random? getRandomId() : '1',
         senderId: '1',
         content: 'I should buy a boat',
         createdAt: moment().subtract(1, 'days').unix(),
@@ -179,7 +185,7 @@ const chats: Chat[] = [
         holderIds: ['1', '5'],
       },
       {
-        id: '2',
+        id: random? getRandomId() : '2',
         senderId: '1',
         content: 'You still there?',
         createdAt: moment().subtract(1, 'days').add(16, 'hours').unix(),
@@ -205,7 +211,7 @@ const chats: Chat[] = [
     ownerId: null,
     messages: [
       {
-        id: '1',
+        id: random? getRandomId() : '1',
         senderId: '3',
         content: 'Look at my mukluks!',
         createdAt: moment().subtract(4, 'days').unix(),
@@ -231,7 +237,7 @@ const chats: Chat[] = [
     ownerId: null,
     messages: [
       {
-        id: '1',
+        id: random? getRandomId() : '1',
         senderId: '2',
         content: 'This is wicked good ice cream.',
         createdAt: moment().subtract(2, 'weeks').unix(),
@@ -246,7 +252,7 @@ const chats: Chat[] = [
         holderIds: ['2', '5'],
       },
       {
-        id: '2',
+        id: random? getRandomId() : '2',
         senderId: '5',
         content: 'Love it!',
         createdAt: moment().subtract(2, 'weeks').add(10, 'minutes').unix(),
@@ -293,7 +299,7 @@ const chats: Chat[] = [
     ownerId: '1',
     messages: [
       {
-        id: '1',
+        id: random? getRandomId() : '1',
         senderId: '1',
         content: 'I made a group',
         createdAt: moment().subtract(2, 'weeks').unix(),
@@ -318,7 +324,7 @@ const chats: Chat[] = [
         holderIds: ['1', '3', '4', '6'],
       },
       {
-        id: '2',
+        id: random? getRandomId() : '2',
         senderId: '1',
         content: 'Ops, user 2 was not supposed to be here',
         createdAt: moment().subtract(2, 'weeks').add(2, 'minutes').unix(),
@@ -338,7 +344,7 @@ const chats: Chat[] = [
         holderIds: ['1', '4', '6'],
       },
       {
-        id: '3',
+        id: random? getRandomId() : '3',
         senderId: '4',
         content: 'Awesome!',
         createdAt: moment().subtract(2, 'weeks').add(10, 'minutes').unix(),

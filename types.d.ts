@@ -48,6 +48,7 @@ export interface Recipient {
 
 export interface Mutation {
   addChat?: Chat | null; 
+  addGroup?: Chat | null; 
   removeChat?: boolean | null; 
   addMessage?: Message | null; 
   removeMessages?: boolean | null; 
@@ -64,8 +65,11 @@ export interface ChatQueryArgs {
   chatId: string; 
 }
 export interface AddChatMutationArgs {
+  recipientId: string; 
+}
+export interface AddGroupMutationArgs {
   recipientIds: string[]; 
-  groupName?: string | null; 
+  groupName: string; 
 }
 export interface RemoveChatMutationArgs {
   chatId: string; 

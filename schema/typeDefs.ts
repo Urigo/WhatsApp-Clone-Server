@@ -70,7 +70,8 @@ export const typeDefs: ITypeDefinitions = `
   }
 
   type Mutation {
-    addChat(recipientIds: [ID!]!, groupName: String): Chat
+    addChat(recipientId: ID!): Chat
+    addGroup(recipientIds: [ID!]!, groupName: String!): Chat
     removeChat(chatId: ID!): Boolean
     addMessage(chatId: ID!, content: String!): Message
     removeMessages(chatId: ID!, messageIds: [ID!], all: Boolean): Boolean

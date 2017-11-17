@@ -1,8 +1,8 @@
 import * as moment from "moment";
-import { Chat, db, Message, MessageType, Recipient } from "./db";
+import { Chat, db, getRandomId, Message, MessageType, random, Recipient } from "./db";
 import { IResolvers } from "graphql-tools/dist/Interfaces";
 import {
-  AddChatMutationArgs, AddMessageMutationArgs, ChatQueryArgs, RemoveChatMutationArgs,
+  AddChatMutationArgs, AddGroupMutationArgs, AddMessageMutationArgs, ChatQueryArgs, RemoveChatMutationArgs,
   RemoveMessagesMutationArgs
 } from "../types";
 
@@ -18,69 +18,63 @@ export const resolvers: IResolvers = {
     chat: (obj: any, {chatId}: ChatQueryArgs) => chats.find(chat => chat.id === chatId),
   },
   Mutation: {
-    addChat: (obj: any, {recipientIds, groupName}: AddChatMutationArgs) => {
+    addChat: (obj: any, {recipientId}: AddChatMutationArgs) => {
+      if (!users.find(user => user.id === recipientId)) {
+        throw new Error(`Recipient ${recipientId} doesn't exist.`);
+      }
+
+      const chat = chats.find(chat => !chat.name && chat.userIds.includes(currentUser) && chat.userIds.includes(recipientId));
+      if (chat) {
+        // Chat already exists. Both users are already in the userIds array
+        const chatId = chat.id;
+        if (!chat.listingIds.includes(currentUser)) {
+          // The chat isn't listed for the current user. Add him to the memberIds
+          chat.listingIds.push(currentUser);
+          chats.find(chat => chat.id === chatId)!.listingIds.push(currentUser);
+          return chat;
+        } else {
+          throw new Error(`Chat already exists.`);
+        }
+      } else {
+        // Create the chat
+        const id = (chats.length && String(Number(chats[chats.length - 1].id) + 1)) || '1';
+        const chat: Chat = {
+          id,
+          name: null,
+          picture: null,
+          adminIds: null,
+          ownerId: null,
+          userIds: [currentUser, recipientId],
+          // Chat will not be listed to the other user until the first message gets written
+          listingIds: [currentUser],
+          memberIds: null,
+          messages: [],
+        };
+        chats.push(chat);
+        return chat;
+      }
+    },
+    addGroup: (obj: any, {recipientIds, groupName}: AddGroupMutationArgs) => {
       recipientIds.forEach(recipientId => {
         if (!users.find(user => user.id === recipientId)) {
           throw new Error(`Recipient ${recipientId} doesn't exist.`);
         }
       });
 
-      if (!groupName) {
-        if (!recipientIds || recipientIds.length !== 1) {
-          // Ambiguous request: is it a chat or a group?
-          throw new Error(`Chats expect recipientIds to be of length 1. Groups expect groupName to be non-null.`);
-        }
-        // Chat
-        const recipientId = recipientIds[0];
-        const chat = chats.find(chat => !chat.name && chat.userIds.includes(currentUser) && chat.userIds.includes(recipientId));
-        if (chat) {
-          // Chat already exists. Both users are already in the userIds array
-          const chatId = chat.id;
-          if (!chat.listingIds.includes(currentUser)) {
-            // The chat isn't listed for the current user. Add him to the memberIds
-            chat.listingIds.push(currentUser);
-            chats.find(chat => chat.id === chatId)!.listingIds.push(currentUser);
-          }
-          return chat;
-        } else {
-          // Create the chat
-          const id = (chats.length && String(Number(chats[chats.length - 1].id) + 1)) || '1';
-          const chat: Chat = {
-            id,
-            name: null,
-            picture: null,
-            adminIds: null,
-            ownerId: null,
-            userIds: [currentUser, recipientId],
-            // Chat will not be listed to the other user until the first message gets written
-            listingIds: [currentUser],
-            memberIds: null,
-            messages: [],
-          };
-          chats.push(chat);
-          return chat;
-        }
-      } else {
-        // Group
-        if (!recipientIds || !(recipientIds.length)) {
-          throw new Error(`recipientIds must be an array of 1 or more elements.`);
-        }
-        // Create the group
-        const id = (chats.length && String(Number(chats[chats.length - 1].id) + 1)) || '1';
-        const chat: Chat = {
-          id,
-          name: groupName,
-          picture: null,
-          adminIds: [currentUser],
-          ownerId: currentUser,
-          userIds: [currentUser, ...recipientIds],
-          listingIds: [currentUser, ...recipientIds],
-          memberIds: [currentUser, ...recipientIds],
-          messages: [],
-        };
-        chats.push(chat);
-        return chat;
-      }
+      const id = (chats.length && String(Number(chats[chats.length - 1].id) + 1)) || '1';
+      const chat: Chat = {
+        id,
+        name: groupName,
+        picture: null,
+        adminIds: [currentUser],
+        ownerId: currentUser,
+        userIds: [currentUser, ...recipientIds],
+        listingIds: [currentUser, ...recipientIds],
+        memberIds: [currentUser, ...recipientIds],
+        messages: [],
+      };
+      chats.push(chat);
+      return chat;
     },
     removeChat: (obj: any, {chatId}: RemoveChatMutationArgs) => {
       const chat = chats.find(chat => chat.id === chatId);
@@ -218,7 +212,7 @@ export const resolvers: IResolvers = {
         holderIds = chat.memberIds!;
       }
 
-      const id = (chat.messages.length && String(Number(chat.messages[chat.messages.length - 1].id) + 1)) || '1';
+      const id = random ? getRandomId() : (chat.messages.length && String(Number(chat.messages[chat.messages.length - 1].id) + 1)) || '1';
 
       let recipients: Recipient[] = [];
 
