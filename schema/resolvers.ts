@@ -117,7 +117,7 @@ export const resolvers: IResolvers = {
             return chat;
           });
         }
-        return true;
+        return chatId;
       } else {
         // Group
         if (chat.ownerId !== currentUser) {
@@ -166,7 +166,7 @@ export const resolvers: IResolvers = {
             return chat;
           });
         }
-        return true;
+        return chatId;
       }
     },
     addMessage: (obj: any, {chatId, content}: AddMessageMutationArgs) => {
@@ -260,11 +260,13 @@ export const resolvers: IResolvers = {
         throw new Error(`Cannot specify both 'all' and 'messageIds'.`);
       }
 
+      let deletedIds: string[] = [];
       chats = chats.map(chat => {
         if (chat.id === chatId) {
           // Instead of chaining map and filter we can loop once using reduce
           const messages = chat.messages.reduce<Message[]>((filtered, message) => {
             if (all || messageIds!.includes(message.id)) {
+              deletedIds.push(message.id);
               // Remove the current user from the message holders
               message.holderIds = message.holderIds.filter(holderId => holderId !== currentUser);
             }
@@ -279,7 +281,7 @@ export const resolvers: IResolvers = {
         }
         return chat;
       });
-      return true;
+      return deletedIds;
     },
   },
   Chat: {

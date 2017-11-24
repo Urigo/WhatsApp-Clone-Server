@@ -49,14 +49,14 @@ export interface Recipient {
 export interface Mutation {
   addChat?: Chat | null; 
   addGroup?: Chat | null; 
-  removeChat?: boolean | null; 
+  removeChat?: string | null; 
   addMessage?: Message | null; 
-  removeMessages?: boolean | null; 
-  addMembers?: boolean | null; 
-  removeMembers?: boolean | null; 
-  addAdmins?: boolean | null; 
-  removeAdmins?: boolean | null; 
-  setGroupName?: boolean | null; 
+  removeMessages?: string[] | null; 
+  addMembers?: string[] | null; 
+  removeMembers?: string[] | null; 
+  addAdmins?: string[] | null; 
+  removeAdmins?: string[] | null; 
+  setGroupName?: string | null; 
   setGroupPicture?: string | null; 
   markAsReceived?: boolean | null; 
   markAsRead?: boolean | null; 
@@ -80,7 +80,7 @@ export interface AddMessageMutationArgs {
 }
 export interface RemoveMessagesMutationArgs {
   chatId: string; 
-  messageIds: string[]; 
+  messageIds?: string[] | null; 
   all?: boolean | null; 
 }
 export interface AddMembersMutationArgs {
