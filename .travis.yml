@@ -1,0 +1,24 @@
+dist: trusty
+sudo: required
+
+language: node_js
+node_js:
+  - "8"
+
+services:
+  - mongodb
+
+cache:
+  directories:
+     - ./node_modules
+
+before_install:
+  - rm -rf node_modules
+
+install:
+  - git clean -fXd
+  - npm install
+
+script:
+  - npm run test
+  - npm run e2e
