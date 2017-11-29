@@ -3,11 +3,15 @@ import * as koaRouter from 'koa-router';
 import * as koaBody from 'koa-bodyparser';
 import { graphqlKoa, graphiqlKoa } from 'apollo-server-koa';
 import { schema } from "./schema";
+const cors = require('@koa/cors');
 
 const app = new koa();
 const router = new koaRouter();
 const PORT = 3000;
 
+app.use(cors({
+  origin: '*',
+}));
 app.use(koaBody());
 router.post('/graphql', graphqlKoa({schema}));
 router.get('/graphiql', graphiqlKoa({endpointURL: '/graphql'}));
