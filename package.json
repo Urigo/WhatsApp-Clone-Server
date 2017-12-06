@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "start": "npm run build:live",
-    "build:live": "nodemon --exec ./node_modules/.bin/ts-node -- ./index.ts"
+    "build:live": "nodemon --exec ./node_modules/.bin/ts-node -- ./index.ts",
+    "generator": "gql-gen --config codegen.yml"
   },
   "devDependencies": {
     "@types/body-parser": "^1.17.0",
@@ -12,6 +13,9 @@
     "@types/express": "^4.16.0",
     "@types/graphql": "^14.0.4",
     "@types/node": "^10.12.18",
+    "graphql-codegen-typescript-common": "^0.15.2",
+    "graphql-codegen-typescript-resolvers": "^0.15.2",
+    "graphql-codegen-typescript-server": "^0.15.2",
     "nodemon": "^1.18.9",
     "ts-node": "^7.0.1",
     "typescript": "^3.2.2"
@@ -22,6 +26,7 @@
     "cors": "^2.8.5",
     "express": "^4.16.4",
     "graphql": "^14.0.2",
+    "graphql-code-generator": "^0.15.2",
     "moment": "^2.23.0"
   }
 }
