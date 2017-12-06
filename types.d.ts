@@ -45,7 +45,70 @@ export interface Recipient {
   receivedAt?: number | null; 
   readAt?: number | null; 
 }
+
+export interface Mutation {
+  addChat?: Chat | null; 
+  addGroup?: Chat | null; 
+  removeChat?: string | null; 
+  addMessage?: Message | null; 
+  removeMessages?: string[] | null; 
+  addMembers?: string[] | null; 
+  removeMembers?: string[] | null; 
+  addAdmins?: string[] | null; 
+  removeAdmins?: string[] | null; 
+  setGroupName?: string | null; 
+  setGroupPicture?: string | null; 
+  markAsReceived?: boolean | null; 
+  markAsRead?: boolean | null; 
+}
 export interface ChatQueryArgs {
+  chatId: string; 
+}
+export interface AddChatMutationArgs {
+  recipientId: string; 
+}
+export interface AddGroupMutationArgs {
+  recipientIds: string[]; 
+  groupName: string; 
+}
+export interface RemoveChatMutationArgs {
+  chatId: string; 
+}
+export interface AddMessageMutationArgs {
+  chatId: string; 
+  content: string; 
+}
+export interface RemoveMessagesMutationArgs {
+  chatId: string; 
+  messageIds?: string[] | null; 
+  all?: boolean | null; 
+}
+export interface AddMembersMutationArgs {
+  groupId: string; 
+  userIds: string[]; 
+}
+export interface RemoveMembersMutationArgs {
+  groupId: string; 
+  userIds: string[]; 
+}
+export interface AddAdminsMutationArgs {
+  groupId: string; 
+  userIds: string[]; 
+}
+export interface RemoveAdminsMutationArgs {
+  groupId: string; 
+  userIds: string[]; 
+}
+export interface SetGroupNameMutationArgs {
+  groupId: string; 
+}
+export interface SetGroupPictureMutationArgs {
+  groupId: string; 
+}
+export interface MarkAsReceivedMutationArgs {
+  chatId: string; 
+}
+export interface MarkAsReadMutationArgs {
   chatId: string; 
 }
 
