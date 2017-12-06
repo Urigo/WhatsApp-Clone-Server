@@ -21,6 +21,7 @@
     "body-parser": "1.18.2",
     "cors": "2.8.4",
     "express": "4.16.3",
-    "graphql": "14.0.2"
+    "graphql": "14.0.2",
+    "moment": "2.22.1"
   }
 }
