@@ -1,6 +1,9 @@
 import { Chat, db, getRandomId, Message, MessageType, random, Recipient } from "../db";
 import { IResolvers } from "graphql-tools/dist/Interfaces";
-import { ChatQueryArgs } from "../types";
+import {
+  AddChatMutationArgs, AddGroupMutationArgs, AddMessageMutationArgs, ChatQueryArgs,
+  RemoveChatMutationArgs, RemoveMessagesMutationArgs
+} from "../types";
 import * as moment from "moment";
 
 let users = db.users;
@@ -15,7 +18,7 @@ export const resolvers: IResolvers = {
     chat: (obj: any, {chatId}: ChatQueryArgs) => chats.find(chat => chat.id === chatId),
   },
   Mutation: {
-    addChat: (obj: any, {recipientId}: any) => {
+    addChat: (obj: any, {recipientId}: AddChatMutationArgs) => {
       if (!users.find(user => user.id === recipientId)) {
         throw new Error(`Recipient ${recipientId} doesn't exist.`);
       }
@@ -51,8 +54,8 @@ export const resolvers: IResolvers = {
         return chat;
       }
     },
-    addGroup: (obj: any, {recipientIds, groupName}: any) => {
-      recipientIds.forEach((recipientId: any) => {
+    addGroup: (obj: any, {recipientIds, groupName}: AddGroupMutationArgs) => {
+      recipientIds.forEach(recipientId => {
         if (!users.find(user => user.id === recipientId)) {
           throw new Error(`Recipient ${recipientId} doesn't exist.`);
         }
@@ -73,7 +76,7 @@ export const resolvers: IResolvers = {
       chats.push(chat);
       return chat;
     },
-    removeChat: (obj: any, {chatId}: any) => {
+    removeChat: (obj: any, {chatId}: RemoveChatMutationArgs) => {
       const chat = chats.find(chat => chat.id === chatId);
 
       if (!chat) {
@@ -166,7 +169,7 @@ export const resolvers: IResolvers = {
         return chatId;
       }
     },
-    addMessage: (obj: any, {chatId, content}: any) => {
+    addMessage: (obj: any, {chatId, content}: AddMessageMutationArgs) => {
       if (content === null || content === '') {
         throw new Error(`Cannot add empty or null messages.`);
       }
@@ -242,7 +245,7 @@ export const resolvers: IResolvers = {
 
       return message;
     },
-    removeMessages: (obj: any, {chatId, messageIds, all}: any) => {
+    removeMessages: (obj: any, {chatId, messageIds, all}: RemoveMessagesMutationArgs) => {
       const chat = chats.find(chat => chat.id === chatId);
 
       if (!chat) {
