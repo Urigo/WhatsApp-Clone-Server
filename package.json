@@ -5,7 +5,7 @@
   "scripts": {
     "start": "npm run build:live",
     "build:live": "nodemon --exec ./node_modules/.bin/ts-node -- ./index.ts",
-    "generator": "gql-gen --url http://localhost:3000/graphql --template ts --out ./types.d.ts"
+    "generator": "gql-gen --schema http://localhost:3000/graphql --template ts --out ./types.d.ts"
   },
   "devDependencies": {
     "@types/body-parser": "1.17.0",
@@ -24,6 +24,7 @@
     "express": "4.16.3",
     "graphql": "0.13.2",
     "graphql-code-generator": "0.9.1",
+    "graphql-codegen-typescript-template": "0.9.1",
     "graphql-tools": "3.0.1",
     "moment": "2.22.1"
   }
