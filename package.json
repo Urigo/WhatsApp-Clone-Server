@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "start": "npm run build:live",
-    "build:live": "nodemon --exec ./node_modules/.bin/ts-node -- ./index.ts"
+    "build:live": "nodemon --exec ./node_modules/.bin/ts-node -- ./index.ts",
+    "generator": "gql-gen --url http://localhost:3000/graphql --template ts --out ./types.d.ts"
   },
   "devDependencies": {
     "@types/body-parser": "1.16.8",
@@ -22,6 +23,7 @@
     "cors": "2.8.4",
     "express": "4.16.2",
     "graphql": "0.12.3",
+    "graphql-code-generator": "0.8.14",
     "graphql-tools": "2.21.0",
     "moment": "2.20.1"
   }
