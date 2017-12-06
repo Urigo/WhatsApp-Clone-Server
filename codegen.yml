@@ -1,0 +1,11 @@
+overwrite: true
+schema: './schema/typeDefs.ts'
+documents: null
+require: 
+  - ts-node/register
+generates:
+  ./types.d.ts:
+    plugins:
+      - 'typescript-common'
+      - 'typescript-server'
+      - 'typescript-resolvers'
