@@ -1,5 +1,5 @@
-import { Chat, db, Message, MessageType, Recipient } from "../db";
 import { IResolvers } from "../types";
+import { Chat, db, Message, MessageType, Recipient } from "../db";
 import * as moment from "moment";
 
 let users = db.users;
@@ -15,11 +15,11 @@ export const resolvers: IResolvers = {
   },
   Mutation: {
     addChat: (obj, {recipientId}) => {
-      if (!users.find(user => user.id === recipientId)) {
+      if (!users.find(user => user.id === Number(recipientId))) {
         throw new Error(`Recipient ${recipientId} doesn't exist.`);
       }
 
-      const chat = chats.find(chat => !chat.name && chat.allTimeMemberIds.includes(currentUser) && chat.allTimeMemberIds.includes(recipientId));
+      const chat = chats.find(chat => !chat.name && chat.allTimeMemberIds.includes(currentUser) && chat.allTimeMemberIds.includes(Number(recipientId)));
       if (chat) {
         // Chat already exists. Both users are already in the allTimeMemberIds array
         const chatId = chat.id;
@@ -40,7 +40,7 @@ export const resolvers: IResolvers = {
           picture: null,
           adminIds: null,
           ownerId: null,
-          allTimeMemberIds: [currentUser, recipientId],
+          allTimeMemberIds: [currentUser, Number(recipientId)],
           // Chat will not be listed to the other user until the first message gets written
           listingMemberIds: [currentUser],
           actualGroupMemberIds: null,
@@ -51,8 +51,8 @@ export const resolvers: IResolvers = {
       }
     },
     addGroup: (obj, {recipientIds, groupName}) => {
-      recipientIds.forEach((recipientId: any) => {
-        if (!users.find(user => user.id === recipientId)) {
+      recipientIds.forEach(recipientId => {
+        if (!users.find(user => user.id === Number(recipientId))) {
           throw new Error(`Recipient ${recipientId} doesn't exist.`);
         }
       });
@@ -64,16 +64,16 @@ export const resolvers: IResolvers = {
         picture: null,
         adminIds: [currentUser],
         ownerId: currentUser,
-        allTimeMemberIds: [currentUser, ...recipientIds],
-        listingMemberIds: [currentUser, ...recipientIds],
-        actualGroupMemberIds: [currentUser, ...recipientIds],
+        allTimeMemberIds: [currentUser, ...recipientIds.map(id => Number(id))],
+        listingMemberIds: [currentUser, ...recipientIds.map(id => Number(id))],
+        actualGroupMemberIds: [currentUser, ...recipientIds.map(id => Number(id))],
         messages: [],
       };
       chats.push(chat);
       return chat;
     },
     removeChat: (obj, {chatId}) => {
-      const chat = chats.find(chat => chat.id === chatId);
+      const chat = chats.find(chat => chat.id === Number(chatId));
 
       if (!chat) {
         throw new Error(`The chat ${chatId} doesn't exist.`);
@@ -103,17 +103,17 @@ export const resolvers: IResolvers = {
         // Check how many members are left
         if (listingMemberIds.length === 0) {
           // Delete the chat
-          chats = chats.filter(chat => chat.id !== chatId);
+          chats = chats.filter(chat => chat.id !== Number(chatId));
         } else {
           // Update the chat
           chats = chats.map(chat => {
-            if (chat.id === chatId) {
+            if (chat.id === Number(chatId)) {
               chat = {...chat, listingMemberIds, messages};
             }
             return chat;
           });
         }
-        return chatId;
+        return Number(chatId);
       } else {
         // Group
         if (chat.ownerId !== currentUser) {
@@ -138,7 +138,7 @@ export const resolvers: IResolvers = {
         // Check how many members (including previous ones who can still access old messages) are left
         if (listingMemberIds.length === 0) {
           // Remove the group
-          chats = chats.filter(chat => chat.id !== chatId);
+          chats = chats.filter(chat => chat.id !== Number(chatId));
         } else {
           // Update the group
 
@@ -156,13 +156,13 @@ export const resolvers: IResolvers = {
           }
 
           chats = chats.map(chat => {
-            if (chat.id === chatId) {
+            if (chat.id === Number(chatId)) {
               chat = {...chat, messages, listingMemberIds, actualGroupMemberIds, adminIds, ownerId};
             }
             return chat;
           });
         }
-        return chatId;
+        return Number(chatId);
       }
     },
     addMessage: (obj, {chatId, content}) => {
@@ -170,7 +170,7 @@ export const resolvers: IResolvers = {
         throw new Error(`Cannot add empty or null messages.`);
       }
 
-      let chat = chats.find(chat => chat.id === chatId);
+      let chat = chats.find(chat => chat.id === Number(chatId));
 
       if (!chat) {
         throw new Error(`Cannot find chat ${chatId}.`);
@@ -191,7 +191,7 @@ export const resolvers: IResolvers = {
           const listingMemberIds = chat.listingMemberIds.concat(recipientId);
 
           chats = chats.map(chat => {
-            if (chat.id === chatId) {
+            if (chat.id === Number(chatId)) {
               chat = {...chat, listingMemberIds};
             }
             return chat;
@@ -217,7 +217,7 @@ export const resolvers: IResolvers = {
           recipients.push({
             userId: holderId,
             messageId: id,
-            chatId: chatId,
+            chatId: Number(chatId),
             receivedAt: null,
             readAt: null,
           });
@@ -226,7 +226,7 @@ export const resolvers: IResolvers = {
 
       const message: Message = {
         id,
-        chatId,
+        chatId: Number(chatId),
         senderId: currentUser,
         content,
         createdAt: moment().unix(),
@@ -236,7 +236,7 @@ export const resolvers: IResolvers = {
       };
 
       chats = chats.map(chat => {
-        if (chat.id === chatId) {
+        if (chat.id === Number(chatId)) {
           chat = {...chat, messages: chat.messages.concat(message)}
         }
         return chat;
@@ -245,7 +245,7 @@ export const resolvers: IResolvers = {
       return message;
     },
     removeMessages: (obj, {chatId, messageIds, all}) => {
-      const chat = chats.find(chat => chat.id === chatId);
+      const chat = chats.find(chat => chat.id === Number(chatId));
 
       if (!chat) {
         throw new Error(`Cannot find chat ${chatId}.`);
@@ -261,7 +261,7 @@ export const resolvers: IResolvers = {
 
       let deletedIds: number[] = [];
       chats = chats.map(chat => {
-        if (chat.id === chatId) {
+        if (chat.id === Number(chatId)) {
           // Instead of chaining map and filter we can loop once using reduce
           const messages = chat.messages.reduce<Message[]>((filtered, message) => {
             if (all || messageIds!.includes(message.id)) {
