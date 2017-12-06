@@ -1,5 +1,6 @@
 import { Chat, db, Message, Recipient, User } from "../db";
 import { IResolvers } from "graphql-tools/dist/Interfaces";
+import { ChatQueryArgs } from "../types";
 
 let users = db.users;
 let chats = db.chats;
@@ -10,7 +11,7 @@ export const resolvers: IResolvers = {
     // Show all users for the moment.
     users: (): User[] => users.filter(user => user.id !== currentUser),
     chats: (): Chat[] => chats.filter(chat => chat.listingMemberIds.includes(currentUser)),
-    chat: (obj: any, {chatId}): Chat | null => chats.find(chat => chat.id === chatId) || null,
+    chat: (obj: any, {chatId}: ChatQueryArgs): Chat | null => chats.find(chat => chat.id === Number(chatId)) || null,
   },
   Chat: {
     name: (chat: Chat): string => chat.name ? chat.name : users
