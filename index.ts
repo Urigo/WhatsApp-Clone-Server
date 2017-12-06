@@ -1,7 +1,7 @@
 import { schema } from "./schema";
-import * as bodyParser from "body-parser";
-import * as cors from 'cors';
-import * as express from 'express';
+import bodyParser from "body-parser";
+import cors from 'cors';
+import express from 'express';
 import { ApolloServer } from "apollo-server-express";
 
 const PORT = 3000;
