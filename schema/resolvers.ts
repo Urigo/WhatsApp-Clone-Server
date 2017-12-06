@@ -1,5 +1,5 @@
-import { IResolvers } from 'apollo-server-express';
-import { Chat, db, Message, Recipient, User } from "../db";
+import { db, Message } from "../db";
+import { IResolvers } from '../types';
 
 let users = db.users;
 let chats = db.chats;
@@ -8,44 +8,44 @@ const currentUser = 1;
 export const resolvers: IResolvers = {
   Query: {
     // Show all users for the moment.
-    users: (): User[] => users.filter(user => user.id !== currentUser),
-    chats: (): Chat[] => chats.filter(chat => chat.listingMemberIds.includes(currentUser)),
-    chat: (obj: any, {chatId}): Chat | null => chats.find(chat => chat.id === chatId) || null,
+    users: () => users.filter(user => user.id !== currentUser),
+    chats: () => chats.filter(chat => chat.listingMemberIds.includes(currentUser)),
+    chat: (obj, {chatId}) => chats.find(chat => chat.id === Number(chatId)),
   },
   Chat: {
-    name: (chat: Chat): string => chat.name ? chat.name : users
+    name: (chat): string => chat.name ? chat.name : users
       .find(user => user.id === chat.allTimeMemberIds.find(userId => userId !== currentUser))!.name,
-    picture: (chat: Chat) => chat.name ? chat.picture : users
+    picture: (chat) => chat.name ? chat.picture : users
       .find(user => user.id === chat.allTimeMemberIds.find(userId => userId !== currentUser))!.picture,
-    allTimeMembers: (chat: Chat): User[] => users.filter(user => chat.allTimeMemberIds.includes(user.id)),
-    listingMembers: (chat: Chat): User[] => users.filter(user => chat.listingMemberIds.includes(user.id)),
-    actualGroupMembers: (chat: Chat): User[] => users.filter(user => chat.actualGroupMemberIds && chat.actualGroupMemberIds.includes(user.id)),
-    admins: (chat: Chat): User[] => users.filter(user => chat.adminIds && chat.adminIds.includes(user.id)),
-    owner: (chat: Chat): User | null => users.find(user => chat.ownerId === user.id) || null,
-    messages: (chat: Chat, {amount = 0}: {amount: number}): Message[] => {
+    allTimeMembers: (chat) => users.filter(user => chat.allTimeMemberIds.includes(user.id)),
+    listingMembers: (chat) => users.filter(user => chat.listingMemberIds.includes(user.id)),
+    actualGroupMembers: (chat) => users.filter(user => chat.actualGroupMemberIds && chat.actualGroupMemberIds.includes(user.id)),
+    admins: (chat) => users.filter(user => chat.adminIds && chat.adminIds.includes(user.id)),
+    owner: (chat) => users.find(user => chat.ownerId === user.id) || null,
+    messages: (chat, {amount = 0}) => {
       const messages = chat.messages
       .filter(message => message.holderIds.includes(currentUser))
       .sort((a, b) => b.createdAt - a.createdAt) || <Message[]>[];
       return (amount ? messages.slice(0, amount) : messages).reverse();
     },
-    unreadMessages: (chat: Chat): number => chat.messages
+    unreadMessages: (chat) => chat.messages
       .filter(message => message.holderIds.includes(currentUser) &&
         message.recipients.find(recipient => recipient.userId === currentUser && !recipient.readAt))
       .length,
-    isGroup: (chat: Chat): boolean => !!chat.name,
+    isGroup: (chat) => !!chat.name,
   },
   Message: {
-    chat: (message: Message): Chat | null => chats.find(chat => message.chatId === chat.id) || null,
-    sender: (message: Message): User | null => users.find(user => user.id === message.senderId) || null,
-    holders: (message: Message): User[] => users.filter(user => message.holderIds.includes(user.id)),
-    ownership: (message: Message): boolean => message.senderId === currentUser,
+    chat: (message) => chats.find(chat => message.chatId === chat.id)!,
+    sender: (message) => users.find(user => user.id === message.senderId)!,
+    holders: (message) => users.filter(user => message.holderIds.includes(user.id)),
+    ownership: (message) => message.senderId === currentUser,
   },
   Recipient: {
-    user: (recipient: Recipient): User | null => users.find(user => recipient.userId === user.id) || null,
-    message: (recipient: Recipient): Message | null => {
-      const chat = chats.find(chat => recipient.chatId === chat.id);
-      return chat ? chat.messages.find(message => recipient.messageId === message.id) || null : null;
+    user: (recipient) => users.find(user => recipient.userId === user.id)!,
+    message: (recipient) => {
+      const chat = chats.find(chat => recipient.chatId === chat.id)!;
+      return chat.messages.find(message => recipient.messageId === message.id)!;
     },
-    chat: (recipient: Recipient): Chat | null => chats.find(chat => recipient.chatId === chat.id) || null,
+    chat: (recipient) => chats.find(chat => recipient.chatId === chat.id)!,
   },
 };

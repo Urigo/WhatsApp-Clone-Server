@@ -1,4 +1,4 @@
-export type Maybe<T> = T | null;
+export type Maybe<T> = T | undefined | null;
 
 export enum MessageType {
   Location = "LOCATION",
@@ -19,7 +19,7 @@ export interface Query {
 }
 
 export interface User {
-  id: string;
+  id: number;
 
   name?: Maybe<string>;
 
@@ -29,7 +29,7 @@ export interface User {
 }
 
 export interface Chat {
-  id: string;
+  id: number;
 
   name?: Maybe<string>;
 
@@ -53,7 +53,7 @@ export interface Chat {
 }
 
 export interface Message {
-  id: string;
+  id: number;
 
   sender: User;
 
@@ -89,13 +89,15 @@ export interface Recipient {
 // ====================================================
 
 export interface ChatQueryArgs {
-  chatId: string;
+  chatId: number;
 }
 export interface MessagesChatArgs {
   amount?: Maybe<number>;
 }
 
 import { GraphQLResolveInfo } from "graphql";
+
+import { Chat, Message, Recipient } from "./db";
 
 export type Resolver<Result, Parent = {}, Context = {}, Args = {}> = (
   parent: Parent,
@@ -171,13 +173,13 @@ export namespace QueryResolvers {
     Context = {}
   > = Resolver<R, Parent, Context, ChatArgs>;
   export interface ChatArgs {
-    chatId: string;
+    chatId: number;
   }
 }
 
 export namespace UserResolvers {
   export interface Resolvers<Context = {}, TypeParent = User> {
-    id?: IdResolver<string, TypeParent, Context>;
+    id?: IdResolver<number, TypeParent, Context>;
 
     name?: NameResolver<Maybe<string>, TypeParent, Context>;
 
@@ -186,7 +188,7 @@ export namespace UserResolvers {
     phone?: PhoneResolver<Maybe<string>, TypeParent, Context>;
   }
 
-  export type IdResolver<R = string, Parent = User, Context = {}> = Resolver<
+  export type IdResolver<R = number, Parent = User, Context = {}> = Resolver<
     R,
     Parent,
     Context
@@ -210,7 +212,7 @@ export namespace UserResolvers {
 
 export namespace ChatResolvers {
   export interface Resolvers<Context = {}, TypeParent = Chat> {
-    id?: IdResolver<string, TypeParent, Context>;
+    id?: IdResolver<number, TypeParent, Context>;
 
     name?: NameResolver<Maybe<string>, TypeParent, Context>;
 
@@ -237,7 +239,7 @@ export namespace ChatResolvers {
     isGroup?: IsGroupResolver<boolean, TypeParent, Context>;
   }
 
-  export type IdResolver<R = string, Parent = Chat, Context = {}> = Resolver<
+  export type IdResolver<R = number, Parent = Chat, Context = {}> = Resolver<
     R,
     Parent,
     Context
@@ -300,7 +302,7 @@ export namespace ChatResolvers {
 
 export namespace MessageResolvers {
   export interface Resolvers<Context = {}, TypeParent = Message> {
-    id?: IdResolver<string, TypeParent, Context>;
+    id?: IdResolver<number, TypeParent, Context>;
 
     sender?: SenderResolver<User, TypeParent, Context>;
 
@@ -319,7 +321,7 @@ export namespace MessageResolvers {
     ownership?: OwnershipResolver<boolean, TypeParent, Context>;
   }
 
-  export type IdResolver<R = string, Parent = Message, Context = {}> = Resolver<
+  export type IdResolver<R = number, Parent = Message, Context = {}> = Resolver<
     R,
     Parent,
     Context

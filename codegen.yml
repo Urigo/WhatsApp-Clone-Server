@@ -5,6 +5,14 @@ require:
   - ts-node/register
 generates:
   ./types.d.ts:
+    config:
+      optionalType: undefined | null
+      scalars:
+        ID: number
+      mappers:
+        Chat: ./db#Chat
+        Message: ./db#Message
+        Recipient: ./db#Recipient
     plugins:
       - 'typescript-common'
       - 'typescript-server'
