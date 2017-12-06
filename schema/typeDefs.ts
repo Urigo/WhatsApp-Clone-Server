@@ -67,4 +67,20 @@ export const typeDefs: ITypeDefinitions = `
     picture: String
     phone: String
   }
+
+  type Mutation {
+    addChat(recipientId: ID!): Chat
+    addGroup(recipientIds: [ID!]!, groupName: String!): Chat
+    removeChat(chatId: ID!): ID
+    addMessage(chatId: ID!, content: String!): Message
+    removeMessages(chatId: ID!, messageIds: [ID], all: Boolean): [ID]
+    addMembers(groupId: ID!, userIds: [ID!]!): [ID]
+    removeMembers(groupId: ID!, userIds: [ID!]!): [ID]
+    addAdmins(groupId: ID!, userIds: [ID!]!): [ID]
+    removeAdmins(groupId: ID!, userIds: [ID!]!): [ID]
+    setGroupName(groupId: ID!): String
+    setGroupPicture(groupId: ID!): String
+    markAsReceived(chatId: ID!): Boolean
+    markAsRead(chatId: ID!): Boolean
+  }
 `;
