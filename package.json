@@ -24,6 +24,7 @@
     "express": "4.16.3",
     "graphql": "14.0.2",
     "graphql-code-generator": "0.12.6",
+    "graphql-codegen-typescript-template": "0.12.6",
     "moment": "2.22.1"
   }
 }
