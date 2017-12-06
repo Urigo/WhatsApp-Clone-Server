@@ -4,8 +4,12 @@
   "private": true,
   "scripts": {
     "build": "tsc",
-    "start": "ts-node index.ts",
-    "dev": "nodemon --exec yarn start:server -e ts"
+    "generate": "gql-gen",
+    "generate:watch": "nodemon --exec yarn generate -e graphql",
+    "start:server": "ts-node index.ts",
+    "start:server:watch": "nodemon --exec yarn start:server -e ts",
+    "dev": "concurrently \"yarn generate:watch\" \"yarn start:server:watch\"",
+    "start": "yarn generate && yarn start:server"
   },
   "devDependencies": {
     "@types/body-parser": "^1.17.0",
@@ -14,6 +18,10 @@
     "@types/graphql": "^14.0.7",
     "@types/graphql-iso-date": "^3.3.1",
     "@types/node": "^11.9.4",
+    "concurrently": "^4.1.0",
+    "graphql-codegen-typescript-common": "^0.16.1",
+    "graphql-codegen-typescript-resolvers": "^0.16.1",
+    "graphql-codegen-typescript-server": "^0.16.1",
     "nodemon": "^1.18.10",
     "ts-node": "^8.0.2",
     "typescript": "^3.3.3"
@@ -24,6 +32,7 @@
     "cors": "^2.8.5",
     "express": "^4.16.4",
     "graphql": "^14.1.1",
+    "graphql-code-generator": "^0.16.1",
     "graphql-iso-date": "^3.6.1",
     "moment": "^2.24.0"
   }
