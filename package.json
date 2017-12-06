@@ -12,6 +12,7 @@
     "@types/cors": "^2.8.4",
     "@types/express": "^4.16.1",
     "@types/graphql": "^14.0.7",
+    "@types/graphql-iso-date": "^3.3.1",
     "@types/node": "^11.9.4",
     "nodemon": "^1.18.10",
     "ts-node": "^8.0.2",
@@ -23,6 +24,7 @@
     "cors": "^2.8.5",
     "express": "^4.16.4",
     "graphql": "^14.1.1",
+    "graphql-iso-date": "^3.6.1",
     "moment": "^2.24.0"
   }
 }
