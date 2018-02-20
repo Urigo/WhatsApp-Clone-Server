@@ -112,6 +112,12 @@ export interface Mutation {
   markAsRead?: Maybe<boolean>;
 }
 
+export interface Subscription {
+  messageAdded?: Maybe<Message>;
+
+  chatAdded?: Maybe<Chat>;
+}
+
 // ====================================================
 // Arguments
 // ====================================================
@@ -176,6 +182,9 @@ export interface MarkAsReceivedMutationArgs {
 }
 export interface MarkAsReadMutationArgs {
   chatId: string;
+}
+export interface MessageAddedSubscriptionArgs {
+  chatId?: Maybe<string>;
 }
 
 import { GraphQLResolveInfo } from "graphql";
@@ -680,6 +689,29 @@ export namespace MutationResolvers {
   }
 }
 
+export namespace SubscriptionResolvers {
+  export interface Resolvers<Context = {}, TypeParent = {}> {
+    messageAdded?: MessageAddedResolver<Maybe<Message>, TypeParent, Context>;
+
+    chatAdded?: ChatAddedResolver<Maybe<Chat>, TypeParent, Context>;
+  }
+
+  export type MessageAddedResolver<
+    R = Maybe<Message>,
+    Parent = {},
+    Context = {}
+  > = SubscriptionResolver<R, Parent, Context, MessageAddedArgs>;
+  export interface MessageAddedArgs {
+    chatId?: Maybe<string>;
+  }
+
+  export type ChatAddedResolver<
+    R = Maybe<Chat>,
+    Parent = {},
+    Context = {}
+  > = SubscriptionResolver<R, Parent, Context>;
+}
+
 /** Directs the executor to skip this field or fragment when the `if` argument is true. */
 export type SkipDirectiveResolver<Result> = DirectiveResolverFn<
   Result,
@@ -720,6 +752,7 @@ export interface IResolvers {
   Message?: MessageResolvers.Resolvers;
   Recipient?: RecipientResolvers.Resolvers;
   Mutation?: MutationResolvers.Resolvers;
+  Subscription?: SubscriptionResolvers.Resolvers;
 }
 
 export interface IDirectiveResolvers<Result> {
