@@ -7,6 +7,9 @@ import * as passport from "passport";
 import * as basicStrategy from 'passport-http';
 import * as bcrypt from 'bcrypt-nodejs';
 import { db, User } from "./db";
+import { createServer } from "http";
+import { SubscriptionServer } from "subscriptions-transport-ws";
+import { execute, subscribe } from "graphql";
 
 let users = db.users;
 
@@ -76,4 +79,36 @@ app.use('/graphiql', graphiqlExpress({
   endpointURL: '/graphql',
 }));
 
-app.listen(PORT);
+// Wrap the Express server
+const ws = createServer(app);
+ws.listen(PORT, () => {
+  console.log(`Apollo Server is now running on http://localhost:${PORT}`);
+  // Set up the WebSocket for handling GraphQL subscriptions
+  new SubscriptionServer({
+    onConnect: (connectionParams: any, webSocket: any) => {
+      if (connectionParams.authToken) {
+        // create a buffer and tell it the data coming in is base64
+        const buf = new Buffer(connectionParams.authToken.split(' ')[1], 'base64');
+        // read it back out as a string
+        const [username, password]: string[] = buf.toString().split(':');
+        if (username && password) {
+          const user = users.find(user => user.username == username);
+
+          if (user && validPassword(password, user.password)) {
+            // Set context for the WebSocket
+            return {user};
+          } else {
+            throw new Error('Wrong credentials!');
+          }
+        }
+      }
+      throw new Error('Missing auth token!');
+    },
+    execute,
+    subscribe,
+    schema
+  }, {
+    server: ws,
+    path: '/subscriptions',
+  });
+});
