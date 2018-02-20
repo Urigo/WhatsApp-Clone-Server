@@ -28,9 +28,11 @@
     "express": "4.16.2",
     "graphql": "0.12.3",
     "graphql-code-generator": "0.8.14",
+    "graphql-subscriptions": "0.5.8",
     "graphql-tools": "2.21.0",
     "moment": "2.20.1",
     "passport": "0.4.0",
-    "passport-http": "0.3.0"
+    "passport-http": "0.3.0",
+    "subscriptions-transport-ws": "0.9.6"
   }
 }
