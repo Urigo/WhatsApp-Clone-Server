@@ -8,6 +8,14 @@ export default `
     chat(chatId: ID!): Chat
   }
 
+  type Subscription {
+    messageAdded(chatId: ID): Message
+    chatAdded: Chat
+    chatUpdated: Chat
+    userUpdated: User
+    userAdded: User
+  }
+
   enum MessageType {
     LOCATION
     TEXT
