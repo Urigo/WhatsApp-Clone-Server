@@ -189,7 +189,11 @@ export interface MessageAddedSubscriptionArgs {
 
 import { GraphQLResolveInfo } from "graphql";
 
-import { Chat, Message, Recipient } from "./db";
+import { Chat } from "./entity/Chat";
+
+import { Message } from "./entity/Message";
+
+import { Recipient } from "./entity/Recipient";
 
 import { AppContext } from "./schema/types";
 
