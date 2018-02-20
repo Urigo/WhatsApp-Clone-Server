@@ -16,6 +16,7 @@
     "@types/node": "^8.0.55",
     "@types/passport": "0.4.3",
     "@types/passport-http": "0.3.5",
+    "@types/pg": "7.4.4",
     "graphql-code-generator": "^0.8.14",
     "nodemon": "^1.12.5",
     "ts-node": "^3.3.0",
@@ -33,6 +34,9 @@
     "moment": "^2.19.3",
     "passport": "0.4.0",
     "passport-http": "0.3.0",
-    "subscriptions-transport-ws": "0.9.5"
+    "pg": "7.4.1",
+    "reflect-metadata": "0.1.12",
+    "subscriptions-transport-ws": "0.9.5",
+    "typeorm": "0.1.12"
   }
 }
