@@ -16,6 +16,7 @@
     "@types/node": "10.11.3",
     "@types/passport": "0.4.5",
     "@types/passport-http": "0.3.6",
+    "@types/pg": "7.4.8",
     "nodemon": "1.18.4",
     "ts-node": "7.0.1",
     "typescript": "3.1.1"
@@ -31,6 +32,9 @@
     "graphql-codegen-typescript-template": "0.12.6",
     "moment": "2.22.1",
     "passport": "0.4.0",
-    "passport-http": "0.3.0"
+    "passport-http": "0.3.0",
+    "pg": "7.4.3",
+    "reflect-metadata": "0.1.12",
+    "typeorm": "0.2.5"
   }
 }
