@@ -1,10 +1,13 @@
-import { IResolvers } from "../types";
+import { PubSub, withFilter } from 'apollo-server-express';
 import { GraphQLDateTime } from 'graphql-iso-date';
-import { ChatDb, db, MessageDb, MessageType, RecipientDb } from "../db";
+import { ChatDb, db, MessageDb, MessageType, RecipientDb, UserDb } from "../db";
+import { IResolvers, MessageAddedSubscriptionArgs } from "../types";
 import moment from "moment";
 
 let users = db.users;
 let chats = db.chats;
+
+export const pubsub = new PubSub();
 
 export const resolvers: IResolvers = {
   Date: GraphQLDateTime,
@@ -18,6 +21,20 @@ export const resolvers: IResolvers = {
     updateUser: (obj, {name, picture}, {currentUser}) => {
       currentUser.name = name || currentUser.name;
       currentUser.picture = picture || currentUser.picture;
+
+      pubsub.publish('userUpdated', {
+        userUpdated: currentUser,
+      });
+
+      // Get a list of the chats who have/had currentUser involved
+      const chatsAffected = chats.filter(chat => !chat.name && chat.allTimeMemberIds.includes(currentUser.id));
+
+      chatsAffected.forEach(chat => {
+        pubsub.publish('chatUpdated', {
+          updaterId: currentUser.id,
+          chatUpdated: chat,
+        })
+      });
 
       return currentUser;
     },
@@ -79,6 +96,12 @@ export const resolvers: IResolvers = {
         messages: [],
       };
       chats.push(chat);
+
+      pubsub.publish('chatAdded', {
+        creatorId: currentUser.id,
+        chatAdded: chat,
+      });
+
       return chat;
     },
     updateGroup: (obj, {chatId, groupName, groupPicture}, {currentUser}) => {
@@ -94,6 +117,11 @@ export const resolvers: IResolvers = {
 
       chat.name = groupName || chat.name;
       chat.picture = groupPicture || chat.picture;
+
+      pubsub.publish('chatUpdated', {
+        updaterId: currentUser.id,
+        chatUpdated: chat,
+      });
 
       return chat;
     },
@@ -221,6 +249,11 @@ export const resolvers: IResolvers = {
           chat.listingMemberIds = chat.listingMemberIds.concat(receiverId);
 
           holderIds = chat.listingMemberIds;
+
+          pubsub.publish('chatAdded', {
+            creatorId: currentUser.id,
+            chatAdded: chat,
+          });
         }
       } else {
         // Group
@@ -265,6 +298,10 @@ export const resolvers: IResolvers = {
         return chat;
       });
 
+      pubsub.publish('messageAdded', {
+        messageAdded: message,
+      });
+
       return message;
     },
     removeMessages: (obj, {chatId, messageIds, all}, {currentUser}) => {
@@ -304,6 +341,39 @@ export const resolvers: IResolvers = {
         return chat;
       });
       return deletedIds;
+    },
+  },
+  Subscription: {
+    messageAdded: {
+      subscribe: withFilter(() => pubsub.asyncIterator('messageAdded'),
+        ({messageAdded}: {messageAdded: MessageDb & {chat: {id: number}}}, {chatId}: MessageAddedSubscriptionArgs, {currentUser}: { currentUser: UserDb }) => {
+          return (!chatId || messageAdded.chat.id === Number(chatId)) &&
+            messageAdded.recipients.some(recipient => recipient.userId === currentUser.id);
+        }),
+    },
+    chatAdded: {
+      subscribe: withFilter(() => pubsub.asyncIterator('chatAdded'),
+        ({creatorId, chatAdded}: {creatorId: number, chatAdded: ChatDb}, variables: any, {currentUser}: { currentUser: UserDb }) => {
+          return creatorId !== currentUser.id && chatAdded.listingMemberIds.includes(currentUser.id);
+        }),
+    },
+    chatUpdated: {
+      subscribe: withFilter(() => pubsub.asyncIterator('chatUpdated'),
+        ({updaterId, chatUpdated}: {updaterId: number, chatUpdated: ChatDb}, variables: any, {currentUser}: { currentUser: UserDb }) => {
+          return updaterId !== currentUser.id && chatUpdated.listingMemberIds.includes(currentUser.id);
+        }),
+    },
+    userUpdated: {
+      subscribe: withFilter(() => pubsub.asyncIterator('userUpdated'),
+        ({userUpdated}: {userUpdated: UserDb}, variables: any, {currentUser}: { currentUser: UserDb }) => {
+          return userUpdated.id !== currentUser.id;
+        }),
+    },
+    userAdded: {
+      subscribe: withFilter(() => pubsub.asyncIterator('userAdded'),
+        ({userAdded}: {userAdded: UserDb}, variables: any, {currentUser}: { currentUser: UserDb }) => {
+          return userAdded.id !== currentUser.id;
+        }),
     },
   },
   Chat: {
