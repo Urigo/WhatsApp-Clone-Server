@@ -189,7 +189,13 @@ export interface MessageAddedSubscriptionArgs {
 
 import { GraphQLResolveInfo } from "graphql";
 
-import { ChatDb, MessageDb, RecipientDb, UserDb } from "./db";
+import { Chat } from "./entity/Chat";
+
+import { Message } from "./entity/Message";
+
+import { Recipient } from "./entity/Recipient";
+
+import { User } from "./entity/User";
 
 import { AppContext } from "./schema/types";
 
@@ -244,25 +250,25 @@ export type DirectiveResolverFn<TResult, TArgs = {}, TContext = {}> = (
 
 export namespace QueryResolvers {
   export interface Resolvers<Context = AppContext, TypeParent = {}> {
-    users?: UsersResolver<Maybe<UserDb[]>, TypeParent, Context>;
+    users?: UsersResolver<Maybe<User[]>, TypeParent, Context>;
 
-    chats?: ChatsResolver<Maybe<ChatDb[]>, TypeParent, Context>;
+    chats?: ChatsResolver<Maybe<Chat[]>, TypeParent, Context>;
 
-    chat?: ChatResolver<Maybe<ChatDb>, TypeParent, Context>;
+    chat?: ChatResolver<Maybe<Chat>, TypeParent, Context>;
   }
 
   export type UsersResolver<
-    R = Maybe<UserDb[]>,
+    R = Maybe<User[]>,
     Parent = {},
     Context = AppContext
   > = Resolver<R, Parent, Context>;
   export type ChatsResolver<
-    R = Maybe<ChatDb[]>,
+    R = Maybe<Chat[]>,
     Parent = {},
     Context = AppContext
   > = Resolver<R, Parent, Context>;
   export type ChatResolver<
-    R = Maybe<ChatDb>,
+    R = Maybe<Chat>,
     Parent = {},
     Context = AppContext
   > = Resolver<R, Parent, Context, ChatArgs>;
@@ -272,7 +278,7 @@ export namespace QueryResolvers {
 }
 
 export namespace UserResolvers {
-  export interface Resolvers<Context = AppContext, TypeParent = UserDb> {
+  export interface Resolvers<Context = AppContext, TypeParent = User> {
     id?: IdResolver<string, TypeParent, Context>;
 
     name?: NameResolver<Maybe<string>, TypeParent, Context>;
@@ -284,49 +290,49 @@ export namespace UserResolvers {
 
   export type IdResolver<
     R = string,
-    Parent = UserDb,
+    Parent = User,
     Context = AppContext
   > = Resolver<R, Parent, Context>;
   export type NameResolver<
     R = Maybe<string>,
-    Parent = UserDb,
+    Parent = User,
     Context = AppContext
   > = Resolver<R, Parent, Context>;
   export type PictureResolver<
     R = Maybe<string>,
-    Parent = UserDb,
+    Parent = User,
     Context = AppContext
   > = Resolver<R, Parent, Context>;
   export type PhoneResolver<
     R = Maybe<string>,
-    Parent = UserDb,
+    Parent = User,
     Context = AppContext
   > = Resolver<R, Parent, Context>;
 }
 
 export namespace ChatResolvers {
-  export interface Resolvers<Context = AppContext, TypeParent = ChatDb> {
+  export interface Resolvers<Context = AppContext, TypeParent = Chat> {
     id?: IdResolver<string, TypeParent, Context>;
 
     name?: NameResolver<Maybe<string>, TypeParent, Context>;
 
     picture?: PictureResolver<Maybe<string>, TypeParent, Context>;
 
-    allTimeMembers?: AllTimeMembersResolver<UserDb[], TypeParent, Context>;
+    allTimeMembers?: AllTimeMembersResolver<User[], TypeParent, Context>;
 
-    listingMembers?: ListingMembersResolver<UserDb[], TypeParent, Context>;
+    listingMembers?: ListingMembersResolver<User[], TypeParent, Context>;
 
     actualGroupMembers?: ActualGroupMembersResolver<
-      UserDb[],
+      User[],
       TypeParent,
       Context
     >;
 
-    admins?: AdminsResolver<Maybe<UserDb[]>, TypeParent, Context>;
+    admins?: AdminsResolver<Maybe<User[]>, TypeParent, Context>;
 
-    owner?: OwnerResolver<Maybe<UserDb>, TypeParent, Context>;
+    owner?: OwnerResolver<Maybe<User>, TypeParent, Context>;
 
-    messages?: MessagesResolver<(Maybe<MessageDb>)[], TypeParent, Context>;
+    messages?: MessagesResolver<(Maybe<Message>)[], TypeParent, Context>;
 
     unreadMessages?: UnreadMessagesResolver<number, TypeParent, Context>;
 
@@ -335,47 +341,47 @@ export namespace ChatResolvers {
 
   export type IdResolver<
     R = string,
-    Parent = ChatDb,
+    Parent = Chat,
     Context = AppContext
   > = Resolver<R, Parent, Context>;
   export type NameResolver<
     R = Maybe<string>,
-    Parent = ChatDb,
+    Parent = Chat,
     Context = AppContext
   > = Resolver<R, Parent, Context>;
   export type PictureResolver<
     R = Maybe<string>,
-    Parent = ChatDb,
+    Parent = Chat,
     Context = AppContext
   > = Resolver<R, Parent, Context>;
   export type AllTimeMembersResolver<
-    R = UserDb[],
-    Parent = ChatDb,
+    R = User[],
+    Parent = Chat,
     Context = AppContext
   > = Resolver<R, Parent, Context>;
   export type ListingMembersResolver<
-    R = UserDb[],
-    Parent = ChatDb,
+    R = User[],
+    Parent = Chat,
     Context = AppContext
   > = Resolver<R, Parent, Context>;
   export type ActualGroupMembersResolver<
-    R = UserDb[],
-    Parent = ChatDb,
+    R = User[],
+    Parent = Chat,
     Context = AppContext
   > = Resolver<R, Parent, Context>;
   export type AdminsResolver<
-    R = Maybe<UserDb[]>,
-    Parent = ChatDb,
+    R = Maybe<User[]>,
+    Parent = Chat,
     Context = AppContext
   > = Resolver<R, Parent, Context>;
   export type OwnerResolver<
-    R = Maybe<UserDb>,
-    Parent = ChatDb,
+    R = Maybe<User>,
+    Parent = Chat,
     Context = AppContext
   > = Resolver<R, Parent, Context>;
   export type MessagesResolver<
-    R = (Maybe<MessageDb>)[],
-    Parent = ChatDb,
+    R = (Maybe<Message>)[],
+    Parent = Chat,
     Context = AppContext
   > = Resolver<R, Parent, Context, MessagesArgs>;
   export interface MessagesArgs {
@@ -384,23 +390,23 @@ export namespace ChatResolvers {
 
   export type UnreadMessagesResolver<
     R = number,
-    Parent = ChatDb,
+    Parent = Chat,
     Context = AppContext
   > = Resolver<R, Parent, Context>;
   export type IsGroupResolver<
     R = boolean,
-    Parent = ChatDb,
+    Parent = Chat,
     Context = AppContext
   > = Resolver<R, Parent, Context>;
 }
 
 export namespace MessageResolvers {
-  export interface Resolvers<Context = AppContext, TypeParent = MessageDb> {
+  export interface Resolvers<Context = AppContext, TypeParent = Message> {
     id?: IdResolver<string, TypeParent, Context>;
 
-    sender?: SenderResolver<UserDb, TypeParent, Context>;
+    sender?: SenderResolver<User, TypeParent, Context>;
 
-    chat?: ChatResolver<ChatDb, TypeParent, Context>;
+    chat?: ChatResolver<Chat, TypeParent, Context>;
 
     content?: ContentResolver<string, TypeParent, Context>;
 
@@ -408,67 +414,67 @@ export namespace MessageResolvers {
 
     type?: TypeResolver<number, TypeParent, Context>;
 
-    recipients?: RecipientsResolver<RecipientDb[], TypeParent, Context>;
+    recipients?: RecipientsResolver<Recipient[], TypeParent, Context>;
 
-    holders?: HoldersResolver<UserDb[], TypeParent, Context>;
+    holders?: HoldersResolver<User[], TypeParent, Context>;
 
     ownership?: OwnershipResolver<boolean, TypeParent, Context>;
   }
 
   export type IdResolver<
     R = string,
-    Parent = MessageDb,
+    Parent = Message,
     Context = AppContext
   > = Resolver<R, Parent, Context>;
   export type SenderResolver<
-    R = UserDb,
-    Parent = MessageDb,
+    R = User,
+    Parent = Message,
     Context = AppContext
   > = Resolver<R, Parent, Context>;
   export type ChatResolver<
-    R = ChatDb,
-    Parent = MessageDb,
+    R = Chat,
+    Parent = Message,
     Context = AppContext
   > = Resolver<R, Parent, Context>;
   export type ContentResolver<
     R = string,
-    Parent = MessageDb,
+    Parent = Message,
     Context = AppContext
   > = Resolver<R, Parent, Context>;
   export type CreatedAtResolver<
     R = string,
-    Parent = MessageDb,
+    Parent = Message,
     Context = AppContext
   > = Resolver<R, Parent, Context>;
   export type TypeResolver<
     R = number,
-    Parent = MessageDb,
+    Parent = Message,
     Context = AppContext
   > = Resolver<R, Parent, Context>;
   export type RecipientsResolver<
-    R = RecipientDb[],
-    Parent = MessageDb,
+    R = Recipient[],
+    Parent = Message,
     Context = AppContext
   > = Resolver<R, Parent, Context>;
   export type HoldersResolver<
-    R = UserDb[],
-    Parent = MessageDb,
+    R = User[],
+    Parent = Message,
     Context = AppContext
   > = Resolver<R, Parent, Context>;
   export type OwnershipResolver<
     R = boolean,
-    Parent = MessageDb,
+    Parent = Message,
     Context = AppContext
   > = Resolver<R, Parent, Context>;
 }
 
 export namespace RecipientResolvers {
-  export interface Resolvers<Context = AppContext, TypeParent = RecipientDb> {
-    user?: UserResolver<UserDb, TypeParent, Context>;
+  export interface Resolvers<Context = AppContext, TypeParent = Recipient> {
+    user?: UserResolver<User, TypeParent, Context>;
 
-    message?: MessageResolver<MessageDb, TypeParent, Context>;
+    message?: MessageResolver<Message, TypeParent, Context>;
 
-    chat?: ChatResolver<ChatDb, TypeParent, Context>;
+    chat?: ChatResolver<Chat, TypeParent, Context>;
 
     receivedAt?: ReceivedAtResolver<Maybe<string>, TypeParent, Context>;
 
@@ -476,41 +482,41 @@ export namespace RecipientResolvers {
   }
 
   export type UserResolver<
-    R = UserDb,
-    Parent = RecipientDb,
+    R = User,
+    Parent = Recipient,
     Context = AppContext
   > = Resolver<R, Parent, Context>;
   export type MessageResolver<
-    R = MessageDb,
-    Parent = RecipientDb,
+    R = Message,
+    Parent = Recipient,
     Context = AppContext
   > = Resolver<R, Parent, Context>;
   export type ChatResolver<
-    R = ChatDb,
-    Parent = RecipientDb,
+    R = Chat,
+    Parent = Recipient,
     Context = AppContext
   > = Resolver<R, Parent, Context>;
   export type ReceivedAtResolver<
     R = Maybe<string>,
-    Parent = RecipientDb,
+    Parent = Recipient,
     Context = AppContext
   > = Resolver<R, Parent, Context>;
   export type ReadAtResolver<
     R = Maybe<string>,
-    Parent = RecipientDb,
+    Parent = Recipient,
     Context = AppContext
   > = Resolver<R, Parent, Context>;
 }
 
 export namespace MutationResolvers {
   export interface Resolvers<Context = AppContext, TypeParent = {}> {
-    addChat?: AddChatResolver<Maybe<ChatDb>, TypeParent, Context>;
+    addChat?: AddChatResolver<Maybe<Chat>, TypeParent, Context>;
 
-    addGroup?: AddGroupResolver<Maybe<ChatDb>, TypeParent, Context>;
+    addGroup?: AddGroupResolver<Maybe<Chat>, TypeParent, Context>;
 
     removeChat?: RemoveChatResolver<Maybe<string>, TypeParent, Context>;
 
-    addMessage?: AddMessageResolver<Maybe<MessageDb>, TypeParent, Context>;
+    addMessage?: AddMessageResolver<Maybe<Message>, TypeParent, Context>;
 
     removeMessages?: RemoveMessagesResolver<
       Maybe<(Maybe<string>)[]>,
@@ -560,7 +566,7 @@ export namespace MutationResolvers {
   }
 
   export type AddChatResolver<
-    R = Maybe<ChatDb>,
+    R = Maybe<Chat>,
     Parent = {},
     Context = AppContext
   > = Resolver<R, Parent, Context, AddChatArgs>;
@@ -569,7 +575,7 @@ export namespace MutationResolvers {
   }
 
   export type AddGroupResolver<
-    R = Maybe<ChatDb>,
+    R = Maybe<Chat>,
     Parent = {},
     Context = AppContext
   > = Resolver<R, Parent, Context, AddGroupArgs>;
@@ -589,7 +595,7 @@ export namespace MutationResolvers {
   }
 
   export type AddMessageResolver<
-    R = Maybe<MessageDb>,
+    R = Maybe<Message>,
     Parent = {},
     Context = AppContext
   > = Resolver<R, Parent, Context, AddMessageArgs>;
@@ -695,13 +701,13 @@ export namespace MutationResolvers {
 
 export namespace SubscriptionResolvers {
   export interface Resolvers<Context = AppContext, TypeParent = {}> {
-    messageAdded?: MessageAddedResolver<Maybe<MessageDb>, TypeParent, Context>;
+    messageAdded?: MessageAddedResolver<Maybe<Message>, TypeParent, Context>;
 
-    chatAdded?: ChatAddedResolver<Maybe<ChatDb>, TypeParent, Context>;
+    chatAdded?: ChatAddedResolver<Maybe<Chat>, TypeParent, Context>;
   }
 
   export type MessageAddedResolver<
-    R = Maybe<MessageDb>,
+    R = Maybe<Message>,
     Parent = {},
     Context = AppContext
   > = SubscriptionResolver<R, Parent, Context, MessageAddedArgs>;
@@ -710,7 +716,7 @@ export namespace SubscriptionResolvers {
   }
 
   export type ChatAddedResolver<
-    R = Maybe<ChatDb>,
+    R = Maybe<Chat>,
     Parent = {},
     Context = AppContext
   > = SubscriptionResolver<R, Parent, Context>;
