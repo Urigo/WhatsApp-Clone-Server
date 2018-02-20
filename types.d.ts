@@ -62,6 +62,11 @@ export interface Mutation {
   markAsReceived?: boolean | null;
   markAsRead?: boolean | null;
 }
+
+export interface Subscription {
+  messageAdded?: Message | null;
+  chatAdded?: Chat | null;
+}
 export interface ChatQueryArgs {
   chatId: string;
 }
@@ -114,6 +119,9 @@ export interface MarkAsReceivedMutationArgs {
 }
 export interface MarkAsReadMutationArgs {
   chatId: string;
+}
+export interface MessageAddedSubscriptionArgs {
+  chatId?: string | null;
 }
 
 export enum MessageType {
