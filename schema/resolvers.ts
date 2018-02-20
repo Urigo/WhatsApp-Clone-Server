@@ -8,29 +8,28 @@ import * as moment from "moment";
 
 let users = db.users;
 let chats = db.chats;
-const currentUser = 1;
 
 export const resolvers: IResolvers = {
   Query: {
     // Show all users for the moment.
-    users: (): User[] => users.filter(user => user.id !== currentUser),
-    chats: (): Chat[] => chats.filter(chat => chat.listingMemberIds.includes(currentUser)),
+    users: (obj: any, args: any, {user: currentUser}: {user: User}): User[] => users.filter(user => user.id !== currentUser.id),
+    chats: (obj: any, args: any, {user: currentUser}: {user: User}): Chat[] => chats.filter(chat => chat.listingMemberIds.includes(currentUser.id)),
     chat: (obj: any, {chatId}: ChatQueryArgs): Chat | null => chats.find(chat => chat.id === Number(chatId)) || null,
   },
   Mutation: {
-    addChat: (obj: any, {recipientId}: AddChatMutationArgs): Chat => {
+    addChat: (obj: any, {recipientId}: AddChatMutationArgs, {user: currentUser}: {user: User}): Chat => {
       if (!users.find(user => user.id === Number(recipientId))) {
         throw new Error(`Recipient ${recipientId} doesn't exist.`);
       }
 
-      const chat = chats.find(chat => !chat.name && chat.allTimeMemberIds.includes(currentUser) && chat.allTimeMemberIds.includes(Number(recipientId)));
+      const chat = chats.find(chat => !chat.name && chat.allTimeMemberIds.includes(currentUser.id) && chat.allTimeMemberIds.includes(Number(recipientId)));
       if (chat) {
         // Chat already exists. Both users are already in the allTimeMemberIds array
         const chatId = chat.id;
-        if (!chat.listingMemberIds.includes(currentUser)) {
+        if (!chat.listingMemberIds.includes(currentUser.id)) {
           // The chat isn't listed for the current user. Add him to the memberIds
-          chat.listingMemberIds.push(currentUser);
-          chats.find(chat => chat.id === chatId)!.listingMemberIds.push(currentUser);
+          chat.listingMemberIds.push(currentUser.id);
+          chats.find(chat => chat.id === chatId)!.listingMemberIds.push(currentUser.id);
           return chat;
         } else {
           throw new Error(`Chat already exists.`);
@@ -44,9 +43,9 @@ export const resolvers: IResolvers = {
           picture: null,
           adminIds: null,
           ownerId: null,
-          allTimeMemberIds: [currentUser, Number(recipientId)],
+          allTimeMemberIds: [currentUser.id, Number(recipientId)],
           // Chat will not be listed to the other user until the first message gets written
-          listingMemberIds: [currentUser],
+          listingMemberIds: [currentUser.id],
           actualGroupMemberIds: null,
           messages: [],
         };
@@ -54,7 +53,7 @@ export const resolvers: IResolvers = {
         return chat;
       }
     },
-    addGroup: (obj: any, {recipientIds, groupName}: AddGroupMutationArgs): Chat => {
+    addGroup: (obj: any, {recipientIds, groupName}: AddGroupMutationArgs, {user: currentUser}: {user: User}): Chat => {
       recipientIds.forEach(recipientId => {
         if (!users.find(user => user.id === Number(recipientId))) {
           throw new Error(`Recipient ${recipientId} doesn't exist.`);
@@ -66,17 +65,17 @@ export const resolvers: IResolvers = {
         id,
         name: groupName,
         picture: null,
-        adminIds: [currentUser],
-        ownerId: currentUser,
-        allTimeMemberIds: [currentUser, ...recipientIds.map(id => Number(id))],
-        listingMemberIds: [currentUser, ...recipientIds.map(id => Number(id))],
-        actualGroupMemberIds: [currentUser, ...recipientIds.map(id => Number(id))],
+        adminIds: [currentUser.id],
+        ownerId: currentUser.id,
+        allTimeMemberIds: [currentUser.id, ...recipientIds.map(id => Number(id))],
+        listingMemberIds: [currentUser.id, ...recipientIds.map(id => Number(id))],
+        actualGroupMemberIds: [currentUser.id, ...recipientIds.map(id => Number(id))],
         messages: [],
       };
       chats.push(chat);
       return chat;
     },
-    removeChat: (obj: any, {chatId}: RemoveChatMutationArgs): number => {
+    removeChat: (obj: any, {chatId}: RemoveChatMutationArgs, {user: currentUser}: {user: User}): number => {
       const chat = chats.find(chat => chat.id === Number(chatId));
 
       if (!chat) {
@@ -85,14 +84,14 @@ export const resolvers: IResolvers = {
 
       if (!chat.name) {
         // Chat
-        if (!chat.listingMemberIds.includes(currentUser)) {
+        if (!chat.listingMemberIds.includes(currentUser.id)) {
           throw new Error(`The user is not a member of the chat ${chatId}.`);
         }
 
         // Instead of chaining map and filter we can loop once using reduce
         const messages = chat.messages.reduce<Message[]>((filtered, message) => {
           // Remove the current user from the message holders
-          message.holderIds = message.holderIds.filter(holderId => holderId !== currentUser);
+          message.holderIds = message.holderIds.filter(holderId => holderId !== currentUser.id);
 
           if (message.holderIds.length !== 0) {
             filtered.push(message);
@@ -102,7 +101,7 @@ export const resolvers: IResolvers = {
         }, []);
 
         // Remove the current user from who gets the chat listed. The chat will no longer appear in his list
-        const listingMemberIds = chat.listingMemberIds.filter(listingId => listingId !== currentUser);
+        const listingMemberIds = chat.listingMemberIds.filter(listingId => listingId !== currentUser.id);
 
         // Check how many members are left
         if (listingMemberIds.length === 0) {
@@ -120,14 +119,14 @@ export const resolvers: IResolvers = {
         return Number(chatId);
       } else {
         // Group
-        if (chat.ownerId !== currentUser) {
+        if (chat.ownerId !== currentUser.id) {
           throw new Error(`Group ${chatId} is not owned by the user.`);
         }
 
         // Instead of chaining map and filter we can loop once using reduce
         const messages = chat.messages.reduce<Message[]>((filtered, message) => {
           // Remove the current user from the message holders
-          message.holderIds = message.holderIds.filter(holderId => holderId !== currentUser);
+          message.holderIds = message.holderIds.filter(holderId => holderId !== currentUser.id);
 
           if (message.holderIds.length !== 0) {
             filtered.push(message);
@@ -137,7 +136,7 @@ export const resolvers: IResolvers = {
         }, []);
 
         // Remove the current user from who gets the group listed. The group will no longer appear in his list
-        const listingMemberIds = chat.listingMemberIds.filter(listingId => listingId !== currentUser);
+        const listingMemberIds = chat.listingMemberIds.filter(listingId => listingId !== currentUser.id);
 
         // Check how many members (including previous ones who can still access old messages) are left
         if (listingMemberIds.length === 0) {
@@ -147,9 +146,9 @@ export const resolvers: IResolvers = {
           // Update the group
 
           // Remove the current user from the chat members. He is no longer a member of the group
-          const actualGroupMemberIds = chat.actualGroupMemberIds!.filter(memberId => memberId !== currentUser);
+          const actualGroupMemberIds = chat.actualGroupMemberIds!.filter(memberId => memberId !== currentUser.id);
           // Remove the current user from the chat admins
-          const adminIds = chat.adminIds!.filter(memberId => memberId !== currentUser);
+          const adminIds = chat.adminIds!.filter(memberId => memberId !== currentUser.id);
           // Set the owner id to be null. A null owner means the group is read-only
           let ownerId: number | null = null;
 
@@ -169,7 +168,7 @@ export const resolvers: IResolvers = {
         return Number(chatId);
       }
     },
-    addMessage: (obj: any, {chatId, content}: AddMessageMutationArgs): Message => {
+    addMessage: (obj: any, {chatId, content}: AddMessageMutationArgs, {user: currentUser}: {user: User}): Message => {
       if (content === null || content === '') {
         throw new Error(`Cannot add empty or null messages.`);
       }
@@ -184,11 +183,11 @@ export const resolvers: IResolvers = {
 
       if (!chat.name) {
         // Chat
-        if (!chat.listingMemberIds.find(listingId => listingId === currentUser)) {
+        if (!chat.listingMemberIds.find(listingId => listingId === currentUser.id)) {
           throw new Error(`The chat ${chatId} must be listed for the current user before adding a message.`);
         }
 
-        const recipientId = chat.allTimeMemberIds.filter(userId => userId !== currentUser)[0];
+        const recipientId = chat.allTimeMemberIds.filter(userId => userId !== currentUser.id)[0];
 
         if (!chat.listingMemberIds.find(listingId => listingId === recipientId)) {
           // Chat is not listed for the recipient. Add him to the listingMemberIds
@@ -205,7 +204,7 @@ export const resolvers: IResolvers = {
         }
       } else {
         // Group
-        if (!chat.actualGroupMemberIds!.find(memberId => memberId === currentUser)) {
+        if (!chat.actualGroupMemberIds!.find(memberId => memberId === currentUser.id)) {
           throw new Error(`The user is not a member of the group ${chatId}. Cannot add message.`);
         }
 
@@ -217,7 +216,7 @@ export const resolvers: IResolvers = {
       let recipients: Recipient[] = [];
 
       holderIds.forEach(holderId => {
-        if (holderId !== currentUser) {
+        if (holderId !== currentUser.id) {
           recipients.push({
             userId: holderId,
             messageId: id,
@@ -231,7 +230,7 @@ export const resolvers: IResolvers = {
       const message: Message = {
         id,
         chatId: Number(chatId),
-        senderId: currentUser,
+        senderId: currentUser.id,
         content,
         createdAt: moment().unix(),
         type: MessageType.TEXT,
@@ -248,14 +247,14 @@ export const resolvers: IResolvers = {
 
       return message;
     },
-    removeMessages: (obj: any, {chatId, messageIds, all}: RemoveMessagesMutationArgs): number[] => {
+    removeMessages: (obj: any, {chatId, messageIds, all}: RemoveMessagesMutationArgs, {user: currentUser}: {user: User}): number[] => {
       const chat = chats.find(chat => chat.id === Number(chatId));
 
       if (!chat) {
         throw new Error(`Cannot find chat ${chatId}.`);
       }
 
-      if (!chat.listingMemberIds.find(listingId => listingId === currentUser)) {
+      if (!chat.listingMemberIds.find(listingId => listingId === currentUser.id)) {
         throw new Error(`The chat/group ${chatId} is not listed for the current user, so there is nothing to delete.`);
       }
 
@@ -271,7 +270,7 @@ export const resolvers: IResolvers = {
             if (all || messageIds!.includes(String(message.id))) {
               deletedIds.push(message.id);
               // Remove the current user from the message holders
-              message.holderIds = message.holderIds.filter(holderId => holderId !== currentUser);
+              message.holderIds = message.holderIds.filter(holderId => holderId !== currentUser.id);
             }
 
             if (message.holderIds.length !== 0) {
@@ -288,24 +287,24 @@ export const resolvers: IResolvers = {
     },
   },
   Chat: {
-    name: (chat: Chat): string => chat.name ? chat.name : users
-      .find(user => user.id === chat.allTimeMemberIds.find(userId => userId !== currentUser))!.name,
-    picture: (chat: Chat) => chat.name ? chat.picture : users
-      .find(user => user.id === chat.allTimeMemberIds.find(userId => userId !== currentUser))!.picture,
+    name: (chat: Chat, args: any, {user: currentUser}: {user: User}): string => chat.name ? chat.name : users
+      .find(user => user.id === chat.allTimeMemberIds.find(userId => userId !== currentUser.id))!.name,
+    picture: (chat: Chat, args: any, {user: currentUser}: {user: User}) => chat.name ? chat.picture : users
+      .find(user => user.id === chat.allTimeMemberIds.find(userId => userId !== currentUser.id))!.picture,
     allTimeMembers: (chat: Chat): User[] => users.filter(user => chat.allTimeMemberIds.includes(user.id)),
     listingMembers: (chat: Chat): User[] => users.filter(user => chat.listingMemberIds.includes(user.id)),
     actualGroupMembers: (chat: Chat): User[] => users.filter(user => chat.actualGroupMemberIds && chat.actualGroupMemberIds.includes(user.id)),
     admins: (chat: Chat): User[] => users.filter(user => chat.adminIds && chat.adminIds.includes(user.id)),
     owner: (chat: Chat): User | null => users.find(user => chat.ownerId === user.id) || null,
-    messages: (chat: Chat, {amount = null}: {amount: number}): Message[] => {
+    messages: (chat: Chat, {amount = null}: {amount: number}, {user: currentUser}: {user: User}): Message[] => {
       const messages = chat.messages
-      .filter(message => message.holderIds.includes(currentUser))
+      .filter(message => message.holderIds.includes(currentUser.id))
       .sort((a, b) => b.createdAt - a.createdAt) || <Message[]>[];
       return (amount ? messages.slice(0, amount) : messages).reverse();
     },
-    unreadMessages: (chat: Chat): number => chat.messages
-      .filter(message => message.holderIds.includes(currentUser) &&
-        message.recipients.find(recipient => recipient.userId === currentUser && !recipient.readAt))
+    unreadMessages: (chat: Chat, args: any, {user: currentUser}: {user: User}): number => chat.messages
+      .filter(message => message.holderIds.includes(currentUser.id) &&
+        message.recipients.find(recipient => recipient.userId === currentUser.id && !recipient.readAt))
       .length,
     isGroup: (chat: Chat): boolean => !!chat.name,
   },
@@ -313,7 +312,7 @@ export const resolvers: IResolvers = {
     chat: (message: Message): Chat | null => chats.find(chat => message.chatId === chat.id) || null,
     sender: (message: Message): User | null => users.find(user => user.id === message.senderId) || null,
     holders: (message: Message): User[] => users.filter(user => message.holderIds.includes(user.id)),
-    ownership: (message: Message): boolean => message.senderId === currentUser,
+    ownership: (message: Message, args: any, {user: currentUser}: {user: User}): boolean => message.senderId === currentUser.id,
   },
   Recipient: {
     user: (recipient: Recipient): User | null => users.find(user => recipient.userId === user.id) || null,
