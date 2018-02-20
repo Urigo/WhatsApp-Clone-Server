@@ -231,7 +231,13 @@ import {
   GraphQLScalarTypeConfig
 } from "graphql";
 
-import { ChatDb, MessageDb, RecipientDb, UserDb } from "./db";
+import { Chat } from "./entity/Chat";
+
+import { Message } from "./entity/Message";
+
+import { Recipient } from "./entity/Recipient";
+
+import { User } from "./entity/User";
 
 import { AppContext } from "./schema/types";
 
@@ -286,32 +292,32 @@ export type DirectiveResolverFn<TResult, TArgs = {}, TContext = {}> = (
 
 export namespace QueryResolvers {
   export interface Resolvers<TContext = AppContext, TypeParent = {}> {
-    me?: MeResolver<Maybe<UserDb>, TypeParent, TContext>;
+    me?: MeResolver<Maybe<User>, TypeParent, TContext>;
 
-    users?: UsersResolver<Maybe<UserDb[]>, TypeParent, TContext>;
+    users?: UsersResolver<Maybe<User[]>, TypeParent, TContext>;
 
-    chats?: ChatsResolver<ChatDb[], TypeParent, TContext>;
+    chats?: ChatsResolver<Chat[], TypeParent, TContext>;
 
-    chat?: ChatResolver<Maybe<ChatDb>, TypeParent, TContext>;
+    chat?: ChatResolver<Maybe<Chat>, TypeParent, TContext>;
   }
 
   export type MeResolver<
-    R = Maybe<UserDb>,
+    R = Maybe<User>,
     Parent = {},
     TContext = AppContext
   > = Resolver<R, Parent, TContext>;
   export type UsersResolver<
-    R = Maybe<UserDb[]>,
+    R = Maybe<User[]>,
     Parent = {},
     TContext = AppContext
   > = Resolver<R, Parent, TContext>;
   export type ChatsResolver<
-    R = ChatDb[],
+    R = Chat[],
     Parent = {},
     TContext = AppContext
   > = Resolver<R, Parent, TContext>;
   export type ChatResolver<
-    R = Maybe<ChatDb>,
+    R = Maybe<Chat>,
     Parent = {},
     TContext = AppContext
   > = Resolver<R, Parent, TContext, ChatArgs>;
@@ -321,7 +327,7 @@ export namespace QueryResolvers {
 }
 
 export namespace UserResolvers {
-  export interface Resolvers<TContext = AppContext, TypeParent = UserDb> {
+  export interface Resolvers<TContext = AppContext, TypeParent = User> {
     id?: IdResolver<string, TypeParent, TContext>;
 
     name?: NameResolver<Maybe<string>, TypeParent, TContext>;
@@ -333,28 +339,28 @@ export namespace UserResolvers {
 
   export type IdResolver<
     R = string,
-    Parent = UserDb,
+    Parent = User,
     TContext = AppContext
   > = Resolver<R, Parent, TContext>;
   export type NameResolver<
     R = Maybe<string>,
-    Parent = UserDb,
+    Parent = User,
     TContext = AppContext
   > = Resolver<R, Parent, TContext>;
   export type PictureResolver<
     R = Maybe<string>,
-    Parent = UserDb,
+    Parent = User,
     TContext = AppContext
   > = Resolver<R, Parent, TContext>;
   export type PhoneResolver<
     R = Maybe<string>,
-    Parent = UserDb,
+    Parent = User,
     TContext = AppContext
   > = Resolver<R, Parent, TContext>;
 }
 
 export namespace ChatResolvers {
-  export interface Resolvers<TContext = AppContext, TypeParent = ChatDb> {
+  export interface Resolvers<TContext = AppContext, TypeParent = Chat> {
     id?: IdResolver<string, TypeParent, TContext>;
 
     createdAt?: CreatedAtResolver<Date, TypeParent, TContext>;
@@ -363,25 +369,25 @@ export namespace ChatResolvers {
 
     picture?: PictureResolver<Maybe<string>, TypeParent, TContext>;
 
-    allTimeMembers?: AllTimeMembersResolver<UserDb[], TypeParent, TContext>;
+    allTimeMembers?: AllTimeMembersResolver<User[], TypeParent, TContext>;
 
-    listingMembers?: ListingMembersResolver<UserDb[], TypeParent, TContext>;
+    listingMembers?: ListingMembersResolver<User[], TypeParent, TContext>;
 
     actualGroupMembers?: ActualGroupMembersResolver<
-      Maybe<UserDb[]>,
+      Maybe<User[]>,
       TypeParent,
       TContext
     >;
 
-    admins?: AdminsResolver<Maybe<UserDb[]>, TypeParent, TContext>;
+    admins?: AdminsResolver<Maybe<User[]>, TypeParent, TContext>;
 
-    owner?: OwnerResolver<Maybe<UserDb>, TypeParent, TContext>;
+    owner?: OwnerResolver<Maybe<User>, TypeParent, TContext>;
 
     isGroup?: IsGroupResolver<boolean, TypeParent, TContext>;
 
-    messages?: MessagesResolver<(Maybe<MessageDb>)[], TypeParent, TContext>;
+    messages?: MessagesResolver<(Maybe<Message>)[], TypeParent, TContext>;
 
-    lastMessage?: LastMessageResolver<Maybe<MessageDb>, TypeParent, TContext>;
+    lastMessage?: LastMessageResolver<Maybe<Message>, TypeParent, TContext>;
 
     updatedAt?: UpdatedAtResolver<Date, TypeParent, TContext>;
 
@@ -390,57 +396,57 @@ export namespace ChatResolvers {
 
   export type IdResolver<
     R = string,
-    Parent = ChatDb,
+    Parent = Chat,
     TContext = AppContext
   > = Resolver<R, Parent, TContext>;
   export type CreatedAtResolver<
     R = Date,
-    Parent = ChatDb,
+    Parent = Chat,
     TContext = AppContext
   > = Resolver<R, Parent, TContext>;
   export type NameResolver<
     R = Maybe<string>,
-    Parent = ChatDb,
+    Parent = Chat,
     TContext = AppContext
   > = Resolver<R, Parent, TContext>;
   export type PictureResolver<
     R = Maybe<string>,
-    Parent = ChatDb,
+    Parent = Chat,
     TContext = AppContext
   > = Resolver<R, Parent, TContext>;
   export type AllTimeMembersResolver<
-    R = UserDb[],
-    Parent = ChatDb,
+    R = User[],
+    Parent = Chat,
     TContext = AppContext
   > = Resolver<R, Parent, TContext>;
   export type ListingMembersResolver<
-    R = UserDb[],
-    Parent = ChatDb,
+    R = User[],
+    Parent = Chat,
     TContext = AppContext
   > = Resolver<R, Parent, TContext>;
   export type ActualGroupMembersResolver<
-    R = Maybe<UserDb[]>,
-    Parent = ChatDb,
+    R = Maybe<User[]>,
+    Parent = Chat,
     TContext = AppContext
   > = Resolver<R, Parent, TContext>;
   export type AdminsResolver<
-    R = Maybe<UserDb[]>,
-    Parent = ChatDb,
+    R = Maybe<User[]>,
+    Parent = Chat,
     TContext = AppContext
   > = Resolver<R, Parent, TContext>;
   export type OwnerResolver<
-    R = Maybe<UserDb>,
-    Parent = ChatDb,
+    R = Maybe<User>,
+    Parent = Chat,
     TContext = AppContext
   > = Resolver<R, Parent, TContext>;
   export type IsGroupResolver<
     R = boolean,
-    Parent = ChatDb,
+    Parent = Chat,
     TContext = AppContext
   > = Resolver<R, Parent, TContext>;
   export type MessagesResolver<
-    R = (Maybe<MessageDb>)[],
-    Parent = ChatDb,
+    R = (Maybe<Message>)[],
+    Parent = Chat,
     TContext = AppContext
   > = Resolver<R, Parent, TContext, MessagesArgs>;
   export interface MessagesArgs {
@@ -448,29 +454,29 @@ export namespace ChatResolvers {
   }
 
   export type LastMessageResolver<
-    R = Maybe<MessageDb>,
-    Parent = ChatDb,
+    R = Maybe<Message>,
+    Parent = Chat,
     TContext = AppContext
   > = Resolver<R, Parent, TContext>;
   export type UpdatedAtResolver<
     R = Date,
-    Parent = ChatDb,
+    Parent = Chat,
     TContext = AppContext
   > = Resolver<R, Parent, TContext>;
   export type UnreadMessagesResolver<
     R = number,
-    Parent = ChatDb,
+    Parent = Chat,
     TContext = AppContext
   > = Resolver<R, Parent, TContext>;
 }
 
 export namespace MessageResolvers {
-  export interface Resolvers<TContext = AppContext, TypeParent = MessageDb> {
+  export interface Resolvers<TContext = AppContext, TypeParent = Message> {
     id?: IdResolver<string, TypeParent, TContext>;
 
-    sender?: SenderResolver<UserDb, TypeParent, TContext>;
+    sender?: SenderResolver<User, TypeParent, TContext>;
 
-    chat?: ChatResolver<ChatDb, TypeParent, TContext>;
+    chat?: ChatResolver<Chat, TypeParent, TContext>;
 
     content?: ContentResolver<string, TypeParent, TContext>;
 
@@ -478,67 +484,67 @@ export namespace MessageResolvers {
 
     type?: TypeResolver<number, TypeParent, TContext>;
 
-    holders?: HoldersResolver<UserDb[], TypeParent, TContext>;
+    holders?: HoldersResolver<User[], TypeParent, TContext>;
 
     ownership?: OwnershipResolver<boolean, TypeParent, TContext>;
 
-    recipients?: RecipientsResolver<RecipientDb[], TypeParent, TContext>;
+    recipients?: RecipientsResolver<Recipient[], TypeParent, TContext>;
   }
 
   export type IdResolver<
     R = string,
-    Parent = MessageDb,
+    Parent = Message,
     TContext = AppContext
   > = Resolver<R, Parent, TContext>;
   export type SenderResolver<
-    R = UserDb,
-    Parent = MessageDb,
+    R = User,
+    Parent = Message,
     TContext = AppContext
   > = Resolver<R, Parent, TContext>;
   export type ChatResolver<
-    R = ChatDb,
-    Parent = MessageDb,
+    R = Chat,
+    Parent = Message,
     TContext = AppContext
   > = Resolver<R, Parent, TContext>;
   export type ContentResolver<
     R = string,
-    Parent = MessageDb,
+    Parent = Message,
     TContext = AppContext
   > = Resolver<R, Parent, TContext>;
   export type CreatedAtResolver<
     R = Date,
-    Parent = MessageDb,
+    Parent = Message,
     TContext = AppContext
   > = Resolver<R, Parent, TContext>;
   export type TypeResolver<
     R = number,
-    Parent = MessageDb,
+    Parent = Message,
     TContext = AppContext
   > = Resolver<R, Parent, TContext>;
   export type HoldersResolver<
-    R = UserDb[],
-    Parent = MessageDb,
+    R = User[],
+    Parent = Message,
     TContext = AppContext
   > = Resolver<R, Parent, TContext>;
   export type OwnershipResolver<
     R = boolean,
-    Parent = MessageDb,
+    Parent = Message,
     TContext = AppContext
   > = Resolver<R, Parent, TContext>;
   export type RecipientsResolver<
-    R = RecipientDb[],
-    Parent = MessageDb,
+    R = Recipient[],
+    Parent = Message,
     TContext = AppContext
   > = Resolver<R, Parent, TContext>;
 }
 
 export namespace RecipientResolvers {
-  export interface Resolvers<TContext = AppContext, TypeParent = RecipientDb> {
-    user?: UserResolver<UserDb, TypeParent, TContext>;
+  export interface Resolvers<TContext = AppContext, TypeParent = Recipient> {
+    user?: UserResolver<User, TypeParent, TContext>;
 
-    message?: MessageResolver<MessageDb, TypeParent, TContext>;
+    message?: MessageResolver<Message, TypeParent, TContext>;
 
-    chat?: ChatResolver<ChatDb, TypeParent, TContext>;
+    chat?: ChatResolver<Chat, TypeParent, TContext>;
 
     receivedAt?: ReceivedAtResolver<Maybe<Date>, TypeParent, TContext>;
 
@@ -546,45 +552,45 @@ export namespace RecipientResolvers {
   }
 
   export type UserResolver<
-    R = UserDb,
-    Parent = RecipientDb,
+    R = User,
+    Parent = Recipient,
     TContext = AppContext
   > = Resolver<R, Parent, TContext>;
   export type MessageResolver<
-    R = MessageDb,
-    Parent = RecipientDb,
+    R = Message,
+    Parent = Recipient,
     TContext = AppContext
   > = Resolver<R, Parent, TContext>;
   export type ChatResolver<
-    R = ChatDb,
-    Parent = RecipientDb,
+    R = Chat,
+    Parent = Recipient,
     TContext = AppContext
   > = Resolver<R, Parent, TContext>;
   export type ReceivedAtResolver<
     R = Maybe<Date>,
-    Parent = RecipientDb,
+    Parent = Recipient,
     TContext = AppContext
   > = Resolver<R, Parent, TContext>;
   export type ReadAtResolver<
     R = Maybe<Date>,
-    Parent = RecipientDb,
+    Parent = Recipient,
     TContext = AppContext
   > = Resolver<R, Parent, TContext>;
 }
 
 export namespace MutationResolvers {
   export interface Resolvers<TContext = AppContext, TypeParent = {}> {
-    updateUser?: UpdateUserResolver<UserDb, TypeParent, TContext>;
+    updateUser?: UpdateUserResolver<User, TypeParent, TContext>;
 
-    addChat?: AddChatResolver<Maybe<ChatDb>, TypeParent, TContext>;
+    addChat?: AddChatResolver<Maybe<Chat>, TypeParent, TContext>;
 
-    addGroup?: AddGroupResolver<Maybe<ChatDb>, TypeParent, TContext>;
+    addGroup?: AddGroupResolver<Maybe<Chat>, TypeParent, TContext>;
 
-    updateGroup?: UpdateGroupResolver<Maybe<ChatDb>, TypeParent, TContext>;
+    updateGroup?: UpdateGroupResolver<Maybe<Chat>, TypeParent, TContext>;
 
     removeChat?: RemoveChatResolver<Maybe<string>, TypeParent, TContext>;
 
-    addMessage?: AddMessageResolver<Maybe<MessageDb>, TypeParent, TContext>;
+    addMessage?: AddMessageResolver<Maybe<Message>, TypeParent, TContext>;
 
     removeMessages?: RemoveMessagesResolver<
       Maybe<(Maybe<string>)[]>,
@@ -634,7 +640,7 @@ export namespace MutationResolvers {
   }
 
   export type UpdateUserResolver<
-    R = UserDb,
+    R = User,
     Parent = {},
     TContext = AppContext
   > = Resolver<R, Parent, TContext, UpdateUserArgs>;
@@ -645,7 +651,7 @@ export namespace MutationResolvers {
   }
 
   export type AddChatResolver<
-    R = Maybe<ChatDb>,
+    R = Maybe<Chat>,
     Parent = {},
     TContext = AppContext
   > = Resolver<R, Parent, TContext, AddChatArgs>;
@@ -654,7 +660,7 @@ export namespace MutationResolvers {
   }
 
   export type AddGroupResolver<
-    R = Maybe<ChatDb>,
+    R = Maybe<Chat>,
     Parent = {},
     TContext = AppContext
   > = Resolver<R, Parent, TContext, AddGroupArgs>;
@@ -667,7 +673,7 @@ export namespace MutationResolvers {
   }
 
   export type UpdateGroupResolver<
-    R = Maybe<ChatDb>,
+    R = Maybe<Chat>,
     Parent = {},
     TContext = AppContext
   > = Resolver<R, Parent, TContext, UpdateGroupArgs>;
@@ -689,7 +695,7 @@ export namespace MutationResolvers {
   }
 
   export type AddMessageResolver<
-    R = Maybe<MessageDb>,
+    R = Maybe<Message>,
     Parent = {},
     TContext = AppContext
   > = Resolver<R, Parent, TContext, AddMessageArgs>;
@@ -795,19 +801,19 @@ export namespace MutationResolvers {
 
 export namespace SubscriptionResolvers {
   export interface Resolvers<TContext = AppContext, TypeParent = {}> {
-    messageAdded?: MessageAddedResolver<Maybe<MessageDb>, TypeParent, TContext>;
+    messageAdded?: MessageAddedResolver<Maybe<Message>, TypeParent, TContext>;
 
-    chatAdded?: ChatAddedResolver<Maybe<ChatDb>, TypeParent, TContext>;
+    chatAdded?: ChatAddedResolver<Maybe<Chat>, TypeParent, TContext>;
 
-    chatUpdated?: ChatUpdatedResolver<Maybe<ChatDb>, TypeParent, TContext>;
+    chatUpdated?: ChatUpdatedResolver<Maybe<Chat>, TypeParent, TContext>;
 
-    userUpdated?: UserUpdatedResolver<Maybe<UserDb>, TypeParent, TContext>;
+    userUpdated?: UserUpdatedResolver<Maybe<User>, TypeParent, TContext>;
 
-    userAdded?: UserAddedResolver<Maybe<UserDb>, TypeParent, TContext>;
+    userAdded?: UserAddedResolver<Maybe<User>, TypeParent, TContext>;
   }
 
   export type MessageAddedResolver<
-    R = Maybe<MessageDb>,
+    R = Maybe<Message>,
     Parent = {},
     TContext = AppContext
   > = SubscriptionResolver<R, Parent, TContext, MessageAddedArgs>;
@@ -816,22 +822,22 @@ export namespace SubscriptionResolvers {
   }
 
   export type ChatAddedResolver<
-    R = Maybe<ChatDb>,
+    R = Maybe<Chat>,
     Parent = {},
     TContext = AppContext
   > = SubscriptionResolver<R, Parent, TContext>;
   export type ChatUpdatedResolver<
-    R = Maybe<ChatDb>,
+    R = Maybe<Chat>,
     Parent = {},
     TContext = AppContext
   > = SubscriptionResolver<R, Parent, TContext>;
   export type UserUpdatedResolver<
-    R = Maybe<UserDb>,
+    R = Maybe<User>,
     Parent = {},
     TContext = AppContext
   > = SubscriptionResolver<R, Parent, TContext>;
   export type UserAddedResolver<
-    R = Maybe<UserDb>,
+    R = Maybe<User>,
     Parent = {},
     TContext = AppContext
   > = SubscriptionResolver<R, Parent, TContext>;
