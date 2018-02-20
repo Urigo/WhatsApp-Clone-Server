@@ -130,6 +130,18 @@ export interface Mutation {
   markAsRead?: Maybe<boolean>;
 }
 
+export interface Subscription {
+  messageAdded?: Maybe<Message>;
+
+  chatAdded?: Maybe<Chat>;
+
+  chatUpdated?: Maybe<Chat>;
+
+  userUpdated?: Maybe<User>;
+
+  userAdded?: Maybe<User>;
+}
+
 // ====================================================
 // Arguments
 // ====================================================
@@ -208,6 +220,9 @@ export interface MarkAsReceivedMutationArgs {
 }
 export interface MarkAsReadMutationArgs {
   chatId: string;
+}
+export interface MessageAddedSubscriptionArgs {
+  chatId?: Maybe<string>;
 }
 
 import {
@@ -778,6 +793,50 @@ export namespace MutationResolvers {
   }
 }
 
+export namespace SubscriptionResolvers {
+  export interface Resolvers<Context = AppContext, TypeParent = {}> {
+    messageAdded?: MessageAddedResolver<Maybe<MessageDb>, TypeParent, Context>;
+
+    chatAdded?: ChatAddedResolver<Maybe<ChatDb>, TypeParent, Context>;
+
+    chatUpdated?: ChatUpdatedResolver<Maybe<ChatDb>, TypeParent, Context>;
+
+    userUpdated?: UserUpdatedResolver<Maybe<UserDb>, TypeParent, Context>;
+
+    userAdded?: UserAddedResolver<Maybe<UserDb>, TypeParent, Context>;
+  }
+
+  export type MessageAddedResolver<
+    R = Maybe<MessageDb>,
+    Parent = {},
+    Context = AppContext
+  > = SubscriptionResolver<R, Parent, Context, MessageAddedArgs>;
+  export interface MessageAddedArgs {
+    chatId?: Maybe<string>;
+  }
+
+  export type ChatAddedResolver<
+    R = Maybe<ChatDb>,
+    Parent = {},
+    Context = AppContext
+  > = SubscriptionResolver<R, Parent, Context>;
+  export type ChatUpdatedResolver<
+    R = Maybe<ChatDb>,
+    Parent = {},
+    Context = AppContext
+  > = SubscriptionResolver<R, Parent, Context>;
+  export type UserUpdatedResolver<
+    R = Maybe<UserDb>,
+    Parent = {},
+    Context = AppContext
+  > = SubscriptionResolver<R, Parent, Context>;
+  export type UserAddedResolver<
+    R = Maybe<UserDb>,
+    Parent = {},
+    Context = AppContext
+  > = SubscriptionResolver<R, Parent, Context>;
+}
+
 /** Directs the executor to skip this field or fragment when the `if` argument is true. */
 export type SkipDirectiveResolver<Result> = DirectiveResolverFn<
   Result,
@@ -822,6 +881,7 @@ export interface IResolvers<Context = AppContext> {
   Message?: MessageResolvers.Resolvers<Context>;
   Recipient?: RecipientResolvers.Resolvers<Context>;
   Mutation?: MutationResolvers.Resolvers<Context>;
+  Subscription?: SubscriptionResolvers.Resolvers<Context>;
   Date?: GraphQLScalarType;
 }
 
