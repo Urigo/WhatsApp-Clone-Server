@@ -1,9 +1,12 @@
-import { IResolvers } from "../types";
-import { ChatDb, db, MessageDb, MessageType, RecipientDb } from "../db";
+import { PubSub, withFilter } from 'apollo-server-express';
+import { ChatDb, db, MessageDb, MessageType, RecipientDb, UserDb } from "../db";
+import { IResolvers, MessageAddedSubscriptionArgs } from "../types";
 import moment from "moment";
 
 let users = db.users;
 let chats = db.chats;
+
+export const pubsub = new PubSub();
 
 export const resolvers: IResolvers = {
   Query: {
@@ -46,6 +49,7 @@ export const resolvers: IResolvers = {
           messages: [],
         };
         chats.push(chat);
+
         return chat;
       }
     },
@@ -69,6 +73,12 @@ export const resolvers: IResolvers = {
         messages: [],
       };
       chats.push(chat);
+
+      pubsub.publish('chatAdded', {
+        creatorId: currentUser.id,
+        chatAdded: chat,
+      });
+
       return chat;
     },
     removeChat: (obj, {chatId}, {user: currentUser}) => {
@@ -197,6 +207,11 @@ export const resolvers: IResolvers = {
           });
 
           holderIds = listingMemberIds;
+
+          pubsub.publish('chatAdded', {
+            creatorId: currentUser.id,
+            chatAdded: chat,
+          });
         }
       } else {
         // Group
@@ -241,6 +256,10 @@ export const resolvers: IResolvers = {
         return chat;
       });
 
+      pubsub.publish('messageAdded', {
+        messageAdded: message,
+      });
+
       return message;
     },
     removeMessages: (obj, {chatId, messageIds, all}, {user: currentUser}) => {
@@ -281,6 +300,21 @@ export const resolvers: IResolvers = {
       });
       return deletedIds;
     },
+  },
+  Subscription: {
+    messageAdded: {
+      subscribe: withFilter(() => pubsub.asyncIterator('messageAdded'),
+        ({messageAdded}: {messageAdded: MessageDb & {chat: {id: number}}}, {chatId}: MessageAddedSubscriptionArgs, {user: currentUser}: { user: UserDb }) => {
+          return (!chatId || messageAdded.chat.id === Number(chatId)) &&
+            !!messageAdded.recipients.find((recipient: RecipientDb) => recipient.userId === currentUser.id);
+        }),
+    },
+    chatAdded: {
+      subscribe: withFilter(() => pubsub.asyncIterator('chatAdded'),
+        ({creatorId, chatAdded}: {creatorId: string, chatAdded: ChatDb}, variables: any, {user: currentUser}: { user: UserDb }) => {
+          return Number(creatorId) !== currentUser.id && !chatAdded.listingMemberIds.includes(currentUser.id);
+        }),
+    }
   },
   Chat: {
     name: (chat, args, {user: currentUser}) => chat.name ? chat.name : users
