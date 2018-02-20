@@ -16,6 +16,7 @@
     "@types/node": "10.0.6",
     "@types/passport": "0.4.5",
     "@types/passport-http": "0.3.6",
+    "@types/pg": "7.4.8",
     "@types/ws": "5.1.1",
     "nodemon": "1.17.4",
     "ts-node": "6.0.3",
@@ -35,6 +36,9 @@
     "moment": "2.22.1",
     "passport": "0.4.0",
     "passport-http": "0.3.0",
-    "subscriptions-transport-ws": "0.9.9"
+    "pg": "7.4.3",
+    "reflect-metadata": "0.1.12",
+    "subscriptions-transport-ws": "0.9.9",
+    "typeorm": "0.2.5"
   }
 }
