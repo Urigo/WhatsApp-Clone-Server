@@ -5,24 +5,23 @@ import moment from "moment";
 
 let users = db.users;
 let chats = db.chats;
-const currentUser = users[0];
 
 export const resolvers: IResolvers = {
   Date: GraphQLDateTime,
   Query: {
-    me: () => currentUser,
-    users: () => users.filter(user => user.id !== currentUser.id),
-    chats: () => chats.filter(chat => chat.listingMemberIds.includes(currentUser.id)),
-    chat: (obj, {chatId}) => chats.find(chat => chat.id === Number(chatId)),
+    me: (obj, args, {currentUser}) => currentUser,
+    users: (obj, args, {currentUser}) => users.filter(user => user.id !== currentUser.id),
+    chats: (obj, args, {currentUser}) => chats.filter(chat => chat.listingMemberIds.includes(currentUser.id)),
+    chat: (obj, {chatId}) => chats.find(chat => chat.id === Number(chatId)) || null,
   },
   Mutation: {
-    updateUser: (obj, {name, picture}) => {
+    updateUser: (obj, {name, picture}, {currentUser}) => {
       currentUser.name = name || currentUser.name;
       currentUser.picture = picture || currentUser.picture;
 
       return currentUser;
     },
-    addChat: (obj, {userId}) => {
+    addChat: (obj, {userId}, {currentUser}) => {
       if (!users.find(user => user.id === Number(userId))) {
         throw new Error(`User ${userId} doesn't exist.`);
       }
@@ -59,7 +58,7 @@ export const resolvers: IResolvers = {
         return chat;
       }
     },
-    addGroup: (obj, {userIds, groupName, groupPicture}) => {
+    addGroup: (obj, {userIds, groupName, groupPicture}, {currentUser}) => {
       userIds.forEach(userId => {
         if (!users.find(user => user.id === Number(userId))) {
           throw new Error(`User ${userId} doesn't exist.`);
@@ -82,7 +81,7 @@ export const resolvers: IResolvers = {
       chats.push(chat);
       return chat;
     },
-    updateGroup: (obj, {chatId, groupName, groupPicture}) => {
+    updateGroup: (obj, {chatId, groupName, groupPicture}, {currentUser}) => {
       const chat = chats.find(chat => chat.id === Number(chatId));
 
       if (!chat) {
@@ -98,7 +97,7 @@ export const resolvers: IResolvers = {
 
       return chat;
     },
-    removeChat: (obj, {chatId}) => {
+    removeChat: (obj, {chatId}, {currentUser}) => {
       const chat = chats.find(chat => chat.id === Number(chatId));
 
       if (!chat) {
@@ -191,7 +190,7 @@ export const resolvers: IResolvers = {
         return chatId;
       }
     },
-    addMessage: (obj, {chatId, content}) => {
+    addMessage: (obj, {chatId, content}, {currentUser}) => {
       if (content === null || content === '') {
         throw new Error(`Cannot add empty or null messages.`);
       }
@@ -268,7 +267,7 @@ export const resolvers: IResolvers = {
 
       return message;
     },
-    removeMessages: (obj, {chatId, messageIds, all}) => {
+    removeMessages: (obj, {chatId, messageIds, all}, {currentUser}) => {
       const chat = chats.find(chat => chat.id === Number(chatId));
 
       if (!chat) {
@@ -308,9 +307,9 @@ export const resolvers: IResolvers = {
     },
   },
   Chat: {
-    name: (chat) => chat.name ? chat.name : users
+    name: (chat, args, {currentUser}) => chat.name ? chat.name : users
       .find(user => user.id === chat.allTimeMemberIds.find(userId => userId !== currentUser.id))!.name,
-    picture: (chat) => chat.name ? chat.picture : users
+    picture: (chat, args, {currentUser}) => chat.name ? chat.picture : users
       .find(user => user.id === chat.allTimeMemberIds.find(userId => userId !== currentUser.id))!.picture,
     allTimeMembers: (chat) => users.filter(user => chat.allTimeMemberIds.includes(user.id)),
     listingMembers: (chat) => users.filter(user => chat.listingMemberIds.includes(user.id)),
@@ -318,25 +317,25 @@ export const resolvers: IResolvers = {
     admins: (chat) => users.filter(user => chat.adminIds && chat.adminIds.includes(user.id)),
     owner: (chat) => users.find(user => chat.ownerId === user.id) || null,
     isGroup: (chat) => !!chat.name,
-    messages: (chat, {amount = 0}) => {
+    messages: (chat, {amount = 0}, {currentUser}) => {
       const messages = chat.messages
       .filter(message => message.holderIds.includes(currentUser.id))
       .sort((a, b) => b.createdAt.valueOf() - a.createdAt.valueOf()) || [];
       return (amount ? messages.slice(0, amount) : messages).reverse();
     },
-    lastMessage: (chat) => {
+    lastMessage: (chat, args, {currentUser}) => {
       return chat.messages
         .filter(message => message.holderIds.includes(currentUser.id))
         .sort((a, b) => b.createdAt.valueOf() - a.createdAt.valueOf())[0] || null;
     },
-    updatedAt: (chat) => {
+    updatedAt: (chat, args, {currentUser}) => {
       const lastMessage = chat.messages
         .filter(message => message.holderIds.includes(currentUser.id))
         .sort((a, b) => b.createdAt.valueOf() - a.createdAt.valueOf())[0];
 
       return lastMessage ? lastMessage.createdAt : chat.createdAt;
     },
-    unreadMessages: (chat) => chat.messages
+    unreadMessages: (chat, args, {currentUser}) => chat.messages
       .filter(message => message.holderIds.includes(currentUser.id) &&
         message.recipients.find(recipient => recipient.userId === currentUser.id && !recipient.readAt))
       .length,
@@ -345,7 +344,7 @@ export const resolvers: IResolvers = {
     chat: (message) => chats.find(chat => message.chatId === chat.id)!,
     sender: (message) => users.find(user => user.id === message.senderId)!,
     holders: (message) => users.filter(user => message.holderIds.includes(user.id)),
-    ownership: (message) => message.senderId === currentUser.id,
+    ownership: (message, args, {currentUser}) => message.senderId === currentUser.id,
   },
   Recipient: {
     user: (recipient) => users.find(user => recipient.userId === user.id)!,
