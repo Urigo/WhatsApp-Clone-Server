@@ -8,17 +8,21 @@
     "generator": "gql-gen --schema http://localhost:3000/graphql --template ts --out ./types.d.ts"
   },
   "devDependencies": {
+    "@types/bcrypt-nodejs": "0.0.30",
     "@types/body-parser": "1.17.0",
     "@types/cors": "2.8.4",
     "@types/express": "4.11.1",
     "@types/graphql": "0.13.0",
     "@types/node": "10.0.6",
+    "@types/passport": "0.4.5",
+    "@types/passport-http": "0.3.6",
     "nodemon": "1.17.4",
     "ts-node": "6.0.3",
     "typescript": "2.8.3"
   },
   "dependencies": {
     "apollo-server-express": "1.3.6",
+    "bcrypt-nodejs": "0.0.3",
     "body-parser": "1.18.2",
     "cors": "2.8.4",
     "express": "4.16.3",
@@ -26,6 +30,8 @@
     "graphql-code-generator": "0.9.1",
     "graphql-codegen-typescript-template": "0.9.1",
     "graphql-tools": "3.0.1",
-    "moment": "2.22.1"
+    "moment": "2.22.1",
+    "passport": "0.4.0",
+    "passport-http": "0.3.0"
   }
 }
