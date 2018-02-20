@@ -8,11 +8,14 @@
     "generator": "gql-gen --config codegen.yml"
   },
   "devDependencies": {
+    "@types/bcrypt-nodejs": "0.0.30",
     "@types/body-parser": "1.17.0",
     "@types/cors": "2.8.4",
     "@types/express": "4.16.0",
     "@types/graphql": "14.0.1",
     "@types/node": "10.11.3",
+    "@types/passport": "0.4.5",
+    "@types/passport-http": "0.3.6",
     "nodemon": "1.18.4",
     "ts-node": "7.0.1",
     "typescript": "3.1.1",
@@ -22,11 +25,14 @@
   },
   "dependencies": {
     "apollo-server-express": "2.1.0",
+    "bcrypt-nodejs": "0.0.3",
     "body-parser": "1.18.2",
     "cors": "2.8.4",
     "express": "4.16.3",
     "graphql": "14.0.2",
     "graphql-code-generator": "0.16.0-alpha.207cae5d",
-    "moment": "2.22.1"
+    "moment": "2.22.1",
+    "passport": "0.4.0",
+    "passport-http": "0.3.0"
   }
 }
