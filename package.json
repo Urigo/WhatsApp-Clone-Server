@@ -16,6 +16,7 @@
     "@types/node": "10.0.6",
     "@types/passport": "0.4.5",
     "@types/passport-http": "0.3.6",
+    "@types/ws": "5.1.1",
     "nodemon": "1.17.4",
     "ts-node": "6.0.3",
     "typescript": "2.8.3"
@@ -29,9 +30,11 @@
     "graphql": "0.13.2",
     "graphql-code-generator": "0.9.1",
     "graphql-codegen-typescript-template": "0.9.1",
+    "graphql-subscriptions": "0.5.8",
     "graphql-tools": "3.0.1",
     "moment": "2.22.1",
     "passport": "0.4.0",
-    "passport-http": "0.3.0"
+    "passport-http": "0.3.0",
+    "subscriptions-transport-ws": "0.9.9"
   }
 }
