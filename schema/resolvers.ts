@@ -1,11 +1,11 @@
 import { PubSub, withFilter } from 'apollo-server-express';
 import { GraphQLDateTime } from 'graphql-iso-date';
-import { ChatDb, db, MessageDb, MessageType, RecipientDb, UserDb } from "../db";
+import { MessageType } from "../db";
 import { IResolvers, MessageAddedSubscriptionArgs } from "../types";
-import moment from "moment";
-
-let users = db.users;
-let chats = db.chats;
+import { User } from "../entity/User";
+import { Chat } from "../entity/Chat";
+import { Message } from "../entity/Message";
+import { Recipient } from "../entity/Recipient";
 
 export const pubsub = new PubSub();
 
@@ -13,21 +13,81 @@ export const resolvers: IResolvers = {
   Date: GraphQLDateTime,
   Query: {
     me: (obj, args, {currentUser}) => currentUser,
-    users: (obj, args, {currentUser}) => users.filter(user => user.id !== currentUser.id),
-    chats: (obj, args, {currentUser}) => chats.filter(chat => chat.listingMemberIds.includes(currentUser.id)),
-    chat: (obj, {chatId}) => chats.find(chat => chat.id === Number(chatId)) || null,
+    users: async (obj, args, {currentUser, connection}) => {
+      return await connection
+        .createQueryBuilder(User, "user")
+        .where('user.id != :id', {id: currentUser.id})
+        .getMany();
+    },
+    chats: async (obj, args, {currentUser, connection}) => {
+      // TODO: make a proper query instead of this mess (see https://github.com/typeorm/typeorm/issues/2132)
+      const chats = await connection
+        .createQueryBuilder(Chat, "chat")
+        .leftJoin('chat.listingMembers', 'listingMembers')
+        .where('listingMembers.id = :id', {id: currentUser.id})
+        .getMany();
+
+      for (let chat of chats) {
+        chat.messages = (await connection
+          .createQueryBuilder(Message, "message")
+          .innerJoin('message.chat', 'chat', 'chat.id = :chatId', { chatId: chat.id })
+          .innerJoin('message.holders', 'holders', 'holders.id = :userId', {
+            userId: currentUser.id,
+          })
+          .orderBy({ 'message.createdAt': { order: 'DESC', nulls: 'NULLS LAST' } })
+          .getMany())
+          .reverse();
+      }
+
+      return chats.sort((chatA, chatB) => {
+        const dateA = chatA.messages.length ? chatA.messages[chatA.messages.length - 1].createdAt : chatA.createdAt;
+        const dateB = chatB.messages.length ? chatB.messages[chatB.messages.length - 1].createdAt : chatB.createdAt;
+        return dateB.valueOf() - dateA.valueOf();
+      });
+    },
+    chat: async (obj, {chatId}, {connection}) => {
+      return await connection
+        .createQueryBuilder(Chat, "chat")
+        .whereInIds(chatId)
+        .getOne();
+    },
   },
   Mutation: {
-    updateUser: (obj, {name, picture}, {currentUser}) => {
+    updateUser: async (obj, {name, picture}, {currentUser, connection}) => {
+      if (name === currentUser.name && picture === currentUser.picture) {
+        return currentUser;
+      }
+
       currentUser.name = name || currentUser.name;
       currentUser.picture = picture || currentUser.picture;
+
+      await connection.getRepository(User).save(currentUser);
 
       pubsub.publish('userUpdated', {
         userUpdated: currentUser,
       });
 
-      // Get a list of the chats who have/had currentUser involved
-      const chatsAffected = chats.filter(chat => !chat.name && chat.allTimeMemberIds.includes(currentUser.id));
+      const data = await connection
+        .createQueryBuilder(User, 'user')
+        .where('user.id = :id', { id: currentUser.id })
+        // Get a list of the chats who have/had currentUser involved
+        .innerJoinAndSelect(
+          'user.allTimeMemberChats',
+          'allTimeMemberChats',
+          // Groups are unaffected
+          'allTimeMemberChats.name IS NULL',
+        )
+        // We need to notify only those who get the chat listed (except currentUser of course)
+        .innerJoin(
+          'allTimeMemberChats.listingMembers',
+          'listingMembers',
+          'listingMembers.id != :currentUserId',
+          {
+            currentUserId: currentUser.id,
+          })
+        .getOne();
+
+      const chatsAffected = data && data.allTimeMemberChats || [];
 
       chatsAffected.forEach(chat => {
         pubsub.publish('chatUpdated', {
@@ -38,74 +98,87 @@ export const resolvers: IResolvers = {
 
       return currentUser;
     },
-    addChat: (obj, {userId}, {currentUser}) => {
-      if (!users.find(user => user.id === Number(userId))) {
+    addChat: async (obj, {userId}, {currentUser, connection}) => {
+      const user = await connection
+        .createQueryBuilder(User, "user")
+        .whereInIds(userId)
+        .getOne();
+        
+        if (!user) {
         throw new Error(`User ${userId} doesn't exist.`);
       }
 
-      const chat = chats.find(chat => !chat.name && chat.allTimeMemberIds.includes(currentUser.id) && chat.allTimeMemberIds.includes(Number(userId)));
+      let chat = await connection
+        .createQueryBuilder(Chat, "chat")
+        .where('chat.name IS NULL')
+        .innerJoin('chat.allTimeMembers', 'allTimeMembers1', 'allTimeMembers1.id = :currentUserId', {currentUserId: currentUser.id})
+        .innerJoin('chat.allTimeMembers', 'allTimeMembers2', 'allTimeMembers2.id = :userId', {userId})
+        .innerJoinAndSelect('chat.listingMembers', 'listingMembers')
+        .getOne();
+
       if (chat) {
-        // Chat already exists. Both users are already in the allTimeMemberIds array
-        const chatId = chat.id;
-        if (!chat.listingMemberIds.includes(currentUser.id)) {
+        // Chat already exists. Both users are already in the userIds array
+        const listingMembers = await connection
+          .createQueryBuilder(User, "user")
+          .innerJoin('user.listingMemberChats', 'listingMemberChats', 'listingMemberChats.id = :chatId', {chatId: chat.id})
+          .getMany();
+
+        if (!listingMembers.find(user => user.id === currentUser.id)) {
           // The chat isn't listed for the current user. Add him to the memberIds
-          chat.listingMemberIds.push(currentUser.id);
-          chats.find(chat => chat.id === chatId)!.listingMemberIds.push(currentUser.id);
-          return chat;
+          chat.listingMembers.push(currentUser);
+          chat = await connection.getRepository(Chat).save(chat);
+
+          return chat || null;
         } else {
           throw new Error(`Chat already exists.`);
         }
       } else {
         // Create the chat
-        const id = (chats.length && chats[chats.length - 1].id + 1) || 1;
-        const chat: ChatDb = {
-          id,
-          createdAt: moment().toDate(),
-          name: null,
-          picture: null,
-          adminIds: null,
-          ownerId: null,
-          allTimeMemberIds: [currentUser.id, Number(userId)],
+        chat = await connection.getRepository(Chat).save(new Chat({
+          allTimeMembers: [currentUser, user],
           // Chat will not be listed to the other user until the first message gets written
-          listingMemberIds: [currentUser.id],
-          actualGroupMemberIds: null,
-          messages: [],
-        };
-        chats.push(chat);
-        return chat;
+          listingMembers: [currentUser],
+        }));
+        return chat || null;
       }
     },
-    addGroup: (obj, {userIds, groupName, groupPicture}, {currentUser}) => {
-      userIds.forEach(userId => {
-        if (!users.find(user => user.id === Number(userId))) {
+    addGroup: async (obj, {userIds, groupName, groupPicture}, {currentUser, connection}) => {
+      let users: User[] = [];
+      for (let userId of userIds) {
+        const user = await connection
+          .createQueryBuilder(User, "user")
+          .whereInIds(userId)
+          .getOne();
+
+        if (!user) {
           throw new Error(`User ${userId} doesn't exist.`);
         }
-      });
 
-      const id = (chats.length && chats[chats.length - 1].id + 1) || 1;
-      const chat: ChatDb = {
-        id,
-        createdAt: moment().toDate(),
+        users.push(user);
+      }
+
+      const chat = await connection.getRepository(Chat).save(new Chat({
         name: groupName,
-        picture: groupPicture || null,
-        adminIds: [currentUser.id],
-        ownerId: currentUser.id,
-        allTimeMemberIds: [currentUser.id, ...userIds.map(id => Number(id))],
-        listingMemberIds: [currentUser.id, ...userIds.map(id => Number(id))],
-        actualGroupMemberIds: [currentUser.id, ...userIds.map(id => Number(id))],
-        messages: [],
-      };
-      chats.push(chat);
+        picture: groupPicture || undefined,
+        admins: [currentUser],
+        owner: currentUser,
+        allTimeMembers: [...users, currentUser],
+        listingMembers: [...users, currentUser],
+        actualGroupMembers: [...users, currentUser],
+      }));
 
       pubsub.publish('chatAdded', {
         creatorId: currentUser.id,
         chatAdded: chat,
       });
 
-      return chat;
+      return chat || null;
     },
-    updateGroup: (obj, {chatId, groupName, groupPicture}, {currentUser}) => {
-      const chat = chats.find(chat => chat.id === Number(chatId));
+    updateGroup: async (obj, {chatId, groupName, groupPicture}, {currentUser, connection}) => {
+      const chat = await connection
+        .createQueryBuilder(Chat, 'chat')
+        .whereInIds(chatId)
+        .getOne();
 
       if (!chat) {
         throw new Error(`The chat ${chatId} doesn't exist.`);
@@ -118,6 +191,9 @@ export const resolvers: IResolvers = {
       chat.name = groupName || chat.name;
       chat.picture = groupPicture || chat.picture;
 
+      // Update the chat
+      await connection.getRepository(Chat).save(chat);
+
       pubsub.publish('chatUpdated', {
         updaterId: currentUser.id,
         chatUpdated: chat,
@@ -125,8 +201,17 @@ export const resolvers: IResolvers = {
 
       return chat;
     },
-    removeChat: (obj, {chatId}, {currentUser}) => {
-      const chat = chats.find(chat => chat.id === Number(chatId));
+    removeChat: async (obj, {chatId}, {currentUser, connection}) => {
+      const chat = await connection
+        .createQueryBuilder(Chat, "chat")
+        .whereInIds(Number(chatId))
+        .innerJoinAndSelect('chat.listingMembers', 'listingMembers')
+        .leftJoinAndSelect('chat.actualGroupMembers', 'actualGroupMembers')
+        .leftJoinAndSelect('chat.admins', 'admins')
+        .leftJoinAndSelect('chat.owner', 'owner')
+        .leftJoinAndSelect('chat.messages', 'messages')
+        .leftJoinAndSelect('messages.holders', 'holders')
+        .getOne();
 
       if (!chat) {
         throw new Error(`The chat ${chatId} doesn't exist.`);
@@ -134,184 +219,189 @@ export const resolvers: IResolvers = {
 
       if (!chat.name) {
         // Chat
-        if (!chat.listingMemberIds.includes(currentUser.id)) {
-          throw new Error(`The user is not a member of the chat ${chatId}.`);
+        if (!chat.listingMembers.find(user => user.id === currentUser.id)) {
+          throw new Error(`The user is not a listing member of the chat ${chatId}.`);
         }
 
         // Instead of chaining map and filter we can loop once using reduce
-        const messages = chat.messages.reduce<MessageDb[]>((filtered, message) => {
-          // Remove the current user from the message holders
-          message.holderIds = message.holderIds.filter(holderId => holderId !== currentUser.id);
+        chat.messages = await chat.messages.reduce<Promise<Message[]>>(async (filtered$, message) => {
+          const filtered = await filtered$;
 
-          if (message.holderIds.length !== 0) {
+          message.holders = message.holders.filter(user => user.id !== currentUser.id);
+
+          if (message.holders.length !== 0) {
+            // Remove the current user from the message holders
+            await connection.getRepository(Message).save(message);
             filtered.push(message);
-          } // else discard the message
+          } else {
+            // Simply remove the message
+            const recipients = await connection
+              .createQueryBuilder(Recipient, "recipient")
+              .innerJoinAndSelect('recipient.message', 'message', 'message.id = :messageId', {messageId: message.id})
+              .innerJoinAndSelect('recipient.user', 'user')
+              .getMany();
+            for (let recipient of recipients) {
+              await connection.getRepository(Recipient).remove(recipient);
+            }
+            await connection.getRepository(Message).remove(message);
+          }
 
           return filtered;
-        }, []);
+        }, Promise.resolve([]));
 
         // Remove the current user from who gets the chat listed. The chat will no longer appear in his list
-        const listingMemberIds = chat.listingMemberIds.filter(listingId => listingId !== currentUser.id);
+        chat.listingMembers = chat.listingMembers.filter(user => user.id !== currentUser.id);
 
         // Check how many members are left
-        if (listingMemberIds.length === 0) {
+        if (chat.listingMembers.length === 0) {
           // Delete the chat
-          chats = chats.filter(chat => chat.id !== Number(chatId));
+          await connection.getRepository(Chat).remove(chat);
         } else {
           // Update the chat
-          chats = chats.map(chat => {
-            if (chat.id === Number(chatId)) {
-              chat = {...chat, listingMemberIds, messages};
-            }
-            return chat;
-          });
+          await connection.getRepository(Chat).save(chat);
         }
         return chatId;
       } else {
         // Group
-        if (chat.ownerId !== currentUser.id) {
-          throw new Error(`Group ${chatId} is not owned by the user.`);
-        }
 
         // Instead of chaining map and filter we can loop once using reduce
-        const messages = chat.messages.reduce<MessageDb[]>((filtered, message) => {
-          // Remove the current user from the message holders
-          message.holderIds = message.holderIds.filter(holderId => holderId !== currentUser.id);
+        chat.messages = await chat.messages.reduce<Promise<Message[]>>(async (filtered$, message) => {
+          const filtered = await filtered$;
 
-          if (message.holderIds.length !== 0) {
+          message.holders = message.holders.filter(user => user.id !== currentUser.id);
+
+          if (message.holders.length !== 0) {
+            // Remove the current user from the message holders
+            await connection.getRepository(Message).save(message);
             filtered.push(message);
-          } // else discard the message
+          } else {
+            // Simply remove the message
+            const recipients = await connection
+              .createQueryBuilder(Recipient, "recipient")
+              .innerJoinAndSelect('recipient.message', 'message', 'message.id = :messageId', {messageId: message.id})
+              .innerJoinAndSelect('recipient.user', 'user')
+              .getMany();
+            for (let recipient of recipients) {
+              await connection.getRepository(Recipient).remove(recipient);
+            }
+            await connection.getRepository(Message).remove(message);
+          }
 
           return filtered;
-        }, []);
+        }, Promise.resolve([]));
 
         // Remove the current user from who gets the group listed. The group will no longer appear in his list
-        const listingMemberIds = chat.listingMemberIds.filter(listingId => listingId !== currentUser.id);
+        chat.listingMembers = chat.listingMembers.filter(user => user.id !== currentUser.id);
 
         // Check how many members (including previous ones who can still access old messages) are left
-        if (listingMemberIds.length === 0) {
+        if (chat.listingMembers.length === 0) {
           // Remove the group
-          chats = chats.filter(chat => chat.id !== Number(chatId));
+          await connection.getRepository(Chat).remove(chat);
         } else {
           // Update the group
 
           // Remove the current user from the chat members. He is no longer a member of the group
-          const actualGroupMemberIds = chat.actualGroupMemberIds!.filter(memberId => memberId !== currentUser.id);
+          chat.actualGroupMembers = chat.actualGroupMembers && chat.actualGroupMembers.filter(user => user.id !== currentUser.id);
           // Remove the current user from the chat admins
-          const adminIds = chat.adminIds!.filter(memberId => memberId !== currentUser.id);
-          // Set the owner id to be null. A null owner means the group is read-only
-          let ownerId: number | null = null;
+          chat.admins = chat.admins && chat.admins.filter(user => user.id !== currentUser.id);
+          // If there are no more admins left the group goes read only
+          chat.owner = chat.admins && chat.admins[0] || null; // A null owner means the group is read-only
 
-          // Check if there is any admin left
-          if (adminIds!.length) {
-            // Pick an admin as the new owner. The group is no longer read-only
-            ownerId = chat.adminIds![0];
-          }
-
-          chats = chats.map(chat => {
-            if (chat.id === Number(chatId)) {
-              chat = {...chat, messages, listingMemberIds, actualGroupMemberIds, adminIds, ownerId};
-            }
-            return chat;
-          });
+          await connection.getRepository(Chat).save(chat);
         }
         return chatId;
       }
     },
-    addMessage: (obj, {chatId, content}, {currentUser}) => {
+    addMessage: async (obj, {chatId, content}, {currentUser, connection}) => {
       if (content === null || content === '') {
         throw new Error(`Cannot add empty or null messages.`);
       }
 
-      let chat = chats.find(chat => chat.id === Number(chatId));
+      let chat = await connection
+        .createQueryBuilder(Chat, "chat")
+        .whereInIds(chatId)
+        .innerJoinAndSelect('chat.allTimeMembers', 'allTimeMembers')
+        .innerJoinAndSelect('chat.listingMembers', 'listingMembers')
+        .leftJoinAndSelect('chat.actualGroupMembers', 'actualGroupMembers')
+        .getOne();
 
       if (!chat) {
         throw new Error(`Cannot find chat ${chatId}.`);
       }
 
-      let holderIds = chat.listingMemberIds;
+      let holders: User[];
 
       if (!chat.name) {
         // Chat
-        if (!chat.listingMemberIds.find(listingId => listingId === currentUser.id)) {
+        if (!chat.listingMembers.map(user => user.id).includes(currentUser.id)) {
           throw new Error(`The chat ${chatId} must be listed for the current user before adding a message.`);
         }
 
         // Receiver's user
-        const receiverId = chat.allTimeMemberIds.find(userId => userId !== currentUser.id);
+        const receiver = chat.allTimeMembers.find(user => user.id !== currentUser.id);
 
-        if (!receiverId) {
+        if (!receiver) {
           throw new Error(`Cannot find receiver's user.`);
         }
 
-        if (!chat.listingMemberIds.find(listingId => listingId === receiverId)) {
-          // Chat is not listed for the receiver user. Add him to the listingMemberIds
-          chat.listingMemberIds = chat.listingMemberIds.concat(receiverId);
+        if (!chat.listingMembers.find(listingMember => listingMember.id === receiver.id)) {
+          // Chat is not listed for the receiver user. Add him to the listingIds
+          chat.listingMembers.push(receiver);
 
-          holderIds = chat.listingMemberIds;
+          await connection.getRepository(Chat).save(chat);
 
           pubsub.publish('chatAdded', {
             creatorId: currentUser.id,
             chatAdded: chat,
           });
         }
+
+        holders = chat.listingMembers;
       } else {
         // Group
-        if (!chat.actualGroupMemberIds!.find(memberId => memberId === currentUser.id)) {
+        if (!chat.actualGroupMembers || !chat.actualGroupMembers.find(actualGroupMember => actualGroupMember.id === currentUser.id)) {
           throw new Error(`The user is not a member of the group ${chatId}. Cannot add message.`);
         }
 
-        holderIds = chat.actualGroupMemberIds!;
+        holders = chat.actualGroupMembers;
       }
 
-      const id = (chat.messages.length && chat.messages[chat.messages.length - 1].id + 1) || 1;
-
-      let recipients: RecipientDb[] = [];
-
-      holderIds.forEach(holderId => {
-        if (holderId !== currentUser.id) {
-          recipients.push({
-            userId: holderId,
-            messageId: id,
-            chatId: Number(chatId),
-            receivedAt: null,
-            readAt: null,
-          });
-        }
-      });
-
-      const message: MessageDb = {
-        id,
-        chatId: Number(chatId),
-        senderId: currentUser.id,
+      const message = await connection.getRepository(Message).save(new Message({
+        chat,
+        sender: currentUser,
         content,
-        createdAt: moment().toDate(),
         type: MessageType.TEXT,
-        recipients,
-        holderIds,
-      };
-
-      chats = chats.map(chat => {
-        if (chat.id === Number(chatId)) {
-          chat = {...chat, messages: chat.messages.concat(message)}
-        }
-        return chat;
-      });
+        holders,
+        recipients: holders.reduce<Recipient[]>((filtered, holder) => {
+          if (holder.id !== currentUser.id) {
+            filtered.push(new Recipient({
+              user: holder,
+            }));
+          }
+          return filtered;
+        }, []),
+      }));
 
       pubsub.publish('messageAdded', {
         messageAdded: message,
       });
 
-      return message;
+      return message || null;
     },
-    removeMessages: (obj, {chatId, messageIds, all}, {currentUser}) => {
-      const chat = chats.find(chat => chat.id === Number(chatId));
+    removeMessages: async (obj, {chatId, messageIds, all}, {currentUser, connection}) => {
+      const chat = await connection
+        .createQueryBuilder(Chat, "chat")
+        .whereInIds(chatId)
+        .innerJoinAndSelect('chat.listingMembers', 'listingMembers')
+        .innerJoinAndSelect('chat.messages', 'messages')
+        .innerJoinAndSelect('messages.holders', 'holders')
+        .getOne();
 
       if (!chat) {
         throw new Error(`Cannot find chat ${chatId}.`);
       }
 
-      if (!chat.listingMemberIds.find(listingId => listingId === currentUser.id)) {
+      if (!chat.listingMembers.find(user => user.id === currentUser.id)) {
         throw new Error(`The chat/group ${chatId} is not listed for the current user, so there is nothing to delete.`);
       }
 
@@ -319,109 +409,228 @@ export const resolvers: IResolvers = {
         throw new Error(`Cannot specify both 'all' and 'messageIds'.`);
       }
 
+      if (!all && !(messageIds && messageIds.length)) {
+        throw new Error(`'all' and 'messageIds' cannot be both null`);
+      }
+
       let deletedIds: string[] = [];
-      chats = chats.map(chat => {
-        if (chat.id === Number(chatId)) {
-          // Instead of chaining map and filter we can loop once using reduce
-          const messages = chat.messages.reduce<MessageDb[]>((filtered, message) => {
-            if (all || messageIds!.map(Number).includes(message.id)) {
-              deletedIds.push(String(message.id));
-              // Remove the current user from the message holders
-              message.holderIds = message.holderIds.filter(holderId => holderId !== currentUser.id);
-            }
+      // Instead of chaining map and filter we can loop once using reduce
+      chat.messages = await chat.messages.reduce<Promise<Message[]>>(async (filtered$, message) => {
+        const filtered = await filtered$;
 
-            if (message.holderIds.length !== 0) {
-              filtered.push(message);
-            } // else discard the message
+        if (all || messageIds!.map(Number).includes(message.id)) {
+          deletedIds.push(String(message.id));
+          // Remove the current user from the message holders
+          message.holders = message.holders.filter(user => user.id !== currentUser.id);
 
-            return filtered;
-          }, []);
-          chat = {...chat, messages};
         }
-        return chat;
-      });
+
+        if (message.holders.length !== 0) {
+          // Remove the current user from the message holders
+          await connection.getRepository(Message).save(message);
+          filtered.push(message);
+        } else {
+          // Simply remove the message
+          const recipients = await connection
+            .createQueryBuilder(Recipient, "recipient")
+            .innerJoinAndSelect('recipient.message', 'message', 'message.id = :messageId', {messageId: message.id})
+            .innerJoinAndSelect('recipient.user', 'user')
+            .getMany();
+          for (let recipient of recipients) {
+            await connection.getRepository(Recipient).remove(recipient);
+          }
+          await connection.getRepository(Message).remove(message);
+        }
+
+        return filtered;
+      }, Promise.resolve([]));
+
+      await connection.getRepository(Chat).save(chat);
+
       return deletedIds;
     },
   },
   Subscription: {
     messageAdded: {
       subscribe: withFilter(() => pubsub.asyncIterator('messageAdded'),
-        ({messageAdded}: {messageAdded: MessageDb & {chat: {id: number}}}, {chatId}: MessageAddedSubscriptionArgs, {currentUser}: { currentUser: UserDb }) => {
+        ({messageAdded}: {messageAdded: Message}, {chatId}: MessageAddedSubscriptionArgs, {currentUser}: { currentUser: User }) => {
           return (!chatId || messageAdded.chat.id === Number(chatId)) &&
-            messageAdded.recipients.some(recipient => recipient.userId === currentUser.id);
+            messageAdded.recipients.some(recipient => recipient.user.id === currentUser.id);
         }),
     },
     chatAdded: {
       subscribe: withFilter(() => pubsub.asyncIterator('chatAdded'),
-        ({creatorId, chatAdded}: {creatorId: number, chatAdded: ChatDb}, variables: any, {currentUser}: { currentUser: UserDb }) => {
-          return creatorId !== currentUser.id && chatAdded.listingMemberIds.includes(currentUser.id);
+        ({creatorId, chatAdded}: {creatorId: string, chatAdded: Chat}, variables, {currentUser}: { currentUser: User }) => {
+          return Number(creatorId) !== currentUser.id &&
+            chatAdded.listingMembers.some(user => user.id === currentUser.id);
         }),
     },
     chatUpdated: {
       subscribe: withFilter(() => pubsub.asyncIterator('chatUpdated'),
-        ({updaterId, chatUpdated}: {updaterId: number, chatUpdated: ChatDb}, variables: any, {currentUser}: { currentUser: UserDb }) => {
-          return updaterId !== currentUser.id && chatUpdated.listingMemberIds.includes(currentUser.id);
+        ({updaterId, chatUpdated}: {updaterId: number, chatUpdated: Chat}, variables: any, {currentUser}: { currentUser: User }) => {
+          return updaterId !== currentUser.id && chatUpdated.listingMembers.some(user => user.id === currentUser.id);
         }),
     },
     userUpdated: {
       subscribe: withFilter(() => pubsub.asyncIterator('userUpdated'),
-        ({userUpdated}: {userUpdated: UserDb}, variables: any, {currentUser}: { currentUser: UserDb }) => {
+        ({userUpdated}: {userUpdated: User}, variables: any, {currentUser}: { currentUser: User }) => {
           return userUpdated.id !== currentUser.id;
         }),
     },
     userAdded: {
       subscribe: withFilter(() => pubsub.asyncIterator('userAdded'),
-        ({userAdded}: {userAdded: UserDb}, variables: any, {currentUser}: { currentUser: UserDb }) => {
+        ({userAdded}: {userAdded: User}, variables: any, {currentUser}: { currentUser: User }) => {
           return userAdded.id !== currentUser.id;
         }),
     },
   },
   Chat: {
-    name: (chat, args, {currentUser}) => chat.name ? chat.name : users
-      .find(user => user.id === chat.allTimeMemberIds.find(userId => userId !== currentUser.id))!.name,
-    picture: (chat, args, {currentUser}) => chat.name ? chat.picture : users
-      .find(user => user.id === chat.allTimeMemberIds.find(userId => userId !== currentUser.id))!.picture,
-    allTimeMembers: (chat) => users.filter(user => chat.allTimeMemberIds.includes(user.id)),
-    listingMembers: (chat) => users.filter(user => chat.listingMemberIds.includes(user.id)),
-    actualGroupMembers: (chat) => users.filter(user => chat.actualGroupMemberIds && chat.actualGroupMemberIds.includes(user.id)),
-    admins: (chat) => users.filter(user => chat.adminIds && chat.adminIds.includes(user.id)),
-    owner: (chat) => users.find(user => chat.ownerId === user.id) || null,
+    name: async (chat, args, {currentUser, connection}) => {
+      if (chat.name) {
+        return chat.name;
+      }
+      const user = await connection
+        .createQueryBuilder(User, "user")
+        .where('user.id != :userId', {userId: currentUser.id})
+        .innerJoin('user.allTimeMemberChats', 'allTimeMemberChats', 'allTimeMemberChats.id = :chatId', {chatId: chat.id})
+        .getOne();
+      return user && user.name || null;
+    },
+    picture: async (chat, args, {currentUser, connection}) => {
+      if (chat.name) {
+        return chat.picture;
+      }
+      const user = await connection
+        .createQueryBuilder(User, "user")
+        .where('user.id != :userId', {userId: currentUser.id})
+        .innerJoin('user.allTimeMemberChats', 'allTimeMemberChats', 'allTimeMemberChats.id = :chatId', {chatId: chat.id})
+        .getOne();
+      return user ? user.picture : null;
+    },
+    allTimeMembers: async (chat, args, {currentUser, connection}) => {
+      return await connection
+        .createQueryBuilder(User, "user")
+        .innerJoin('user.allTimeMemberChats', 'allTimeMemberChats', 'allTimeMemberChats.id = :chatId', {chatId: chat.id})
+        .getMany();
+    },
+    listingMembers: async (chat, args, {currentUser, connection}) => {
+      return await connection
+        .createQueryBuilder(User, "user")
+        .innerJoin('user.listingMemberChats', 'listingMemberChats', 'listingMemberChats.id = :chatId', {chatId: chat.id})
+        .getMany();
+    },
+    actualGroupMembers: async (chat, args, {currentUser, connection}) => {
+      return await connection
+        .createQueryBuilder(User, "user")
+        .innerJoin('user.actualGroupMemberChats', 'actualGroupMemberChats', 'actualGroupMemberChats.id = :chatId', {chatId: chat.id})
+        .getMany();
+    },
+    admins: async (chat, args, {currentUser, connection}) => {
+      return await connection
+        .createQueryBuilder(User, "user")
+        .innerJoin('user.adminChats', 'adminChats', 'adminChats.id = :chatId', {chatId: chat.id})
+        .getMany();
+    },
+    owner: async (chat, args, {currentUser, connection}) => {
+      return await connection
+        .createQueryBuilder(User, "user")
+        .innerJoin('user.ownerChats', 'ownerChats', 'ownerChats.id = :chatId', {chatId: chat.id})
+        .getOne() || null;
+    },
     isGroup: (chat) => !!chat.name,
-    messages: (chat, {amount = 0}, {currentUser}) => {
-      const messages = chat.messages
-      .filter(message => message.holderIds.includes(currentUser.id))
-      .sort((a, b) => b.createdAt.valueOf() - a.createdAt.valueOf()) || [];
-      return (amount ? messages.slice(0, amount) : messages).reverse();
-    },
-    lastMessage: (chat, args, {currentUser}) => {
-      return chat.messages
-        .filter(message => message.holderIds.includes(currentUser.id))
-        .sort((a, b) => b.createdAt.valueOf() - a.createdAt.valueOf())[0] || null;
-    },
-    updatedAt: (chat, args, {currentUser}) => {
-      const lastMessage = chat.messages
-        .filter(message => message.holderIds.includes(currentUser.id))
-        .sort((a, b) => b.createdAt.valueOf() - a.createdAt.valueOf())[0];
+    messages: async (chat, {amount = 0}, {currentUser, connection}) => {
+      if (chat.messages) {
+        return amount ? chat.messages.slice(-amount) : chat.messages;
+      }
 
-      return lastMessage ? lastMessage.createdAt : chat.createdAt;
+      let query = connection
+        .createQueryBuilder(Message, "message")
+        .innerJoin('message.chat', 'chat', 'chat.id = :chatId', { chatId: chat.id })
+        .innerJoin('message.holders', 'holders', 'holders.id = :userId', {
+          userId: currentUser.id,
+        })
+        .orderBy({ 'message.createdAt': { order: 'DESC', nulls: 'NULLS LAST' } });
+
+      if (amount) {
+        query = query.take(amount);
+      }
+
+      return (await query.getMany()).reverse();
     },
-    unreadMessages: (chat, args, {currentUser}) => chat.messages
-      .filter(message => message.holderIds.includes(currentUser.id) &&
-        message.recipients.find(recipient => recipient.userId === currentUser.id && !recipient.readAt))
-      .length,
+    lastMessage: async (chat, args, {currentUser, connection}) => {
+      if (chat.messages) {
+        return chat.messages.length ? chat.messages[chat.messages.length - 1] : null;
+      }
+
+      return await connection
+        .createQueryBuilder(Message, "message")
+        .innerJoin('message.chat', 'chat', 'chat.id = :chatId', { chatId: chat.id })
+        .innerJoin('message.holders', 'holders', 'holders.id = :userId', {
+          userId: currentUser.id,
+        })
+        .orderBy({ 'message.createdAt': { order: 'DESC', nulls: 'NULLS LAST' } })
+        .take(1)
+        .getOne() || null;
+    },
+    updatedAt: async (chat, args, {currentUser, connection}) => {
+      if (chat.messages) {
+        return chat.messages.length ? chat.messages[0].createdAt : null;
+      }
+
+      const latestMessage = await connection
+        .createQueryBuilder(Message, "message")
+        .innerJoin('message.chat', 'chat', 'chat.id = :chatId', { chatId: chat.id })
+        .innerJoin('message.holders', 'holders', 'holders.id = :userId', {
+          userId: currentUser.id,
+        })
+        .orderBy({ 'message.createdAt': 'DESC' })
+        .getOne();
+
+      return latestMessage ? latestMessage.createdAt : null;
+    },
+    unreadMessages: async (chat, args, {currentUser, connection}) => {
+      return await connection
+        .createQueryBuilder(Message, "message")
+        .innerJoin('message.chat', 'chat', 'chat.id = :chatId', {chatId: chat.id})
+        .innerJoin('message.recipients', 'recipients', 'recipients.user.id = :userId AND recipients.readAt IS NULL', {
+          userId: currentUser.id
+        })
+        .getCount();
+    },
   },
   Message: {
-    chat: (message) => chats.find(chat => message.chatId === chat.id)!,
-    sender: (message) => users.find(user => user.id === message.senderId)!,
-    holders: (message) => users.filter(user => message.holderIds.includes(user.id)),
-    ownership: (message, args, {currentUser}) => message.senderId === currentUser.id,
-  },
-  Recipient: {
-    user: (recipient) => users.find(user => recipient.userId === user.id)!,
-    message: (recipient) => {
-      const chat = chats.find(chat => recipient.chatId === chat.id)!;
-      return chat.messages.find(message => recipient.messageId === message.id)!;
+    sender: async (message: Message, args, {currentUser, connection}) => {
+      return (await connection
+        .createQueryBuilder(User, "user")
+        .innerJoin('user.senderMessages', 'senderMessages', 'senderMessages.id = :messageId', {messageId: message.id})
+        .getOne())!;
     },
-    chat: (recipient) => chats.find(chat => recipient.chatId === chat.id)!,
+    ownership: async (message: Message, args, {currentUser, connection}) => {
+      return !!(await connection
+        .createQueryBuilder(User, "user")
+        .whereInIds(currentUser.id)
+        .innerJoin('user.senderMessages', 'senderMessages', 'senderMessages.id = :messageId', {messageId: message.id})
+        .getCount());
+    },
+    recipients: async (message: Message, args, {currentUser, connection}) => {
+      return await connection
+        .createQueryBuilder(Recipient, "recipient")
+        .innerJoinAndSelect('recipient.message', 'message', 'message.id = :messageId', {messageId: message.id})
+        .innerJoinAndSelect('recipient.user', 'user')
+        .innerJoinAndSelect('recipient.chat', 'chat')
+        .getMany();
+    },
+    holders: async (message: Message, args, {currentUser, connection}) => {
+      return await connection
+        .createQueryBuilder(User, "user")
+        .innerJoin('user.holderMessages', 'holderMessages', 'holderMessages.id = :messageId', {messageId: message.id})
+        .getMany();
+    },
+    chat: async (message: Message, args, {currentUser, connection})=> {
+      return (await connection
+        .createQueryBuilder(Chat, "chat")
+        .innerJoin('chat.messages', 'messages', 'messages.id = :messageId', {messageId: message.id})
+        .getOne())!;
+    },
   },
 };
