@@ -28,9 +28,11 @@
     "cors": "^2.8.4",
     "express": "^4.16.2",
     "graphql": "^0.11.7",
+    "graphql-subscriptions": "0.5.7",
     "graphql-tools": "^2.12.0",
     "moment": "^2.19.3",
     "passport": "0.4.0",
-    "passport-http": "0.3.0"
+    "passport-http": "0.3.0",
+    "subscriptions-transport-ws": "0.9.5"
   }
 }
