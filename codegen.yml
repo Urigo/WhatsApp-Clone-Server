@@ -7,6 +7,7 @@ generates:
   ./types.d.ts:
     config:
       optionalType: undefined | null
+      contextType: ./schema/types#AppContext
       mappers:
         Chat: ./db#ChatDb
         Message: ./db#MessageDb
