@@ -17,7 +17,7 @@
     "@types/passport": "0.4.3",
     "@types/passport-http": "0.3.5",
     "@types/pg": "7.4.4",
-    "nodemon": "1.17.1",
+    "nodemon": "1.17.2",
     "ts-node": "5.0.0",
     "typescript": "2.7.2"
   },
