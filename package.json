@@ -28,7 +28,7 @@
     "cors": "2.8.4",
     "express": "4.16.2",
     "graphql": "0.12.3",
-    "graphql-code-generator": "0.8.14",
+    "graphql-code-generator": "0.8.21",
     "graphql-subscriptions": "0.5.8",
     "graphql-tools": "2.21.0",
     "moment": "2.20.1",
