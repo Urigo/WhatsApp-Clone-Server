@@ -36,7 +36,7 @@
     "passport-http": "0.3.0",
     "pg": "7.4.1",
     "reflect-metadata": "0.1.12",
-    "subscriptions-transport-ws": "0.9.6",
+    "subscriptions-transport-ws": "0.9.7",
     "typeorm": "0.1.14"
   }
 }
