@@ -2,7 +2,7 @@ import { MessageType } from "../db";
 import { IResolvers } from "graphql-tools/dist/Interfaces";
 import {
   AddChatMutationArgs, AddGroupMutationArgs, AddMessageMutationArgs, ChatQueryArgs, MessageAddedSubscriptionArgs,
-  RemoveChatMutationArgs, RemoveMessagesMutationArgs
+  MessageFeedChatArgs, MessagesChatArgs, RemoveChatMutationArgs, RemoveMessagesMutationArgs
 } from "../types";
 import * as moment from "moment";
 import { PubSub, withFilter } from "graphql-subscriptions";
@@ -11,10 +11,12 @@ import { Chat } from "../entity/Chat";
 import { Message } from "../entity/Message";
 import { Recipient } from "../entity/Recipient";
 import { Connection } from "typeorm";
+import { GraphQLDateTime } from "graphql-iso-date";
 
 export const pubsub = new PubSub();
 
 export const resolvers: IResolvers = {
+  Date: GraphQLDateTime,
   Query: {
     // Show all users for the moment.
     users: async (obj: any, args: any, {user: currentUser, connection}: { user: User, connection: Connection }): Promise<User[]> => {
@@ -429,13 +431,41 @@ export const resolvers: IResolvers = {
         .innerJoin('user.ownerChats', 'ownerChats', 'ownerChats.id = :chatId', {chatId: chat.id})
         .getOne() || null;
     },
-    messages: async (chat: Chat, {amount = null}: {amount: number}, {user: currentUser, connection}: {user: User, connection: Connection}): Promise<Message[]> => {
-      const query = connection
+    messages: async (chat: Chat, {before, amount}: MessagesChatArgs, {user: currentUser, connection}: {user: User, connection: Connection}): Promise<Message[]> => {
+      let query = connection
         .createQueryBuilder(Message, "message")
         .innerJoin('message.chat', 'chat', 'chat.id = :chatId', {chatId: chat.id})
         .innerJoin('message.holders', 'holders', 'holders.id = :userId', {userId: currentUser.id})
         .orderBy({"message.createdAt": "DESC"});
-      return (amount ? await query.take(amount).getMany() : await query.getMany()).reverse();
+
+      if (amount) {
+        query = query.take(amount);
+      }
+
+      if (before) {
+        query = query.where('message.createdAt < :before', {before: new Date(before)});
+      }
+
+      return (await query.getMany()).reverse();
+    },
+    messageFeed: async (chat: Chat, {before, amount}: MessageFeedChatArgs, {user: currentUser, connection}: {user: User, connection: Connection}): Promise<{hasNextPage: boolean, cursor: Date | null, messages: Message[]}> => {
+      let query = connection
+        .createQueryBuilder(Message, "message")
+        .innerJoin('message.chat', 'chat', 'chat.id = :chatId', {chatId: chat.id})
+        .innerJoin('message.holders', 'holders', 'holders.id = :userId', {userId: currentUser.id})
+        .orderBy({"message.createdAt": "DESC"})
+        .take(amount || 15);
+
+      if (before) {
+        query = query.where('message.createdAt < :before', {before: new Date(before)});
+      }
+
+      const [messages, count] = await query.getManyAndCount();
+      return {
+        hasNextPage: messages.length !== count,
+        cursor: messages && messages.length && messages[messages.length - 1].createdAt || null,
+        messages: messages.reverse(),
+      };
     },
     unreadMessages: async (chat: Chat, args: any, {user: currentUser, connection}: {user: User, connection: Connection}): Promise<number> => {
       return await connection

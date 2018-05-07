@@ -1,6 +1,8 @@
 import { ITypeDefinitions } from "graphql-tools/dist/Interfaces";
 
 export const typeDefs: ITypeDefinitions = `
+  scalar Date
+
   type Query {
     users: [User!]
     chats: [Chat!]
@@ -35,11 +37,19 @@ export const typeDefs: ITypeDefinitions = `
     admins: [User!]
     #If null the group is read-only. Null for chats.
     owner: User
-    messages(amount: Int): [Message]!
+    messages(amount: Int, before: String): [Message]!
+    #Return messages in a a Feed Wrapper with cursor based pagination
+    messageFeed(amount: Int, before: String): MessageFeed
     #Computed property
     unreadMessages: Int!
     #Computed property
     isGroup: Boolean!
+  }
+  
+  type MessageFeed {
+    hasNextPage: Boolean!
+    cursor: String
+    messages: [Message]!
   }
 
   type Message {
@@ -47,7 +57,7 @@ export const typeDefs: ITypeDefinitions = `
     sender: User!
     chat: Chat!
     content: String!
-    createdAt: String!
+    createdAt: Date!
     #FIXME: should return MessageType
     type: Int!
     #Whoever received the message
@@ -62,8 +72,8 @@ export const typeDefs: ITypeDefinitions = `
     user: User!
     message: Message!
     chat: Chat!
-    receivedAt: String
-    readAt: String
+    receivedAt: Date
+    readAt: Date
   }
 
   type User {
