@@ -1,5 +1,8 @@
 /* tslint:disable */
 
+/** A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar. */
+export type DateTime = any;
+
 export interface Query {
   users?: User[] | null;
   chats?: Chat[] | null;
@@ -23,6 +26,7 @@ export interface Chat {
   admins?: User[] | null /** Null for chats */;
   owner?: User | null /** If null the group is read-only. Null for chats. */;
   messages: (Message | null)[];
+  messageFeed?: MessageFeed | null /** Return messages in a a Feed Wrapper with cursor based pagination */;
   unreadMessages: number /** Computed property */;
   isGroup: boolean /** Computed property */;
 }
@@ -32,7 +36,7 @@ export interface Message {
   sender: User;
   chat: Chat;
   content: string;
-  createdAt: string;
+  createdAt: DateTime;
   type: number /** FIXME: should return MessageType */;
   recipients: Recipient[] /** Whoever received the message */;
   holders: User[] /** Whoever still holds a copy of the message. Cannot be null because the message gets deleted otherwise */;
@@ -43,8 +47,14 @@ export interface Recipient {
   user: User;
   message: Message;
   chat: Chat;
-  receivedAt?: string | null;
-  readAt?: string | null;
+  receivedAt?: DateTime | null;
+  readAt?: DateTime | null;
+}
+
+export interface MessageFeed {
+  hasNextPage: boolean;
+  cursor?: string | null;
+  messages: (Message | null)[];
 }
 
 export interface Mutation {
@@ -72,6 +82,11 @@ export interface ChatQueryArgs {
 }
 export interface MessagesChatArgs {
   amount?: number | null;
+  before?: string | null;
+}
+export interface MessageFeedChatArgs {
+  amount?: number | null;
+  before?: string | null;
 }
 export interface AddChatMutationArgs {
   recipientId: string;
