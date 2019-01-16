@@ -1,10 +1,10 @@
 import { PubSub, withFilter } from 'apollo-server-express';
-import { MessageType } from "../db";
-import { IResolvers, MessageAddedSubscriptionArgs } from "../types";
-import { User } from "../entity/User";
-import { Chat } from "../entity/Chat";
-import { Message } from "../entity/Message";
-import { Recipient } from "../entity/Recipient";
+import { MessageType } from "../../../db";
+import { IResolvers, MessageAddedSubscriptionArgs } from "../../../types";
+import { User } from "../../../entity/User";
+import { Chat } from "../../../entity/Chat";
+import { Message } from "../../../entity/Message";
+import { Recipient } from "../../../entity/Recipient";
 
 export const pubsub = new PubSub();
 
@@ -12,6 +12,7 @@ export const resolvers: IResolvers = {
   Query: {
     // Show all users for the moment.
     users: async (obj, args, {user: currentUser, connection}) => {
+      console.log('user', currentUser);
       return await connection
         .createQueryBuilder(User, "user")
         .where('user.id != :id', {id: currentUser.id})
@@ -358,6 +359,9 @@ export const resolvers: IResolvers = {
     messageAdded: {
       subscribe: withFilter(() => pubsub.asyncIterator('messageAdded'),
         ({messageAdded}: {messageAdded: Message}, {chatId}: MessageAddedSubscriptionArgs, {user: currentUser}: { user: User }) => {
+          if (!currentUser) {
+            console.log('currentUser is undefined inside messageAdded subscription');
+          }
           return (!chatId || messageAdded.chat.id === Number(chatId)) &&
             !!messageAdded.recipients.find((recipient: Recipient) => recipient.user.id === currentUser.id);
         }),
