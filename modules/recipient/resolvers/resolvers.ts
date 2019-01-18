@@ -1,31 +1,11 @@
-import { InjectFunction } from '@graphql-modules/di'
-import { PubSub, withFilter } from 'apollo-server-express';
-import { IResolvers, MessageAddedSubscriptionArgs } from "../../../types";
-import { User } from "../../../entity/User";
-import { Chat } from "../../../entity/Chat";
 import { Message } from "../../../entity/Message";
 import { Recipient } from "../../../entity/Recipient";
+import { IResolvers } from "../../../types/recipient";
 
-export default InjectFunction(PubSub)((pubsub): IResolvers => ({
+export default ((): IResolvers => ({
   Mutation: {
     markAsReceived: async (obj, {chatId}, {user: currentUser, connection}) => false,
     markAsRead: async (obj, {chatId}, {user: currentUser, connection}) => false,
-  },
-  Subscription: {
-    messageAdded: {
-      subscribe: withFilter(() => pubsub.asyncIterator('messageAdded'),
-        ({messageAdded}: {messageAdded: Message}, {chatId}: MessageAddedSubscriptionArgs, {user: currentUser}: { user: User }) => {
-          return (!chatId || messageAdded.chat.id === Number(chatId)) &&
-            !!messageAdded.recipients.find((recipient: Recipient) => recipient.user.id === currentUser.id);
-        }),
-    },
-    chatAdded: {
-      subscribe: withFilter(() => pubsub.asyncIterator('chatAdded'),
-        ({creatorId, chatAdded}: {creatorId: string, chatAdded: Chat}, variables, {user: currentUser}: { user: User }) => {
-          return Number(creatorId) !== currentUser.id &&
-            !!chatAdded.listingMembers.find((user: User) => user.id === currentUser.id);
-        }),
-    }
   },
   Recipient: {},
   Message: {

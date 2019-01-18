@@ -1,5 +1,5 @@
-import { IResolvers } from "../../../types";
 import { User } from "../../../entity/User";
+import { IResolvers } from "../../../types/user";
 
 export default ((): IResolvers => ({
   Query: {
