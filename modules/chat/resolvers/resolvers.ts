@@ -1,10 +1,10 @@
 import { Inject } from '@graphql-modules/di'
 import { PubSub, withFilter } from 'apollo-server-express';
-import { IResolvers } from "../../../types";
 import { User } from "../../../entity/User";
 import { Chat } from "../../../entity/Chat";
 import { Message } from "../../../entity/Message";
 import { Recipient } from "../../../entity/Recipient";
+import { IResolvers } from "../../../types/chat";
 
 export default Inject(PubSub)((pubsub): IResolvers => ({
   Query: {

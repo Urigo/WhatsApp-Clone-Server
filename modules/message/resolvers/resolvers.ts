@@ -2,11 +2,11 @@ import { Inject } from '@graphql-modules/di'
 import { PubSub } from "apollo-server-express";
 import { withFilter } from 'apollo-server-express';
 import { MessageType } from "../../../db";
-import { IResolvers, MessageAddedSubscriptionArgs } from "../../../types";
 import { User } from "../../../entity/User";
 import { Chat } from "../../../entity/Chat";
 import { Message } from "../../../entity/Message";
 import { Recipient } from "../../../entity/Recipient";
+import { IResolvers, MessageAddedSubscriptionArgs } from "../../../types/message";
 
 export default Inject(PubSub)((pubsub): IResolvers => ({
   Mutation: {

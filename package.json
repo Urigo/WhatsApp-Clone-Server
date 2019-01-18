@@ -5,7 +5,7 @@
   "scripts": {
     "start": "npm run build:live",
     "build:live": "nodemon --exec ./node_modules/.bin/ts-node -- ./index.ts",
-    "generator": "gql-gen --config codegen.yml"
+    "generator": "gql-gen --config codegen.js"
   },
   "devDependencies": {
     "@types/bcrypt-nodejs": "^0.0.30",

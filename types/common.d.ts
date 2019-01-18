@@ -189,15 +189,15 @@ export interface MessageAddedSubscriptionArgs {
 
 import { GraphQLResolveInfo } from "graphql";
 
-import { Chat } from "./entity/Chat";
+import { Chat } from "../entity/Chat";
 
-import { Message } from "./entity/Message";
+import { Message } from "../entity/Message";
 
-import { Recipient } from "./entity/Recipient";
+import { Recipient } from "../entity/Recipient";
 
-import { User } from "./entity/User";
+import { User } from "../entity/User";
 
-import { IAppModuleContext } from "./modules/app.module";
+import { ICommonModuleContext } from "../modules/common/index";
 
 export type Resolver<Result, Parent = {}, Context = {}, Args = {}> = (
   parent: Parent,
@@ -249,7 +249,7 @@ export type DirectiveResolverFn<TResult, TArgs = {}, TContext = {}> = (
 ) => TResult | Promise<TResult>;
 
 export namespace QueryResolvers {
-  export interface Resolvers<Context = IAppModuleContext, TypeParent = {}> {
+  export interface Resolvers<Context = ICommonModuleContext, TypeParent = {}> {
     users?: UsersResolver<Maybe<User[]>, TypeParent, Context>;
 
     chats?: ChatsResolver<Maybe<Chat[]>, TypeParent, Context>;
@@ -260,17 +260,17 @@ export namespace QueryResolvers {
   export type UsersResolver<
     R = Maybe<User[]>,
     Parent = {},
-    Context = IAppModuleContext
+    Context = ICommonModuleContext
   > = Resolver<R, Parent, Context>;
   export type ChatsResolver<
     R = Maybe<Chat[]>,
     Parent = {},
-    Context = IAppModuleContext
+    Context = ICommonModuleContext
   > = Resolver<R, Parent, Context>;
   export type ChatResolver<
     R = Maybe<Chat>,
     Parent = {},
-    Context = IAppModuleContext
+    Context = ICommonModuleContext
   > = Resolver<R, Parent, Context, ChatArgs>;
   export interface ChatArgs {
     chatId: string;
@@ -278,7 +278,10 @@ export namespace QueryResolvers {
 }
 
 export namespace UserResolvers {
-  export interface Resolvers<Context = IAppModuleContext, TypeParent = User> {
+  export interface Resolvers<
+    Context = ICommonModuleContext,
+    TypeParent = User
+  > {
     id?: IdResolver<string, TypeParent, Context>;
 
     name?: NameResolver<Maybe<string>, TypeParent, Context>;
@@ -291,27 +294,30 @@ export namespace UserResolvers {
   export type IdResolver<
     R = string,
     Parent = User,
-    Context = IAppModuleContext
+    Context = ICommonModuleContext
   > = Resolver<R, Parent, Context>;
   export type NameResolver<
     R = Maybe<string>,
     Parent = User,
-    Context = IAppModuleContext
+    Context = ICommonModuleContext
   > = Resolver<R, Parent, Context>;
   export type PictureResolver<
     R = Maybe<string>,
     Parent = User,
-    Context = IAppModuleContext
+    Context = ICommonModuleContext
   > = Resolver<R, Parent, Context>;
   export type PhoneResolver<
     R = Maybe<string>,
     Parent = User,
-    Context = IAppModuleContext
+    Context = ICommonModuleContext
   > = Resolver<R, Parent, Context>;
 }
 
 export namespace ChatResolvers {
-  export interface Resolvers<Context = IAppModuleContext, TypeParent = Chat> {
+  export interface Resolvers<
+    Context = ICommonModuleContext,
+    TypeParent = Chat
+  > {
     id?: IdResolver<string, TypeParent, Context>;
 
     name?: NameResolver<Maybe<string>, TypeParent, Context>;
@@ -342,52 +348,52 @@ export namespace ChatResolvers {
   export type IdResolver<
     R = string,
     Parent = Chat,
-    Context = IAppModuleContext
+    Context = ICommonModuleContext
   > = Resolver<R, Parent, Context>;
   export type NameResolver<
     R = Maybe<string>,
     Parent = Chat,
-    Context = IAppModuleContext
+    Context = ICommonModuleContext
   > = Resolver<R, Parent, Context>;
   export type PictureResolver<
     R = Maybe<string>,
     Parent = Chat,
-    Context = IAppModuleContext
+    Context = ICommonModuleContext
   > = Resolver<R, Parent, Context>;
   export type AllTimeMembersResolver<
     R = User[],
     Parent = Chat,
-    Context = IAppModuleContext
+    Context = ICommonModuleContext
   > = Resolver<R, Parent, Context>;
   export type ListingMembersResolver<
     R = User[],
     Parent = Chat,
-    Context = IAppModuleContext
+    Context = ICommonModuleContext
   > = Resolver<R, Parent, Context>;
   export type ActualGroupMembersResolver<
     R = User[],
     Parent = Chat,
-    Context = IAppModuleContext
+    Context = ICommonModuleContext
   > = Resolver<R, Parent, Context>;
   export type AdminsResolver<
     R = Maybe<User[]>,
     Parent = Chat,
-    Context = IAppModuleContext
+    Context = ICommonModuleContext
   > = Resolver<R, Parent, Context>;
   export type OwnerResolver<
     R = Maybe<User>,
     Parent = Chat,
-    Context = IAppModuleContext
+    Context = ICommonModuleContext
   > = Resolver<R, Parent, Context>;
   export type IsGroupResolver<
     R = boolean,
     Parent = Chat,
-    Context = IAppModuleContext
+    Context = ICommonModuleContext
   > = Resolver<R, Parent, Context>;
   export type MessagesResolver<
     R = (Maybe<Message>)[],
     Parent = Chat,
-    Context = IAppModuleContext
+    Context = ICommonModuleContext
   > = Resolver<R, Parent, Context, MessagesArgs>;
   export interface MessagesArgs {
     amount?: Maybe<number>;
@@ -396,13 +402,13 @@ export namespace ChatResolvers {
   export type UnreadMessagesResolver<
     R = number,
     Parent = Chat,
-    Context = IAppModuleContext
+    Context = ICommonModuleContext
   > = Resolver<R, Parent, Context>;
 }
 
 export namespace MessageResolvers {
   export interface Resolvers<
-    Context = IAppModuleContext,
+    Context = ICommonModuleContext,
     TypeParent = Message
   > {
     id?: IdResolver<string, TypeParent, Context>;
@@ -427,53 +433,53 @@ export namespace MessageResolvers {
   export type IdResolver<
     R = string,
     Parent = Message,
-    Context = IAppModuleContext
+    Context = ICommonModuleContext
   > = Resolver<R, Parent, Context>;
   export type SenderResolver<
     R = User,
     Parent = Message,
-    Context = IAppModuleContext
+    Context = ICommonModuleContext
   > = Resolver<R, Parent, Context>;
   export type ChatResolver<
     R = Chat,
     Parent = Message,
-    Context = IAppModuleContext
+    Context = ICommonModuleContext
   > = Resolver<R, Parent, Context>;
   export type ContentResolver<
     R = string,
     Parent = Message,
-    Context = IAppModuleContext
+    Context = ICommonModuleContext
   > = Resolver<R, Parent, Context>;
   export type CreatedAtResolver<
     R = string,
     Parent = Message,
-    Context = IAppModuleContext
+    Context = ICommonModuleContext
   > = Resolver<R, Parent, Context>;
   export type TypeResolver<
     R = number,
     Parent = Message,
-    Context = IAppModuleContext
+    Context = ICommonModuleContext
   > = Resolver<R, Parent, Context>;
   export type HoldersResolver<
     R = User[],
     Parent = Message,
-    Context = IAppModuleContext
+    Context = ICommonModuleContext
   > = Resolver<R, Parent, Context>;
   export type OwnershipResolver<
     R = boolean,
     Parent = Message,
-    Context = IAppModuleContext
+    Context = ICommonModuleContext
   > = Resolver<R, Parent, Context>;
   export type RecipientsResolver<
     R = Recipient[],
     Parent = Message,
-    Context = IAppModuleContext
+    Context = ICommonModuleContext
   > = Resolver<R, Parent, Context>;
 }
 
 export namespace RecipientResolvers {
   export interface Resolvers<
-    Context = IAppModuleContext,
+    Context = ICommonModuleContext,
     TypeParent = Recipient
   > {
     user?: UserResolver<User, TypeParent, Context>;
@@ -490,32 +496,32 @@ export namespace RecipientResolvers {
   export type UserResolver<
     R = User,
     Parent = Recipient,
-    Context = IAppModuleContext
+    Context = ICommonModuleContext
   > = Resolver<R, Parent, Context>;
   export type MessageResolver<
     R = Message,
     Parent = Recipient,
-    Context = IAppModuleContext
+    Context = ICommonModuleContext
   > = Resolver<R, Parent, Context>;
   export type ChatResolver<
     R = Chat,
     Parent = Recipient,
-    Context = IAppModuleContext
+    Context = ICommonModuleContext
   > = Resolver<R, Parent, Context>;
   export type ReceivedAtResolver<
     R = Maybe<string>,
     Parent = Recipient,
-    Context = IAppModuleContext
+    Context = ICommonModuleContext
   > = Resolver<R, Parent, Context>;
   export type ReadAtResolver<
     R = Maybe<string>,
     Parent = Recipient,
-    Context = IAppModuleContext
+    Context = ICommonModuleContext
   > = Resolver<R, Parent, Context>;
 }
 
 export namespace MutationResolvers {
-  export interface Resolvers<Context = IAppModuleContext, TypeParent = {}> {
+  export interface Resolvers<Context = ICommonModuleContext, TypeParent = {}> {
     addChat?: AddChatResolver<Maybe<Chat>, TypeParent, Context>;
 
     addGroup?: AddGroupResolver<Maybe<Chat>, TypeParent, Context>;
@@ -574,7 +580,7 @@ export namespace MutationResolvers {
   export type AddChatResolver<
     R = Maybe<Chat>,
     Parent = {},
-    Context = IAppModuleContext
+    Context = ICommonModuleContext
   > = Resolver<R, Parent, Context, AddChatArgs>;
   export interface AddChatArgs {
     userId: string;
@@ -583,7 +589,7 @@ export namespace MutationResolvers {
   export type AddGroupResolver<
     R = Maybe<Chat>,
     Parent = {},
-    Context = IAppModuleContext
+    Context = ICommonModuleContext
   > = Resolver<R, Parent, Context, AddGroupArgs>;
   export interface AddGroupArgs {
     userIds: string[];
@@ -594,7 +600,7 @@ export namespace MutationResolvers {
   export type RemoveChatResolver<
     R = Maybe<string>,
     Parent = {},
-    Context = IAppModuleContext
+    Context = ICommonModuleContext
   > = Resolver<R, Parent, Context, RemoveChatArgs>;
   export interface RemoveChatArgs {
     chatId: string;
@@ -603,7 +609,7 @@ export namespace MutationResolvers {
   export type AddMembersResolver<
     R = Maybe<(Maybe<string>)[]>,
     Parent = {},
-    Context = IAppModuleContext
+    Context = ICommonModuleContext
   > = Resolver<R, Parent, Context, AddMembersArgs>;
   export interface AddMembersArgs {
     groupId: string;
@@ -614,7 +620,7 @@ export namespace MutationResolvers {
   export type RemoveMembersResolver<
     R = Maybe<(Maybe<string>)[]>,
     Parent = {},
-    Context = IAppModuleContext
+    Context = ICommonModuleContext
   > = Resolver<R, Parent, Context, RemoveMembersArgs>;
   export interface RemoveMembersArgs {
     groupId: string;
@@ -625,7 +631,7 @@ export namespace MutationResolvers {
   export type AddAdminsResolver<
     R = Maybe<(Maybe<string>)[]>,
     Parent = {},
-    Context = IAppModuleContext
+    Context = ICommonModuleContext
   > = Resolver<R, Parent, Context, AddAdminsArgs>;
   export interface AddAdminsArgs {
     groupId: string;
@@ -636,7 +642,7 @@ export namespace MutationResolvers {
   export type RemoveAdminsResolver<
     R = Maybe<(Maybe<string>)[]>,
     Parent = {},
-    Context = IAppModuleContext
+    Context = ICommonModuleContext
   > = Resolver<R, Parent, Context, RemoveAdminsArgs>;
   export interface RemoveAdminsArgs {
     groupId: string;
@@ -647,7 +653,7 @@ export namespace MutationResolvers {
   export type SetGroupNameResolver<
     R = Maybe<string>,
     Parent = {},
-    Context = IAppModuleContext
+    Context = ICommonModuleContext
   > = Resolver<R, Parent, Context, SetGroupNameArgs>;
   export interface SetGroupNameArgs {
     groupId: string;
@@ -656,7 +662,7 @@ export namespace MutationResolvers {
   export type SetGroupPictureResolver<
     R = Maybe<string>,
     Parent = {},
-    Context = IAppModuleContext
+    Context = ICommonModuleContext
   > = Resolver<R, Parent, Context, SetGroupPictureArgs>;
   export interface SetGroupPictureArgs {
     groupId: string;
@@ -665,7 +671,7 @@ export namespace MutationResolvers {
   export type AddMessageResolver<
     R = Maybe<Message>,
     Parent = {},
-    Context = IAppModuleContext
+    Context = ICommonModuleContext
   > = Resolver<R, Parent, Context, AddMessageArgs>;
   export interface AddMessageArgs {
     chatId: string;
@@ -676,7 +682,7 @@ export namespace MutationResolvers {
   export type RemoveMessagesResolver<
     R = Maybe<(Maybe<string>)[]>,
     Parent = {},
-    Context = IAppModuleContext
+    Context = ICommonModuleContext
   > = Resolver<R, Parent, Context, RemoveMessagesArgs>;
   export interface RemoveMessagesArgs {
     chatId: string;
@@ -689,7 +695,7 @@ export namespace MutationResolvers {
   export type MarkAsReceivedResolver<
     R = Maybe<boolean>,
     Parent = {},
-    Context = IAppModuleContext
+    Context = ICommonModuleContext
   > = Resolver<R, Parent, Context, MarkAsReceivedArgs>;
   export interface MarkAsReceivedArgs {
     chatId: string;
@@ -698,7 +704,7 @@ export namespace MutationResolvers {
   export type MarkAsReadResolver<
     R = Maybe<boolean>,
     Parent = {},
-    Context = IAppModuleContext
+    Context = ICommonModuleContext
   > = Resolver<R, Parent, Context, MarkAsReadArgs>;
   export interface MarkAsReadArgs {
     chatId: string;
@@ -706,7 +712,7 @@ export namespace MutationResolvers {
 }
 
 export namespace SubscriptionResolvers {
-  export interface Resolvers<Context = IAppModuleContext, TypeParent = {}> {
+  export interface Resolvers<Context = ICommonModuleContext, TypeParent = {}> {
     chatAdded?: ChatAddedResolver<Maybe<Chat>, TypeParent, Context>;
 
     messageAdded?: MessageAddedResolver<Maybe<Message>, TypeParent, Context>;
@@ -715,12 +721,12 @@ export namespace SubscriptionResolvers {
   export type ChatAddedResolver<
     R = Maybe<Chat>,
     Parent = {},
-    Context = IAppModuleContext
+    Context = ICommonModuleContext
   > = SubscriptionResolver<R, Parent, Context>;
   export type MessageAddedResolver<
     R = Maybe<Message>,
     Parent = {},
-    Context = IAppModuleContext
+    Context = ICommonModuleContext
   > = SubscriptionResolver<R, Parent, Context, MessageAddedArgs>;
   export interface MessageAddedArgs {
     chatId?: Maybe<string>;
@@ -731,7 +737,7 @@ export namespace SubscriptionResolvers {
 export type SkipDirectiveResolver<Result> = DirectiveResolverFn<
   Result,
   SkipDirectiveArgs,
-  IAppModuleContext
+  ICommonModuleContext
 >;
 export interface SkipDirectiveArgs {
   /** Skipped when true. */
@@ -742,7 +748,7 @@ export interface SkipDirectiveArgs {
 export type IncludeDirectiveResolver<Result> = DirectiveResolverFn<
   Result,
   IncludeDirectiveArgs,
-  IAppModuleContext
+  ICommonModuleContext
 >;
 export interface IncludeDirectiveArgs {
   /** Included when true. */
@@ -753,7 +759,7 @@ export interface IncludeDirectiveArgs {
 export type DeprecatedDirectiveResolver<Result> = DirectiveResolverFn<
   Result,
   DeprecatedDirectiveArgs,
-  IAppModuleContext
+  ICommonModuleContext
 >;
 export interface DeprecatedDirectiveArgs {
   /** Explains why this element was deprecated, usually also including a suggestion for how to access supported similar data. Formatted using the Markdown syntax (as specified by [CommonMark](https://commonmark.org/). */
