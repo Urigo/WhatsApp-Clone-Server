@@ -21,8 +21,6 @@ export interface IAuthModuleSession {
 
 export interface IAuthModuleContext {
   user: User;
-  //Delete me once GraphQL Modules gets fixed
-  connection: Connection,
 }
 
 export const AuthModule = new GraphQLModule<IAuthModuleConfig, IAuthModuleSession, IAuthModuleContext>({
@@ -33,8 +31,7 @@ export const AuthModule = new GraphQLModule<IAuthModuleConfig, IAuthModuleSessio
     AuthProvider,
     SubscriptionHandler,
   ],
-  context: (session, currentContext) => ({ ...currentContext, user: session.req && session.req.user }),
-  subscriptions: ({ injector }) => injector.get(SubscriptionHandler),
+  context: session => ({ user: session.req && session.req.user }),
   typeDefs: mergeGraphQLSchemas(loadSchemaFiles(__dirname + '/schema/')),
   resolvers: mergeResolvers(loadResolversFiles(__dirname + '/resolvers/')),
   configRequired: true,

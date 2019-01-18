@@ -5,6 +5,7 @@ import { CommonModule, ICommonModuleContext } from "../common";
 import { IUserModuleContext, UserModule } from "../user";
 import { IMessageModuleContext, MessageModule } from "../message";
 import { ChatModule, IChatModuleContext } from "../chat";
+import { AuthModule } from '../auth';
 
 export interface IRecipientModuleConfig {}
 

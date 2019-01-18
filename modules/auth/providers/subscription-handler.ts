@@ -2,9 +2,10 @@ import { Injectable } from '@graphql-modules/di';
 import { User } from "../../../entity/User";
 import { validPassword } from "./auth.provider";
 import { Connection } from "typeorm";
+import { OnConnect } from '@graphql-modules/core';
 
 @Injectable()
-export class SubscriptionHandler {
+export class SubscriptionHandler implements OnConnect {
   async onConnect (connectionParams: any, webSocket: any) {
     if (connectionParams.authToken) {
       // Create a buffer and tell it the data coming in is base64
