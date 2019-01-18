@@ -4,12 +4,12 @@ import "reflect-metadata";
 import bodyParser from "body-parser";
 import cors from 'cors';
 import express from 'express';
-import { ApolloServer } from "apollo-server-express";
+import { ApolloServer, PubSub } from "apollo-server-express";
 import passport from "passport";
 import { createServer } from "http";
 import { createConnection } from "typeorm";
 import { addSampleData } from "./db";
-import { AppModule } from "./modules/app";
+import { AppModule } from "./modules/app.module";
 //import { User } from "./entity/User";
 //import { validPassword } from "./modules/auth/providers/auth.provider";
 
@@ -24,9 +24,12 @@ createConnection().then(async connection => {
   app.use(bodyParser.json());
   app.use(passport.initialize());
 
+  const pubsub = new PubSub();
+
   const { schema, context, subscriptions } = AppModule.forRoot({
     connection,
     app,
+    pubsub,
   });
 
   const apollo = new ApolloServer({

@@ -1,19 +1,11 @@
 export default `
   type Query {
-    users: [User!]
     chats: [Chat!]
     chat(chatId: ID!): Chat
   }
 
   type Subscription {
-    messageAdded(chatId: ID): Message
     chatAdded: Chat
-  }
-
-  enum MessageType {
-    LOCATION
-    TEXT
-    PICTURE
   }
   
   type Chat {
@@ -33,57 +25,19 @@ export default `
     admins: [User!]
     #If null the group is read-only. Null for chats.
     owner: User
-    messages(amount: Int): [Message]!
-    #Computed property
-    unreadMessages: Int!
     #Computed property
     isGroup: Boolean!
   }
 
-  type Message {
-    id: ID!
-    sender: User!
-    chat: Chat!
-    content: String!
-    createdAt: String!
-    #FIXME: should return MessageType
-    type: Int!
-    #Whoever received the message
-    recipients: [Recipient!]!
-    #Whoever still holds a copy of the message. Cannot be null because the message gets deleted otherwise
-    holders: [User!]!
-    #Computed property
-    ownership: Boolean!
-  }
-  
-  type Recipient {
-    user: User!
-    message: Message!
-    chat: Chat!
-    receivedAt: String
-    readAt: String
-  }
-
-  type User {
-    id: ID!
-    name: String
-    picture: String
-    phone: String
-  }
-
   type Mutation {
-    addChat(recipientId: ID!): Chat
-    addGroup(recipientIds: [ID!]!, groupName: String!): Chat
+    addChat(userId: ID!): Chat
+    addGroup(userIds: [ID!]!, groupName: String!): Chat
     removeChat(chatId: ID!): ID
-    addMessage(chatId: ID!, content: String!): Message
-    removeMessages(chatId: ID!, messageIds: [ID], all: Boolean): [ID]
     addMembers(groupId: ID!, userIds: [ID!]!): [ID]
     removeMembers(groupId: ID!, userIds: [ID!]!): [ID]
     addAdmins(groupId: ID!, userIds: [ID!]!): [ID]
     removeAdmins(groupId: ID!, userIds: [ID!]!): [ID]
     setGroupName(groupId: ID!): String
     setGroupPicture(groupId: ID!): String
-    markAsReceived(chatId: ID!): Boolean
-    markAsRead(chatId: ID!): Boolean
   }
 `;

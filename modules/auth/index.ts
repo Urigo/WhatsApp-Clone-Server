@@ -6,14 +6,14 @@ import { Express } from "express";
 import { User } from "../../entity/User";
 import { SubscriptionHandler } from "./providers/subscription-handler"
 import { AuthProvider } from "./providers/auth.provider";
-import { APP } from "../config-symbols";
+import { APP } from "../app.symbols";
 
 export interface IAuthModuleConfig {
-  connection: Connection,
-  app: Express;
+  connection?: Connection,
+  app?: Express;
 }
 
-export interface IAuthModuleRequest {
+export interface IAuthModuleSession {
   req: {
     user: User;
   }
@@ -21,22 +21,19 @@ export interface IAuthModuleRequest {
 
 export interface IAuthModuleContext {
   user: User;
+  //Delete me once GraphQL Modules gets fixed
+  connection: Connection,
 }
 
-export const AuthModule = new GraphQLModule<IAuthModuleConfig, IAuthModuleRequest, IAuthModuleContext>({
-  name: 'Auth',
+export const AuthModule = new GraphQLModule<IAuthModuleConfig, IAuthModuleSession, IAuthModuleContext>({
+  name: "Auth",
   providers: ({ config: { connection, app } }) => [
     { provide: Connection, useValue: connection },
     { provide: APP, useValue: app },
     AuthProvider,
     SubscriptionHandler,
   ],
-  context: (request, currentContext, moduleSessionInfo) => {
-    if (!request.req) {
-      console.log('request.req is undefined');
-    }
-    return ({ ...currentContext, user: request.req && request.req.user });
-  },
+  context: (session, currentContext) => ({ ...currentContext, user: session.req && session.req.user }),
   subscriptions: ({ injector }) => injector.get(SubscriptionHandler),
   typeDefs: mergeGraphQLSchemas(loadSchemaFiles(__dirname + '/schema/')),
   resolvers: mergeResolvers(loadResolversFiles(__dirname + '/resolvers/')),

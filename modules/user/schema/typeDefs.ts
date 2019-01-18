@@ -1,0 +1,12 @@
+export default `
+  type Query {
+    users: [User!]
+  }
+
+  type User {
+    id: ID!
+    name: String
+    picture: String
+    phone: String
+  }
+`;

@@ -3,18 +3,22 @@ import { loadResolversFiles, loadSchemaFiles } from '@graphql-modules/sonar';
 import { mergeGraphQLSchemas, mergeResolvers } from '@graphql-modules/epoxy';
 import { CommonModule, ICommonModuleContext } from "../common";
 import { IUserModuleContext, UserModule } from "../user";
+import { IMessageModuleContext, MessageModule } from "../message";
+import { ChatModule, IChatModuleContext } from "../chat";
 
-export interface IChatModuleConfig {}
+export interface IRecipientModuleConfig {}
 
-export interface IChatModuleSession {}
+export interface IRecipientModuleSession {}
 
-export interface IChatModuleContext extends ICommonModuleContext, IUserModuleContext {}
+export interface IRecipientModuleContext extends ICommonModuleContext, IUserModuleContext, IMessageModuleContext, IChatModuleContext {}
 
-export const ChatModule = new GraphQLModule<IChatModuleConfig, IChatModuleSession, IChatModuleContext>({
-  name: 'Chat',
+export const RecipientModule = new GraphQLModule<IRecipientModuleConfig, IRecipientModuleSession, IRecipientModuleContext>({
+  name: 'Recipient',
   imports: [
     CommonModule,
     UserModule,
+    MessageModule,
+    ChatModule,
   ],
   typeDefs: mergeGraphQLSchemas(loadSchemaFiles(__dirname + '/schema/')),
   resolvers: mergeResolvers(loadResolversFiles(__dirname + '/resolvers/')),

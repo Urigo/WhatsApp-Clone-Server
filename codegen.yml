@@ -1,5 +1,5 @@
 overwrite: true
-schema: "./schema/typeDefs.ts"
+schema: "./schema.ts"
 documents: null
 require:
   - ts-node/register
@@ -7,7 +7,7 @@ generates:
   ./types.d.ts:
     config:
       optionalType: undefined | null
-      contextType: ./schema/types#AppContext
+      contextType: ./modules/app.module#IAppModuleContext
       mappers:
         Chat: ./entity/Chat#Chat
         Message: ./entity/Message#Message

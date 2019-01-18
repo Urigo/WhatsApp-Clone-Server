@@ -5,7 +5,7 @@ import passport from "passport";
 import basicStrategy from "passport-http";
 import { User } from "../../../entity/User";
 import bcrypt from "bcrypt-nodejs";
-import { APP } from "../../config-symbols";
+import { APP } from "../../app.symbols";
 
 export function generateHash(password: string) {
   return bcrypt.hashSync(password, bcrypt.genSaltSync(8));
