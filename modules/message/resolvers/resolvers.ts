@@ -1,4 +1,4 @@
-import { Inject } from '@graphql-modules/di'
+import { InjectFunction } from '@graphql-modules/di'
 import { PubSub } from "apollo-server-express";
 import { withFilter } from 'apollo-server-express';
 import { MessageType } from "../../../db";
@@ -8,7 +8,7 @@ import { Chat } from "../../../entity/Chat";
 import { Message } from "../../../entity/Message";
 import { Recipient } from "../../../entity/Recipient";
 
-export default Inject(PubSub)((pubsub): IResolvers => ({
+export default InjectFunction(PubSub)((pubsub): IResolvers => ({
   Mutation: {
     addMessage: async (obj, {chatId, content}, {user: currentUser, connection}) => {
       if (content === null || content === '') {
