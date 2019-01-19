@@ -20,7 +20,6 @@
     "graphql-codegen-add": "^0.15.2",
     "graphql-codegen-typescript-common": "^0.15.2",
     "graphql-codegen-typescript-resolvers": "^0.15.2",
-    "graphql-codegen-typescript-server": "^0.15.2",
     "nodemon": "^1.18.9",
     "ts-node": "^7.0.1",
     "typescript": "^3.2.2"
