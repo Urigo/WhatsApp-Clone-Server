@@ -14,7 +14,6 @@ export interface ICommonModuleSession {
 }
 
 export interface ICommonModuleContext extends IAuthModuleContext {
-  connection: Connection,
 }
 
 export const CommonModule = new GraphQLModule<ICommonModuleConfig, ICommonModuleSession, ICommonModuleContext>({
@@ -26,7 +25,6 @@ export const CommonModule = new GraphQLModule<ICommonModuleConfig, ICommonModule
     { provide: Connection, useValue: connection },
     { provide: PubSub, useValue: pubsub },
   ],
-  context: (session, currentContext, moduleSessionInfo) => ({ ...currentContext, connection: moduleSessionInfo.module.config.connection! }),
   typeDefs: mergeGraphQLSchemas(loadSchemaFiles(__dirname + '/schema/')),
   resolvers: mergeResolvers(loadResolversFiles(__dirname + '/resolvers/')),
   configRequired: true,

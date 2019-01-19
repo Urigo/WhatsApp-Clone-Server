@@ -4,9 +4,9 @@ import { mergeGraphQLSchemas, mergeResolvers } from '@graphql-modules/epoxy';
 import { Connection } from "typeorm";
 import { Express } from "express";
 import { User } from "../../entity/User";
-import { SubscriptionHandler } from "./providers/subscription-handler"
 import { AuthProvider } from "./providers/auth.provider";
 import { APP } from "../app.symbols";
+import { CurrentUserProvider } from './providers/current-user.provider';
 
 export interface IAuthModuleConfig {
   connection?: Connection,
@@ -20,7 +20,6 @@ export interface IAuthModuleSession {
 }
 
 export interface IAuthModuleContext {
-  user: User;
 }
 
 export const AuthModule = new GraphQLModule<IAuthModuleConfig, IAuthModuleSession, IAuthModuleContext>({
@@ -29,9 +28,8 @@ export const AuthModule = new GraphQLModule<IAuthModuleConfig, IAuthModuleSessio
     { provide: Connection, useValue: connection },
     { provide: APP, useValue: app },
     AuthProvider,
-    SubscriptionHandler,
+    CurrentUserProvider,
   ],
-  context: session => ({ user: session.req && session.req.user }),
   typeDefs: mergeGraphQLSchemas(loadSchemaFiles(__dirname + '/schema/')),
   resolvers: mergeResolvers(loadResolversFiles(__dirname + '/resolvers/')),
   configRequired: true,

@@ -17,6 +17,7 @@
     "@types/passport": "^1.0.0",
     "@types/passport-http": "^0.3.7",
     "@types/pg": "^7.4.11",
+    "graphql-codegen-add": "^0.15.2",
     "graphql-codegen-typescript-common": "^0.15.2",
     "graphql-codegen-typescript-resolvers": "^0.15.2",
     "graphql-codegen-typescript-server": "^0.15.2",
@@ -25,9 +26,9 @@
     "typescript": "^3.2.2"
   },
   "dependencies": {
-    "@graphql-modules/core": "0.3.0-alpha.e576c9e1",
-    "@graphql-modules/epoxy": "0.3.0-alpha.e576c9e1",
-    "@graphql-modules/sonar": "0.3.0-alpha.e576c9e1",
+    "@graphql-modules/core": "0.3.0-alpha.0122f92a",
+    "@graphql-modules/epoxy": "0.3.0-alpha.0122f92a",
+    "@graphql-modules/sonar": "0.3.0-alpha.0122f92a",
     "apollo-server-express": "^2.3.1",
     "bcrypt-nodejs": "^0.0.3",
     "body-parser": "^1.18.3",

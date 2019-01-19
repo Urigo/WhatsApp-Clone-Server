@@ -1,11 +1,11 @@
-require('ts-node/register');
+require('ts-node/register/transpile-only');
 
 const modules = {
   overwrite: true,
   schema: "./schema.ts",
   documents: null,
   require: [
-    "ts-node/register",
+    "ts-node/register/transpile-only",
   ],
   generates: {},
 };
@@ -16,7 +16,7 @@ AppModule.forRoot({}).selfImports.forEach(module => {
   modules.generates[`./types/${module.name.toLowerCase()}.d.ts`] = {
     config: {
       optionalType: "undefined | null",
-      contextType: `../modules/${module.name.toLowerCase()}/index#I${module.name}ModuleContext`,
+      contextType: `ModuleContext<I${module.name}ModuleContext>`,
       mappers: {
         "Chat": "../entity/Chat#Chat",
         "Message": "../entity/Message#Message",
@@ -25,6 +25,12 @@ AppModule.forRoot({}).selfImports.forEach(module => {
       },
     },
     plugins: [
+      {
+        "add": `
+              import { ModuleContext } from '@graphql-modules/core';
+              import { I${module.name}ModuleContext } from '../modules/${module.name.toLowerCase()}/index';
+        `
+      },
       "typescript-common",
       "typescript-server",
       "typescript-resolvers",

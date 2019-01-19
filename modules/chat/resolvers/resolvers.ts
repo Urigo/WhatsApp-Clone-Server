@@ -5,17 +5,20 @@ import { Chat } from "../../../entity/Chat";
 import { Message } from "../../../entity/Message";
 import { Recipient } from "../../../entity/Recipient";
 import { IResolvers } from "../../../types/chat";
+import { Connection } from 'typeorm';
+import { CurrentUserProvider } from '../../auth/providers/current-user.provider';
 
-export default InjectFunction(PubSub)((pubsub): IResolvers => ({
+export default InjectFunction(PubSub, Connection)((pubsub, connection): IResolvers => ({
   Query: {
-    chats: async (obj, args, {user: currentUser, connection}) => {
+    chats: async (obj, args, { injector }) => {
+      const { currentUser } = injector.get(CurrentUserProvider);
       return await connection
         .createQueryBuilder(Chat, "chat")
         .leftJoin('chat.listingMembers', 'listingMembers')
-        .where('listingMembers.id = :id', {id: currentUser.id})
+        .where('listingMembers.id = :id', { id: currentUser.id })
         .getMany();
     },
-    chat: async (obj, {chatId}, {connection}) => {
+    chat: async (obj, { chatId }) => {
       return await connection
         .createQueryBuilder(Chat, "chat")
         .whereInIds(chatId)
@@ -23,7 +26,8 @@ export default InjectFunction(PubSub)((pubsub): IResolvers => ({
     },
   },
   Mutation: {
-    addChat: async (obj, {userId}, {user: currentUser, connection}) => {
+    addChat: async (obj, { userId }, { injector }) => {
+      const { currentUser } = injector.get(CurrentUserProvider);
       const user = await connection
         .createQueryBuilder(User, "user")
         .whereInIds(userId)
@@ -36,8 +40,8 @@ export default InjectFunction(PubSub)((pubsub): IResolvers => ({
       let chat = await connection
         .createQueryBuilder(Chat, "chat")
         .where('chat.name IS NULL')
-        .innerJoin('chat.allTimeMembers', 'allTimeMembers1', 'allTimeMembers1.id = :currentUserId', {currentUserId: currentUser.id})
-        .innerJoin('chat.allTimeMembers', 'allTimeMembers2', 'allTimeMembers2.id = :userId', {userId: userId})
+        .innerJoin('chat.allTimeMembers', 'allTimeMembers1', 'allTimeMembers1.id = :currentUserId', { currentUserId: currentUser.id })
+        .innerJoin('chat.allTimeMembers', 'allTimeMembers2', 'allTimeMembers2.id = :userId', { userId: userId })
         .innerJoinAndSelect('chat.listingMembers', 'listingMembers')
         .getOne();
 
@@ -45,7 +49,7 @@ export default InjectFunction(PubSub)((pubsub): IResolvers => ({
         // Chat already exists. Both users are already in the userIds array
         const listingMembers = await connection
           .createQueryBuilder(User, "user")
-          .innerJoin('user.listingMemberChats', 'listingMemberChats', 'listingMemberChats.id = :chatId', {chatId: chat.id})
+          .innerJoin('user.listingMemberChats', 'listingMemberChats', 'listingMemberChats.id = :chatId', { chatId: chat.id })
           .getMany();
 
         if (!listingMembers.find(user => user.id === currentUser.id)) {
@@ -68,7 +72,8 @@ export default InjectFunction(PubSub)((pubsub): IResolvers => ({
         return chat || null;
       }
     },
-    addGroup: async (obj, {userIds, groupName}, {user: currentUser, connection}) => {
+    addGroup: async (obj, { userIds, groupName }, { injector }) => {
+      const { currentUser } = injector.get(CurrentUserProvider);
       let users: User[] = [];
       for (let userId of userIds) {
         const user = await connection
@@ -97,7 +102,8 @@ export default InjectFunction(PubSub)((pubsub): IResolvers => ({
 
       return chat || null;
     },
-    removeChat: async (obj, {chatId}, {user: currentUser, connection}) => {
+    removeChat: async (obj, { chatId }, { injector }) => {
+      const { currentUser } = injector.get(CurrentUserProvider);
       const chat = await connection
         .createQueryBuilder(Chat, "chat")
         .whereInIds(Number(chatId))
@@ -133,7 +139,7 @@ export default InjectFunction(PubSub)((pubsub): IResolvers => ({
             // Simply remove the message
             const recipients = await connection
               .createQueryBuilder(Recipient, "recipient")
-              .innerJoinAndSelect('recipient.message', 'message', 'message.id = :messageId', {messageId: message.id})
+              .innerJoinAndSelect('recipient.message', 'message', 'message.id = :messageId', { messageId: message.id })
               .innerJoinAndSelect('recipient.user', 'user')
               .getMany();
             for (let recipient of recipients) {
@@ -174,7 +180,7 @@ export default InjectFunction(PubSub)((pubsub): IResolvers => ({
             // Simply remove the message
             const recipients = await connection
               .createQueryBuilder(Recipient, "recipient")
-              .innerJoinAndSelect('recipient.message', 'message', 'message.id = :messageId', {messageId: message.id})
+              .innerJoinAndSelect('recipient.message', 'message', 'message.id = :messageId', { messageId: message.id })
               .innerJoinAndSelect('recipient.user', 'user')
               .getMany();
             for (let recipient of recipients) {
@@ -212,63 +218,70 @@ export default InjectFunction(PubSub)((pubsub): IResolvers => ({
   Subscription: {
     chatAdded: {
       subscribe: withFilter(() => pubsub.asyncIterator('chatAdded'),
-        ({creatorId, chatAdded}: {creatorId: string, chatAdded: Chat}, variables, {user: currentUser}: { user: User }) => {
+        ({ creatorId, chatAdded }: { creatorId: string, chatAdded: Chat }, variables, { user: currentUser }: { user: User }) => {
           return Number(creatorId) !== currentUser.id &&
             !!chatAdded.listingMembers.find((user: User) => user.id === currentUser.id);
         }),
     }
   },
   Chat: {
-    name: async (chat, args, {user: currentUser, connection}) => {
+    name: async (chat, args, { injector }) => {
+      const { currentUser } = injector.get(CurrentUserProvider);
       if (chat.name) {
         return chat.name;
       }
       const user = await connection
         .createQueryBuilder(User, "user")
-        .where('user.id != :userId', {userId: currentUser.id})
-        .innerJoin('user.allTimeMemberChats', 'allTimeMemberChats', 'allTimeMemberChats.id = :chatId', {chatId: chat.id})
+        .where('user.id != :userId', { userId: currentUser.id })
+        .innerJoin('user.allTimeMemberChats', 'allTimeMemberChats', 'allTimeMemberChats.id = :chatId', { chatId: chat.id })
         .getOne();
       return user && user.name || null;
     },
-    picture: async (chat, args, {user: currentUser, connection}) => {
+    picture: async (chat, args, { injector }) => {
+      const { currentUser } = injector.get(CurrentUserProvider);
       if (chat.name) {
         return chat.picture;
       }
       const user = await connection
         .createQueryBuilder(User, "user")
-        .where('user.id != :userId', {userId: currentUser.id})
-        .innerJoin('user.allTimeMemberChats', 'allTimeMemberChats', 'allTimeMemberChats.id = :chatId', {chatId: chat.id})
+        .where('user.id != :userId', { userId: currentUser.id })
+        .innerJoin('user.allTimeMemberChats', 'allTimeMemberChats', 'allTimeMemberChats.id = :chatId', { chatId: chat.id })
         .getOne();
       return user ? user.picture : null;
     },
-    allTimeMembers: async (chat, args, {user: currentUser, connection}) => {
+    allTimeMembers: async (chat, args, { injector }) => {
+      const { currentUser } = injector.get(CurrentUserProvider);
       return await connection
         .createQueryBuilder(User, "user")
-        .innerJoin('user.allTimeMemberChats', 'allTimeMemberChats', 'allTimeMemberChats.id = :chatId', {chatId: chat.id})
+        .innerJoin('user.allTimeMemberChats', 'allTimeMemberChats', 'allTimeMemberChats.id = :chatId', { chatId: chat.id })
         .getMany();
     },
-    listingMembers: async (chat, args, {user: currentUser, connection}) => {
+    listingMembers: async (chat, args, { injector }) => {
+      const { currentUser } = injector.get(CurrentUserProvider);
       return await connection
         .createQueryBuilder(User, "user")
-        .innerJoin('user.listingMemberChats', 'listingMemberChats', 'listingMemberChats.id = :chatId', {chatId: chat.id})
+        .innerJoin('user.listingMemberChats', 'listingMemberChats', 'listingMemberChats.id = :chatId', { chatId: chat.id })
         .getMany();
     },
-    actualGroupMembers: async (chat, args, {user: currentUser, connection}) => {
+    actualGroupMembers: async (chat, args, { injector }) => {
+      const { currentUser } = injector.get(CurrentUserProvider);
       return await connection
         .createQueryBuilder(User, "user")
-        .innerJoin('user.actualGroupMemberChats', 'actualGroupMemberChats', 'actualGroupMemberChats.id = :chatId', {chatId: chat.id})
+        .innerJoin('user.actualGroupMemberChats', 'actualGroupMemberChats', 'actualGroupMemberChats.id = :chatId', { chatId: chat.id })
         .getMany();
     },
-    admins: async (chat, args, {user: currentUser, connection}) => {
+    admins: async (chat, args, { injector }) => {
+      const { currentUser } = injector.get(CurrentUserProvider);
       return await connection
         .createQueryBuilder(User, "user")
-        .innerJoin('user.adminChats', 'adminChats', 'adminChats.id = :chatId', {chatId: chat.id})
+        .innerJoin('user.adminChats', 'adminChats', 'adminChats.id = :chatId', { chatId: chat.id })
         .getMany();
     },
-    owner: async (chat, args, {user: currentUser, connection}) => {
+    owner: async (chat, args, { injector }) => {
+      const { currentUser } = injector.get(CurrentUserProvider);
       return await connection
         .createQueryBuilder(User, "user")
-        .innerJoin('user.ownerChats', 'ownerChats', 'ownerChats.id = :chatId', {chatId: chat.id})
+        .innerJoin('user.ownerChats', 'ownerChats', 'ownerChats.id = :chatId', { chatId: chat.id })
         .getOne() || null;
     },
     isGroup: (chat) => !!chat.name,

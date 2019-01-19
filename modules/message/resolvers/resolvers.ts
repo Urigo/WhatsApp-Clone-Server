@@ -7,10 +7,13 @@ import { Chat } from "../../../entity/Chat";
 import { Message } from "../../../entity/Message";
 import { Recipient } from "../../../entity/Recipient";
 import { IResolvers, MessageAddedSubscriptionArgs } from "../../../types/message";
+import { Connection } from 'typeorm';
+import { CurrentUserProvider } from '../../auth/providers/current-user.provider';
 
-export default InjectFunction(PubSub)((pubsub): IResolvers => ({
+export default InjectFunction(PubSub, Connection)((pubsub, connection): IResolvers => ({
   Mutation: {
-    addMessage: async (obj, {chatId, content}, {user: currentUser, connection}) => {
+    addMessage: async (obj, {chatId, content}, { injector }) => {
+      const { currentUser } = injector.get(CurrentUserProvider);
       if (content === null || content === '') {
         throw new Error(`Cannot add empty or null messages.`);
       }
@@ -85,7 +88,8 @@ export default InjectFunction(PubSub)((pubsub): IResolvers => ({
 
       return message || null;
     },
-    removeMessages: async (obj, {chatId, messageIds, all}, {user: currentUser, connection}) => {
+    removeMessages: async (obj, {chatId, messageIds, all}, {injector}) => {
+      const { currentUser } = injector.get(CurrentUserProvider);
       const chat = await connection
         .createQueryBuilder(Chat, "chat")
         .whereInIds(chatId)
@@ -150,17 +154,16 @@ export default InjectFunction(PubSub)((pubsub): IResolvers => ({
   Subscription: {
     messageAdded: {
       subscribe: withFilter(() => pubsub.asyncIterator('messageAdded'),
-        ({messageAdded}: {messageAdded: Message}, {chatId}: MessageAddedSubscriptionArgs, {user: currentUser}: { user: User }) => {
-          if (!currentUser) {
-            console.log('currentUser is undefined inside messageAdded subscription');
-          }
+        ({messageAdded}: {messageAdded: Message}, {chatId}: MessageAddedSubscriptionArgs, { injector }) => {
+          const { currentUser } = injector.get(CurrentUserProvider);
           return (!chatId || messageAdded.chat.id === Number(chatId)) &&
             !!messageAdded.recipients.find((recipient: Recipient) => recipient.user.id === currentUser.id);
         }),
     },
   },
   Chat: {
-    messages: async (chat, {amount = 0}: {amount: number}, {user: currentUser, connection}) => {
+    messages: async (chat, {amount = 0}: {amount: number}, { injector }) => {
+      const { currentUser } = injector.get(CurrentUserProvider);
       const query = connection
         .createQueryBuilder(Message, "message")
         .innerJoin('message.chat', 'chat', 'chat.id = :chatId', {chatId: chat.id})
@@ -168,7 +171,8 @@ export default InjectFunction(PubSub)((pubsub): IResolvers => ({
         .orderBy({"message.createdAt": "DESC"});
       return (amount ? await query.take(amount).getMany() : await query.getMany()).reverse();
     },
-    unreadMessages: async (chat, args, {user: currentUser, connection}) => {
+    unreadMessages: async (chat, _, { injector }) => {
+      const { currentUser } = injector.get(CurrentUserProvider);
       return await connection
         .createQueryBuilder(Message, "message")
         .innerJoin('message.chat', 'chat', 'chat.id = :chatId', {chatId: chat.id})
@@ -177,26 +181,27 @@ export default InjectFunction(PubSub)((pubsub): IResolvers => ({
     },
   },
   Message: {
-    sender: async (message: Message, args, {user: currentUser, connection}) => {
+    sender: async (message) => {
       return (await connection
         .createQueryBuilder(User, "user")
         .innerJoin('user.senderMessages', 'senderMessages', 'senderMessages.id = :messageId', {messageId: message.id})
         .getOne())!;
     },
-    ownership: async (message: Message, args, {user: currentUser, connection}) => {
+    ownership: async (message, _, { injector }) => {
+      const { currentUser } = injector.get(CurrentUserProvider);
       return !!(await connection
         .createQueryBuilder(User, "user")
         .whereInIds(currentUser.id)
         .innerJoin('user.senderMessages', 'senderMessages', 'senderMessages.id = :messageId', {messageId: message.id})
         .getCount());
     },
-    holders: async (message: Message, args, {user: currentUser, connection}) => {
+    holders: async message => {
       return await connection
         .createQueryBuilder(User, "user")
         .innerJoin('user.holderMessages', 'holderMessages', 'holderMessages.id = :messageId', {messageId: message.id})
         .getMany();
     },
-    chat: async (message: Message, args, {user: currentUser, connection})=> {
+    chat: async message => {
       return (await connection
         .createQueryBuilder(Chat, "chat")
         .innerJoin('chat.messages', 'messages', 'messages.id = :messageId', {messageId: message.id})

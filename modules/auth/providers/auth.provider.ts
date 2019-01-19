@@ -18,8 +18,8 @@ export function validPassword(password: string, localPassword: string) {
 @Injectable()
 export class AuthProvider {
   constructor(
-    private connection: Connection,
-    @Inject(APP) private app: Express,
+    connection: Connection,
+    @Inject(APP) app: Express,
   ) {
     passport.use('basic-signin', new basicStrategy.BasicStrategy(
       async function (username: string, password: string, done: any) {

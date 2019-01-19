@@ -1,15 +1,17 @@
 import { Message } from "../../../entity/Message";
 import { Recipient } from "../../../entity/Recipient";
 import { IResolvers } from "../../../types/recipient";
+import { Connection } from "typeorm";
+import { InjectFunction } from "@graphql-modules/di";
 
-export default ((): IResolvers => ({
+export default InjectFunction(Connection)((connection): IResolvers => ({
   Mutation: {
-    markAsReceived: async (obj, {chatId}, {user: currentUser, connection}) => false,
-    markAsRead: async (obj, {chatId}, {user: currentUser, connection}) => false,
+    markAsReceived: async () => false,
+    markAsRead: async () => false,
   },
   Recipient: {},
   Message: {
-    recipients: async (message: Message, args, {user: currentUser, connection}) => {
+    recipients: async (message: Message) => {
       return await connection
         .createQueryBuilder(Recipient, "recipient")
         .innerJoinAndSelect('recipient.message', 'message', 'message.id = :messageId', {messageId: message.id})
