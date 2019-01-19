@@ -1,6 +1,6 @@
 import { Message } from "../../../entity/Message";
 import { Recipient } from "../../../entity/Recipient";
-import { IResolvers } from "../../../types/recipient";
+import { IResolvers } from "../../../types";
 import { Connection } from "typeorm";
 import { InjectFunction } from "@graphql-modules/di";
 

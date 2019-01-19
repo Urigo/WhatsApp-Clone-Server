@@ -1,34 +1,23 @@
 import { GraphQLModule } from "@graphql-modules/core";
 import { Connection } from "typeorm";
 import { Express } from "express";
-import { AuthModule, IAuthModuleContext } from "./auth";
-import { CommonModule, ICommonModuleContext } from "./common";
-import { IUserModuleContext, UserModule } from "./user";
-import { ChatModule, IChatModuleContext } from "./chat";
-import { IMessageModuleContext, MessageModule } from "./message";
-import { IRecipientModuleContext, RecipientModule } from "./recipient";
-import { PubSub } from "apollo-server-express";
+import { AuthModule } from "./auth";
+import { UserModule } from "./user";
+import { ChatModule } from "./chat";
+import { MessageModule } from "./message";
+import { RecipientModule } from "./recipient";
 
 export interface IAppModuleConfig {
   connection?: Connection,
   app?: Express;
-  pubsub?: PubSub;
 }
 
-export interface IAppModuleSession {}
-
-export interface IAppModuleContext extends IAuthModuleContext, ICommonModuleContext, IUserModuleContext, IChatModuleContext, IMessageModuleContext, IRecipientModuleContext {}
-
-export const AppModule = new GraphQLModule<IAppModuleConfig, IAppModuleSession, IAppModuleContext>({
+export const AppModule = new GraphQLModule<IAppModuleConfig>({
   name: 'App',
-  imports: ({ config: { connection, app, pubsub } }) => [
+  imports: ({ config: { connection, app } }) => [
     AuthModule.forRoot({
       connection,
       app,
-    }),
-    CommonModule.forRoot({
-      connection,
-      pubsub,
     }),
     UserModule,
     ChatModule,

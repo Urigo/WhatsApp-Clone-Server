@@ -4,7 +4,7 @@ import { User } from "../../../entity/User";
 import { Chat } from "../../../entity/Chat";
 import { Message } from "../../../entity/Message";
 import { Recipient } from "../../../entity/Recipient";
-import { IResolvers } from "../../../types/chat";
+import { IResolvers } from "../../../types";
 import { Connection } from 'typeorm';
 import { CurrentUserProvider } from '../../auth/providers/current-user.provider';
 

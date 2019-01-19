@@ -29,7 +29,6 @@ createConnection().then(async connection => {
   const { schema, context, subscriptions } = AppModule.forRoot({
     connection,
     app,
-    pubsub,
   });
 
   const apollo = new ApolloServer({

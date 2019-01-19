@@ -6,7 +6,7 @@ import { User } from "../../../entity/User";
 import { Chat } from "../../../entity/Chat";
 import { Message } from "../../../entity/Message";
 import { Recipient } from "../../../entity/Recipient";
-import { IResolvers, MessageAddedSubscriptionArgs } from "../../../types/message";
+import { IResolvers } from "../../../types";
 import { Connection } from 'typeorm';
 import { CurrentUserProvider } from '../../auth/providers/current-user.provider';
 
@@ -154,7 +154,7 @@ export default InjectFunction(PubSub, Connection)((pubsub, connection): IResolve
   Subscription: {
     messageAdded: {
       subscribe: withFilter(() => pubsub.asyncIterator('messageAdded'),
-        ({messageAdded}: {messageAdded: Message}, {chatId}: MessageAddedSubscriptionArgs, { injector }) => {
+        ({messageAdded}: {messageAdded: Message}, {chatId}, { injector }) => {
           const { currentUser } = injector.get(CurrentUserProvider);
           return (!chatId || messageAdded.chat.id === Number(chatId)) &&
             !!messageAdded.recipients.find((recipient: Recipient) => recipient.user.id === currentUser.id);

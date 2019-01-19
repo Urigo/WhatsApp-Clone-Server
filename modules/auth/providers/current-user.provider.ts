@@ -4,6 +4,7 @@ import { Connection } from "typeorm";
 import { validPassword } from "./auth.provider";
 import { OnRequest, OnConnect } from "@graphql-modules/core";
 import { ModuleSessionInfo } from "@graphql-modules/core/dist/module-session-info";
+import { IAuthModuleConfig, IAuthModuleSession } from "..";
 
 @Injectable({
     scope: ProviderScope.Session
@@ -11,7 +12,7 @@ import { ModuleSessionInfo } from "@graphql-modules/core/dist/module-session-inf
 export class CurrentUserProvider implements OnRequest, OnConnect {
     currentUser: User;
     constructor(private connection: Connection) {}
-    async onRequest ({ session }: ModuleSessionInfo) {
+    async onRequest ({ session }: ModuleSessionInfo<IAuthModuleConfig, IAuthModuleSession>) {
         if (session.req) {
             this.currentUser = session.req.user;
         }

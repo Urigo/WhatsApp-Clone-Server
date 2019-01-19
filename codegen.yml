@@ -1,0 +1,13 @@
+overwrite: true
+schema: ./schema.ts
+require: ts-node/register/transpile-only
+generates:
+  ./types.d.ts:
+    config:
+      optionalType: undefined | null
+      contextType: "@graphql-modules/core#ModuleContext"
+    plugins:
+      - add: "import { Chat, Message, Recipient, User } from './entity';"
+      - typescript-common
+      - typescript-resolvers
+

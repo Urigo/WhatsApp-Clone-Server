@@ -1,5 +1,5 @@
 import { User } from "../../../entity/User";
-import { IResolvers } from "../../../types/user";
+import { IResolvers } from "../../../types";
 import { InjectFunction } from "@graphql-modules/di";
 import { Connection } from "typeorm";
 import { CurrentUserProvider } from "../../auth/providers/current-user.provider";
