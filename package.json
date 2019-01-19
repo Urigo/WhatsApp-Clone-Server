@@ -25,9 +25,9 @@
     "typescript": "^3.2.2"
   },
   "dependencies": {
-    "@graphql-modules/core": "0.3.0-alpha.0122f92a",
-    "@graphql-modules/epoxy": "0.3.0-alpha.0122f92a",
-    "@graphql-modules/sonar": "0.3.0-alpha.0122f92a",
+    "@graphql-modules/core": "0.3.0-alpha.9cbd1b8e",
+    "@graphql-modules/epoxy": "0.3.0-alpha.9cbd1b8e",
+    "@graphql-modules/sonar": "0.3.0-alpha.9cbd1b8e",
     "apollo-server-express": "^2.3.1",
     "bcrypt-nodejs": "^0.0.3",
     "body-parser": "^1.18.3",
