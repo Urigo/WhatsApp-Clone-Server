@@ -14,7 +14,7 @@ import { AppModule } from "./modules/app.module";
 //import { validPassword } from "./modules/auth/providers/auth.provider";
 
 createConnection().then(async connection => {
-  await addSampleData(connection);
+  //await addSampleData(connection);
 
   const PORT = 3000;
 

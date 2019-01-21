@@ -2,8 +2,6 @@ import { InjectFunction } from '@graphql-modules/di'
 import { PubSub, withFilter } from 'apollo-server-express';
 import { User } from "../../../entity/User";
 import { Chat } from "../../../entity/Chat";
-import { Message } from "../../../entity/Message";
-import { Recipient } from "../../../entity/Recipient";
 import { IResolvers } from "../../../types/chat";
 
 export default InjectFunction(PubSub)((pubsub): IResolvers => ({
@@ -98,6 +96,7 @@ export default InjectFunction(PubSub)((pubsub): IResolvers => ({
       return chat || null;
     },
     removeChat: async (obj, {chatId}, {user: currentUser, connection}) => {
+      console.log("ChatModule's removeChat");
       const chat = await connection
         .createQueryBuilder(Chat, "chat")
         .whereInIds(Number(chatId))
@@ -105,8 +104,6 @@ export default InjectFunction(PubSub)((pubsub): IResolvers => ({
         .leftJoinAndSelect('chat.actualGroupMembers', 'actualGroupMembers')
         .leftJoinAndSelect('chat.admins', 'admins')
         .leftJoinAndSelect('chat.owner', 'owner')
-        .leftJoinAndSelect('chat.messages', 'messages')
-        .leftJoinAndSelect('messages.holders', 'holders')
         .getOne();
 
       if (!chat) {
@@ -118,32 +115,6 @@ export default InjectFunction(PubSub)((pubsub): IResolvers => ({
         if (!chat.listingMembers.find(user => user.id === currentUser.id)) {
           throw new Error(`The user is not a listing member of the chat ${chatId}.`);
         }
-
-        // Instead of chaining map and filter we can loop once using reduce
-        chat.messages = await chat.messages.reduce<Promise<Message[]>>(async (filtered$, message) => {
-          const filtered = await filtered$;
-
-          message.holders = message.holders.filter(user => user.id !== currentUser.id);
-
-          if (message.holders.length !== 0) {
-            // Remove the current user from the message holders
-            await connection.getRepository(Message).save(message);
-            filtered.push(message);
-          } else {
-            // Simply remove the message
-            const recipients = await connection
-              .createQueryBuilder(Recipient, "recipient")
-              .innerJoinAndSelect('recipient.message', 'message', 'message.id = :messageId', {messageId: message.id})
-              .innerJoinAndSelect('recipient.user', 'user')
-              .getMany();
-            for (let recipient of recipients) {
-              await connection.getRepository(Recipient).remove(recipient);
-            }
-            await connection.getRepository(Message).remove(message);
-          }
-
-          return filtered;
-        }, Promise.resolve([]));
 
         // Remove the current user from who gets the chat listed. The chat will no longer appear in his list
         chat.listingMembers = chat.listingMembers.filter(user => user.id !== currentUser.id);
@@ -159,32 +130,6 @@ export default InjectFunction(PubSub)((pubsub): IResolvers => ({
         return chatId;
       } else {
         // Group
-
-        // Instead of chaining map and filter we can loop once using reduce
-        chat.messages = await chat.messages.reduce<Promise<Message[]>>(async (filtered$, message) => {
-          const filtered = await filtered$;
-
-          message.holders = message.holders.filter(user => user.id !== currentUser.id);
-
-          if (message.holders.length !== 0) {
-            // Remove the current user from the message holders
-            await connection.getRepository(Message).save(message);
-            filtered.push(message);
-          } else {
-            // Simply remove the message
-            const recipients = await connection
-              .createQueryBuilder(Recipient, "recipient")
-              .innerJoinAndSelect('recipient.message', 'message', 'message.id = :messageId', {messageId: message.id})
-              .innerJoinAndSelect('recipient.user', 'user')
-              .getMany();
-            for (let recipient of recipients) {
-              await connection.getRepository(Recipient).remove(recipient);
-            }
-            await connection.getRepository(Message).remove(message);
-          }
-
-          return filtered;
-        }, Promise.resolve([]));
 
         // Remove the current user from who gets the group listed. The group will no longer appear in his list
         chat.listingMembers = chat.listingMembers.filter(user => user.id !== currentUser.id);

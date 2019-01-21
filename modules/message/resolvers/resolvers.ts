@@ -7,6 +7,7 @@ import { Chat } from "../../../entity/Chat";
 import { Message } from "../../../entity/Message";
 import { Recipient } from "../../../entity/Recipient";
 import { IResolvers, MessageAddedSubscriptionArgs } from "../../../types/message";
+import { ChatModule } from "../../chat";
 
 export default InjectFunction(PubSub)((pubsub): IResolvers => ({
   Mutation: {
@@ -145,6 +146,32 @@ export default InjectFunction(PubSub)((pubsub): IResolvers => ({
       await connection.getRepository(Chat).save(chat);
 
       return deletedIds;
+    },
+    removeChat: async (root, args, context, info) => {
+      console.log("MessageModule's removeChat");
+      const {user: currentUser, connection} = context;
+      const {chatId} = args;
+
+      const messages = await connection
+        .createQueryBuilder(Message, "message")
+        .innerJoin('message.chat', 'chat', 'chat.id = :chatId', {chatId})
+        .leftJoinAndSelect('message.holders', 'holders')
+        .getMany();
+
+      for (let message of messages) {
+        message.holders = message.holders.filter(user => user.id !== currentUser.id);
+
+        if (message.holders.length !== 0) {
+          // Remove the current user from the message holders
+          await connection.getRepository(Message).save(message);
+        } else {
+          // Simply remove the message
+          await connection.getRepository(Message).remove(message);
+        }
+      }
+
+      const { resolvers: { Mutation } } = ChatModule;
+      return await (<any>Mutation).removeChat(root, args, context, info);
     },
   },
   Subscription: {
