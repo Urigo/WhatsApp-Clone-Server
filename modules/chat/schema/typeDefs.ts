@@ -1,11 +1,12 @@
 export default `
   type Query {
-    chats: [Chat!]
+    chats: [Chat!]!
     chat(chatId: ID!): Chat
   }
 
   type Subscription {
     chatAdded: Chat
+    chatUpdated: Chat
   }
   
   type Chat {
@@ -31,13 +32,12 @@ export default `
 
   type Mutation {
     addChat(userId: ID!): Chat
-    addGroup(userIds: [ID!]!, groupName: String!): Chat
+    addGroup(userIds: [ID!]!, groupName: String!, groupPicture: String): Chat
+    updateChat(chatId: ID!, name: String, picture: String): Chat
     removeChat(chatId: ID!): ID
-    addMembers(groupId: ID!, userIds: [ID!]!): [ID]
-    removeMembers(groupId: ID!, userIds: [ID!]!): [ID]
-    addAdmins(groupId: ID!, userIds: [ID!]!): [ID]
-    removeAdmins(groupId: ID!, userIds: [ID!]!): [ID]
-    setGroupName(groupId: ID!): String
-    setGroupPicture(groupId: ID!): String
+    addAdmins(groupId: ID!, userIds: [ID!]!): [ID]!
+    removeAdmins(groupId: ID!, userIds: [ID!]!): [ID]!
+    addMembers(groupId: ID!, userIds: [ID!]!): [ID]!
+    removeMembers(groupId: ID!, userIds: [ID!]!): [ID]!
   }
 `;

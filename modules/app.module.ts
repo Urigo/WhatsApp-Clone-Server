@@ -15,13 +15,15 @@ export interface IAppModuleConfig {
   pubsub?: PubSub;
 }
 
-export interface IAppModuleSession {}
+export interface IAppModuleSession {
+}
 
-export interface IAppModuleContext extends IAuthModuleContext, ICommonModuleContext, IUserModuleContext, IChatModuleContext, IMessageModuleContext, IRecipientModuleContext {}
+export interface IAppModuleContext extends IAuthModuleContext, ICommonModuleContext, IUserModuleContext, IChatModuleContext, IMessageModuleContext, IRecipientModuleContext {
+}
 
 export const AppModule = new GraphQLModule<IAppModuleConfig, IAppModuleSession, IAppModuleContext>({
   name: 'App',
-  imports: ({ config: { connection, app, pubsub } }) => [
+  imports: ({config: {connection, app, pubsub}}) => [
     AuthModule.forRoot({
       connection,
       app,
@@ -31,8 +33,8 @@ export const AppModule = new GraphQLModule<IAppModuleConfig, IAppModuleSession, 
       pubsub,
     }),
     UserModule,
-    //ChatModule,
-    //MessageModule,
+    ChatModule,
+    MessageModule,
     RecipientModule,
   ],
   configRequired: true,

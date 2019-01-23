@@ -13,7 +13,7 @@ export enum MessageType {
 export interface Query {
   users?: Maybe<User[]>;
 
-  chats?: Maybe<Chat[]>;
+  chats: Chat[];
 
   chat?: Maybe<Chat>;
 }
@@ -89,19 +89,17 @@ export interface Mutation {
 
   addGroup?: Maybe<Chat>;
 
+  updateChat?: Maybe<Chat>;
+
   removeChat?: Maybe<string>;
 
-  addMembers?: Maybe<(Maybe<string>)[]>;
+  addAdmins: (Maybe<string>)[];
 
-  removeMembers?: Maybe<(Maybe<string>)[]>;
+  removeAdmins: (Maybe<string>)[];
 
-  addAdmins?: Maybe<(Maybe<string>)[]>;
+  addMembers: (Maybe<string>)[];
 
-  removeAdmins?: Maybe<(Maybe<string>)[]>;
-
-  setGroupName?: Maybe<string>;
-
-  setGroupPicture?: Maybe<string>;
+  removeMembers: (Maybe<string>)[];
 
   addMessage?: Maybe<Message>;
 
@@ -114,6 +112,8 @@ export interface Mutation {
 
 export interface Subscription {
   chatAdded?: Maybe<Chat>;
+
+  chatUpdated?: Maybe<Chat>;
 
   messageAdded?: Maybe<Message>;
 }
@@ -135,19 +135,18 @@ export interface AddGroupMutationArgs {
   userIds: string[];
 
   groupName: string;
+
+  groupPicture?: Maybe<string>;
+}
+export interface UpdateChatMutationArgs {
+  chatId: string;
+
+  name?: Maybe<string>;
+
+  picture?: Maybe<string>;
 }
 export interface RemoveChatMutationArgs {
   chatId: string;
-}
-export interface AddMembersMutationArgs {
-  groupId: string;
-
-  userIds: string[];
-}
-export interface RemoveMembersMutationArgs {
-  groupId: string;
-
-  userIds: string[];
 }
 export interface AddAdminsMutationArgs {
   groupId: string;
@@ -159,11 +158,15 @@ export interface RemoveAdminsMutationArgs {
 
   userIds: string[];
 }
-export interface SetGroupNameMutationArgs {
+export interface AddMembersMutationArgs {
   groupId: string;
+
+  userIds: string[];
 }
-export interface SetGroupPictureMutationArgs {
+export interface RemoveMembersMutationArgs {
   groupId: string;
+
+  userIds: string[];
 }
 export interface AddMessageMutationArgs {
   chatId: string;
@@ -252,7 +255,7 @@ export namespace QueryResolvers {
   export interface Resolvers<Context = IChatModuleContext, TypeParent = {}> {
     users?: UsersResolver<Maybe<User[]>, TypeParent, Context>;
 
-    chats?: ChatsResolver<Maybe<Chat[]>, TypeParent, Context>;
+    chats?: ChatsResolver<Chat[], TypeParent, Context>;
 
     chat?: ChatResolver<Maybe<Chat>, TypeParent, Context>;
   }
@@ -263,7 +266,7 @@ export namespace QueryResolvers {
     Context = IChatModuleContext
   > = Resolver<R, Parent, Context>;
   export type ChatsResolver<
-    R = Maybe<Chat[]>,
+    R = Chat[],
     Parent = {},
     Context = IChatModuleContext
   > = Resolver<R, Parent, Context>;
@@ -520,36 +523,18 @@ export namespace MutationResolvers {
 
     addGroup?: AddGroupResolver<Maybe<Chat>, TypeParent, Context>;
 
+    updateChat?: UpdateChatResolver<Maybe<Chat>, TypeParent, Context>;
+
     removeChat?: RemoveChatResolver<Maybe<string>, TypeParent, Context>;
 
-    addMembers?: AddMembersResolver<
-      Maybe<(Maybe<string>)[]>,
-      TypeParent,
-      Context
-    >;
+    addAdmins?: AddAdminsResolver<(Maybe<string>)[], TypeParent, Context>;
+
+    removeAdmins?: RemoveAdminsResolver<(Maybe<string>)[], TypeParent, Context>;
+
+    addMembers?: AddMembersResolver<(Maybe<string>)[], TypeParent, Context>;
 
     removeMembers?: RemoveMembersResolver<
-      Maybe<(Maybe<string>)[]>,
-      TypeParent,
-      Context
-    >;
-
-    addAdmins?: AddAdminsResolver<
-      Maybe<(Maybe<string>)[]>,
-      TypeParent,
-      Context
-    >;
-
-    removeAdmins?: RemoveAdminsResolver<
-      Maybe<(Maybe<string>)[]>,
-      TypeParent,
-      Context
-    >;
-
-    setGroupName?: SetGroupNameResolver<Maybe<string>, TypeParent, Context>;
-
-    setGroupPicture?: SetGroupPictureResolver<
-      Maybe<string>,
+      (Maybe<string>)[],
       TypeParent,
       Context
     >;
@@ -589,6 +574,21 @@ export namespace MutationResolvers {
     userIds: string[];
 
     groupName: string;
+
+    groupPicture?: Maybe<string>;
+  }
+
+  export type UpdateChatResolver<
+    R = Maybe<Chat>,
+    Parent = {},
+    Context = IChatModuleContext
+  > = Resolver<R, Parent, Context, UpdateChatArgs>;
+  export interface UpdateChatArgs {
+    chatId: string;
+
+    name?: Maybe<string>;
+
+    picture?: Maybe<string>;
   }
 
   export type RemoveChatResolver<
@@ -600,30 +600,8 @@ export namespace MutationResolvers {
     chatId: string;
   }
 
-  export type AddMembersResolver<
-    R = Maybe<(Maybe<string>)[]>,
-    Parent = {},
-    Context = IChatModuleContext
-  > = Resolver<R, Parent, Context, AddMembersArgs>;
-  export interface AddMembersArgs {
-    groupId: string;
-
-    userIds: string[];
-  }
-
-  export type RemoveMembersResolver<
-    R = Maybe<(Maybe<string>)[]>,
-    Parent = {},
-    Context = IChatModuleContext
-  > = Resolver<R, Parent, Context, RemoveMembersArgs>;
-  export interface RemoveMembersArgs {
-    groupId: string;
-
-    userIds: string[];
-  }
-
   export type AddAdminsResolver<
-    R = Maybe<(Maybe<string>)[]>,
+    R = (Maybe<string>)[],
     Parent = {},
     Context = IChatModuleContext
   > = Resolver<R, Parent, Context, AddAdminsArgs>;
@@ -634,7 +612,7 @@ export namespace MutationResolvers {
   }
 
   export type RemoveAdminsResolver<
-    R = Maybe<(Maybe<string>)[]>,
+    R = (Maybe<string>)[],
     Parent = {},
     Context = IChatModuleContext
   > = Resolver<R, Parent, Context, RemoveAdminsArgs>;
@@ -644,22 +622,26 @@ export namespace MutationResolvers {
     userIds: string[];
   }
 
-  export type SetGroupNameResolver<
-    R = Maybe<string>,
+  export type AddMembersResolver<
+    R = (Maybe<string>)[],
     Parent = {},
     Context = IChatModuleContext
-  > = Resolver<R, Parent, Context, SetGroupNameArgs>;
-  export interface SetGroupNameArgs {
+  > = Resolver<R, Parent, Context, AddMembersArgs>;
+  export interface AddMembersArgs {
     groupId: string;
+
+    userIds: string[];
   }
 
-  export type SetGroupPictureResolver<
-    R = Maybe<string>,
+  export type RemoveMembersResolver<
+    R = (Maybe<string>)[],
     Parent = {},
     Context = IChatModuleContext
-  > = Resolver<R, Parent, Context, SetGroupPictureArgs>;
-  export interface SetGroupPictureArgs {
+  > = Resolver<R, Parent, Context, RemoveMembersArgs>;
+  export interface RemoveMembersArgs {
     groupId: string;
+
+    userIds: string[];
   }
 
   export type AddMessageResolver<
@@ -709,10 +691,17 @@ export namespace SubscriptionResolvers {
   export interface Resolvers<Context = IChatModuleContext, TypeParent = {}> {
     chatAdded?: ChatAddedResolver<Maybe<Chat>, TypeParent, Context>;
 
+    chatUpdated?: ChatUpdatedResolver<Maybe<Chat>, TypeParent, Context>;
+
     messageAdded?: MessageAddedResolver<Maybe<Message>, TypeParent, Context>;
   }
 
   export type ChatAddedResolver<
+    R = Maybe<Chat>,
+    Parent = {},
+    Context = IChatModuleContext
+  > = SubscriptionResolver<R, Parent, Context>;
+  export type ChatUpdatedResolver<
     R = Maybe<Chat>,
     Parent = {},
     Context = IChatModuleContext
