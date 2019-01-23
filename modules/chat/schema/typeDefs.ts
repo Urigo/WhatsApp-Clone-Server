@@ -16,11 +16,11 @@ export default `
     name: String
     #Computed for chats
     picture: String
-    #All members, current and past ones.
+    #All members, current and past ones. Includes users who still didn't get the chat listed.
     allTimeMembers: [User!]!
-    #Whoever gets the chat listed. For groups includes past members who still didn't delete the group.
+    #Whoever gets the chat listed. For groups includes past members who still didn't delete the group. For chats they are the only ones who can send messages.
     listingMembers: [User!]!
-    #Actual members of the group (they are not the only ones who get the group listed). Null for chats.
+    #Actual members of the group. Null for chats. For groups they are the only ones who can send messages. They aren't the only ones who get the group listed.
     actualGroupMembers: [User!]!
     #Null for chats
     admins: [User!]

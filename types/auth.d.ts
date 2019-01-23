@@ -103,7 +103,7 @@ export interface Mutation {
 
   addMessage?: Maybe<Message>;
 
-  removeMessages?: Maybe<(Maybe<string>)[]>;
+  removeMessages: (Maybe<string>)[];
 
   markAsReceived?: Maybe<boolean>;
 
@@ -176,7 +176,7 @@ export interface AddMessageMutationArgs {
 export interface RemoveMessagesMutationArgs {
   chatId: string;
 
-  messageIds?: Maybe<(Maybe<string>)[]>;
+  messageIds: string[];
 
   all?: Maybe<boolean>;
 }
@@ -185,9 +185,6 @@ export interface MarkAsReceivedMutationArgs {
 }
 export interface MarkAsReadMutationArgs {
   chatId: string;
-}
-export interface MessageAddedSubscriptionArgs {
-  chatId?: Maybe<string>;
 }
 
 import { GraphQLResolveInfo } from "graphql";
@@ -542,7 +539,7 @@ export namespace MutationResolvers {
     addMessage?: AddMessageResolver<Maybe<Message>, TypeParent, Context>;
 
     removeMessages?: RemoveMessagesResolver<
-      Maybe<(Maybe<string>)[]>,
+      (Maybe<string>)[],
       TypeParent,
       Context
     >;
@@ -656,14 +653,14 @@ export namespace MutationResolvers {
   }
 
   export type RemoveMessagesResolver<
-    R = Maybe<(Maybe<string>)[]>,
+    R = (Maybe<string>)[],
     Parent = {},
     Context = IAuthModuleContext
   > = Resolver<R, Parent, Context, RemoveMessagesArgs>;
   export interface RemoveMessagesArgs {
     chatId: string;
 
-    messageIds?: Maybe<(Maybe<string>)[]>;
+    messageIds: string[];
 
     all?: Maybe<boolean>;
   }
@@ -710,10 +707,7 @@ export namespace SubscriptionResolvers {
     R = Maybe<Message>,
     Parent = {},
     Context = IAuthModuleContext
-  > = SubscriptionResolver<R, Parent, Context, MessageAddedArgs>;
-  export interface MessageAddedArgs {
-    chatId?: Maybe<string>;
-  }
+  > = SubscriptionResolver<R, Parent, Context>;
 }
 
 /** Directs the executor to skip this field or fragment when the `if` argument is true. */

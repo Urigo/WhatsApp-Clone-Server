@@ -1,6 +1,6 @@
 export default `
   type Subscription {
-    messageAdded(chatId: ID): Message
+    messageAdded: Message
   }
 
   enum MessageType {
@@ -31,6 +31,6 @@ export default `
 
   type Mutation {
     addMessage(chatId: ID!, content: String!): Message
-    removeMessages(chatId: ID!, messageIds: [ID], all: Boolean): [ID]
+    removeMessages(chatId: ID!, messageIds: [ID!]!, all: Boolean): [ID]!
   }
 `;
