@@ -13,7 +13,7 @@ export interface IMessageModuleSession {}
 export interface IMessageModuleContext extends IAuthModuleContext, IUserModuleContext, IChatModuleContext {}
 
 export const MessageModule = new GraphQLModule<IMessageModuleConfig, IMessageModuleSession, IMessageModuleContext>({
-  name: 'Message',
+  name: "Message",
   imports: [
     AuthModule,
     UserModule,

@@ -1,4 +1,4 @@
-import { InjectFunction } from '@graphql-modules/di'
+import { InjectFunction } from '@graphql-modules/di';
 import { PubSub } from "apollo-server-express";
 import { withFilter } from 'apollo-server-express';
 import { User } from "../../../entity/User";
@@ -7,6 +7,10 @@ import { IResolvers } from "../../../types/message";
 import { MessageProvider } from "../providers/message.provider";
 
 export default InjectFunction(PubSub, MessageProvider)((pubsub, messageProvider): IResolvers => ({
+  Query: {
+    // The ordering depends on the messages
+    chats: (obj, args, {user: currentUser}) => messageProvider.getChats(currentUser),
+  },
   Mutation: {
     addMessage: async (obj, {chatId, content}, {user: currentUser}) =>
       messageProvider.addMessage(currentUser, chatId, content),
@@ -15,6 +19,7 @@ export default InjectFunction(PubSub, MessageProvider)((pubsub, messageProvider)
         messageIds: messageIds || undefined,
         all: all || false,
       }),
+    // We may need to also remove the messages
     removeChat: async (obj, {chatId}, {user: currentUser}) => messageProvider.removeChat(currentUser, chatId),
   },
   Subscription: {
@@ -28,8 +33,7 @@ export default InjectFunction(PubSub, MessageProvider)((pubsub, messageProvider)
   Chat: {
     messages: async (chat, {amount}, {user: currentUser}) =>
       messageProvider.getChatMessages(currentUser, chat, amount || 0),
-    unreadMessages: async (chat, args, {user: currentUser}) =>
-      messageProvider.getChatUnreadMessagesCount(currentUser, chat),
+    updatedAt: async (chat, args, {user: currentUser}) => messageProvider.getChatUpdatedAt(currentUser, chat),
   },
   Message: {
     sender: async (message, args, {user: currentUser}) =>

@@ -1,4 +1,4 @@
-import { InjectFunction } from '@graphql-modules/di'
+import { InjectFunction } from '@graphql-modules/di';
 import { PubSub, withFilter } from 'apollo-server-express';
 import { User } from "../../../entity/User";
 import { Chat } from "../../../entity/Chat";

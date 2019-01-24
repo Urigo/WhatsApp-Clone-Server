@@ -15,7 +15,7 @@ export interface IChatModuleContext extends IAuthModuleContext, IUserModuleConte
 }
 
 export const ChatModule = new GraphQLModule<IChatModuleConfig, IChatModuleSession, IChatModuleContext>({
-  name: 'Chat',
+  name: "Chat",
   imports: [
     AuthModule,
     UserModule,

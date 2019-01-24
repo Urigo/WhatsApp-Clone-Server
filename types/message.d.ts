@@ -31,6 +31,8 @@ export interface User {
 export interface Chat {
   id: string;
 
+  createdAt: string;
+
   name?: Maybe<string>;
 
   picture?: Maybe<string>;
@@ -39,7 +41,7 @@ export interface Chat {
 
   listingMembers: User[];
 
-  actualGroupMembers: User[];
+  actualGroupMembers?: Maybe<User[]>;
 
   admins?: Maybe<User[]>;
 
@@ -48,6 +50,8 @@ export interface Chat {
   isGroup: boolean;
 
   messages: (Maybe<Message>)[];
+
+  updatedAt?: Maybe<string>;
 
   unreadMessages: number;
 }
@@ -176,7 +180,7 @@ export interface AddMessageMutationArgs {
 export interface RemoveMessagesMutationArgs {
   chatId: string;
 
-  messageIds: string[];
+  messageIds?: Maybe<string[]>;
 
   all?: Maybe<boolean>;
 }
@@ -320,6 +324,8 @@ export namespace ChatResolvers {
   > {
     id?: IdResolver<string, TypeParent, Context>;
 
+    createdAt?: CreatedAtResolver<string, TypeParent, Context>;
+
     name?: NameResolver<Maybe<string>, TypeParent, Context>;
 
     picture?: PictureResolver<Maybe<string>, TypeParent, Context>;
@@ -329,7 +335,7 @@ export namespace ChatResolvers {
     listingMembers?: ListingMembersResolver<User[], TypeParent, Context>;
 
     actualGroupMembers?: ActualGroupMembersResolver<
-      User[],
+      Maybe<User[]>,
       TypeParent,
       Context
     >;
@@ -342,10 +348,17 @@ export namespace ChatResolvers {
 
     messages?: MessagesResolver<(Maybe<Message>)[], TypeParent, Context>;
 
+    updatedAt?: UpdatedAtResolver<Maybe<string>, TypeParent, Context>;
+
     unreadMessages?: UnreadMessagesResolver<number, TypeParent, Context>;
   }
 
   export type IdResolver<
+    R = string,
+    Parent = Chat,
+    Context = IMessageModuleContext
+  > = Resolver<R, Parent, Context>;
+  export type CreatedAtResolver<
     R = string,
     Parent = Chat,
     Context = IMessageModuleContext
@@ -371,7 +384,7 @@ export namespace ChatResolvers {
     Context = IMessageModuleContext
   > = Resolver<R, Parent, Context>;
   export type ActualGroupMembersResolver<
-    R = User[],
+    R = Maybe<User[]>,
     Parent = Chat,
     Context = IMessageModuleContext
   > = Resolver<R, Parent, Context>;
@@ -399,6 +412,11 @@ export namespace ChatResolvers {
     amount?: Maybe<number>;
   }
 
+  export type UpdatedAtResolver<
+    R = Maybe<string>,
+    Parent = Chat,
+    Context = IMessageModuleContext
+  > = Resolver<R, Parent, Context>;
   export type UnreadMessagesResolver<
     R = number,
     Parent = Chat,
@@ -666,7 +684,7 @@ export namespace MutationResolvers {
   export interface RemoveMessagesArgs {
     chatId: string;
 
-    messageIds: string[];
+    messageIds?: Maybe<string[]>;
 
     all?: Maybe<boolean>;
   }

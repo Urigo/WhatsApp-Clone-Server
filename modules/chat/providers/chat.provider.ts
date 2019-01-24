@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@graphql-modules/di'
+import { Injectable } from '@graphql-modules/di'
 import { PubSub } from 'apollo-server-express'
 import { Connection } from 'typeorm'
 import { User } from "../../../entity/User";
@@ -7,17 +7,17 @@ import { Chat } from "../../../entity/Chat";
 @Injectable()
 export class ChatProvider {
   constructor(
-    @Inject(PubSub) private pubsub: PubSub,
-    @Inject(Connection) private connection: Connection,
+    private pubsub: PubSub,
+    private connection: Connection,
   ) {
   }
 
-  getChats(currentUser: User) {
+  async getChats(currentUser: User) {
     return this.connection
       .createQueryBuilder(Chat, 'chat')
       .leftJoin('chat.listingMembers', 'listingMembers')
       .where('listingMembers.id = :id', {id: currentUser.id})
-      .orderBy('chat.updatedAt', 'DESC')
+      .orderBy('chat.createdAt', 'DESC')
       .getMany();
   }
 

@@ -11,8 +11,7 @@ export default `
   
   type Chat {
     messages(amount: Int): [Message]!
-    #Computed property
-    unreadMessages: Int!
+    updatedAt: String
   }
 
   type Message {
@@ -31,6 +30,6 @@ export default `
 
   type Mutation {
     addMessage(chatId: ID!, content: String!): Message
-    removeMessages(chatId: ID!, messageIds: [ID!]!, all: Boolean): [ID]!
+    removeMessages(chatId: ID!, messageIds: [ID!], all: Boolean): [ID]!
   }
 `;

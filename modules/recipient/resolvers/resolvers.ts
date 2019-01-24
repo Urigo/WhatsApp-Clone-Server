@@ -1,52 +1,32 @@
+import { InjectFunction } from '@graphql-modules/di';
+import { PubSub } from "apollo-server-express";
 import { Message } from "../../../entity/Message";
-import { Recipient } from "../../../entity/Recipient";
 import { IResolvers } from "../../../types/recipient";
-import { MessageModule } from "../../message";
+import { RecipientProvider } from "../providers/recipient.provider";
 
-export default ((): IResolvers => ({
+export default InjectFunction(PubSub, RecipientProvider)((pubsub, recipientProvider): IResolvers => ({
   Mutation: {
-    markAsReceived: async (obj, {chatId}, {user: currentUser, connection}) => false,
-    markAsRead: async (obj, {chatId}, {user: currentUser, connection}) => false,
-    removeChat: async (root, args, context, info) => {
-      console.log("RecipientModule's removeChat");
-      const {user: currentUser, connection} = context;
-      const {chatId} = args;
-
-      const messages = await connection
-        .createQueryBuilder(Message, "message")
-        .innerJoin('message.chat', 'chat', 'chat.id = :chatId', {chatId})
-        .leftJoinAndSelect('message.holders', 'holders')
-        .getMany();
-
-      for (let message of messages) {
-        message.holders = message.holders.filter(user => user.id !== currentUser.id);
-
-        if (message.holders.filter(user => user.id !== currentUser.id).length === 0) {
-          const recipients = await connection
-            .createQueryBuilder(Recipient, "recipient")
-            .innerJoinAndSelect('recipient.message', 'message', 'message.id = :messageId', {messageId: message.id})
-            .innerJoinAndSelect('recipient.user', 'user')
-            .getMany();
-
-          for (let recipient of recipients) {
-            await connection.getRepository(Recipient).remove(recipient);
-          }
-        }
-      }
-
-      const { resolvers: { Mutation } } = MessageModule;
-      return await (<any>Mutation).removeChat(root, args, context, info);
-    },
+    markAsReceived: async (obj, {chatId}, {user: currentUser}) => false,
+    markAsRead: async (obj, {chatId}, {user: currentUser}) => false,
+    // We may also need to remove the recipients
+    removeChat: async (obj, {chatId}, {user: currentUser}) => recipientProvider.removeChat(currentUser, chatId),
+    // We also need to create the recipients
+    addMessage: async (obj, {chatId, content}, {user: currentUser}) =>
+      recipientProvider.addMessage(currentUser, chatId, content),
+    // We may also need to remove the recipients
+    removeMessages: async (obj, {chatId, messageIds, all}, {user: currentUser}) =>
+      recipientProvider.removeMessages(currentUser, chatId, {
+        messageIds: messageIds || undefined,
+        all: all || false,
+      }),
+  },
+  Chat: {
+    unreadMessages: async (chat, args, {user: currentUser}) =>
+      recipientProvider.getChatUnreadMessagesCount(currentUser, chat),
+  },
+  Message: {
+    recipients: async (message: Message, args, {user: currentUser}) =>
+      recipientProvider.getMessageRecipients(currentUser, message),
   },
   Recipient: {},
-  Message: {
-    recipients: async (message: Message, args, {user: currentUser, connection}) => {
-      return await connection
-        .createQueryBuilder(Recipient, "recipient")
-        .innerJoinAndSelect('recipient.message', 'message', 'message.id = :messageId', {messageId: message.id})
-        .innerJoinAndSelect('recipient.user', 'user')
-        .innerJoinAndSelect('recipient.chat', 'chat')
-        .getMany();
-    },
-  },
 }));

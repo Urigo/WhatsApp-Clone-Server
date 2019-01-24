@@ -1,4 +1,13 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany, JoinTable, ManyToMany, ManyToOne } from "typeorm";
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  OneToMany,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+  CreateDateColumn
+} from "typeorm";
 import { Message } from "./Message";
 import { User } from "./User";
 import { Recipient } from "./Recipient";
@@ -18,6 +27,9 @@ interface ChatConstructor {
 export class Chat {
   @PrimaryGeneratedColumn()
   id: number;
+
+  @CreateDateColumn({nullable: true})
+  createdAt: Date;
 
   @Column({nullable: true})
   name: string;
@@ -47,8 +59,8 @@ export class Chat {
   @OneToMany(type => Message, message => message.chat, {cascade: ["insert", "update"], eager: true})
   messages: Message[];
 
-  @OneToMany(type => Recipient, recipient => recipient.chat)
-  recipients: Recipient[];
+  //@OneToMany(type => Recipient, recipient => recipient.chat)
+  //recipients: Recipient[];
 
   constructor({name, picture, allTimeMembers, listingMembers, actualGroupMembers, admins, owner, messages}: ChatConstructor = {}) {
     if (name) {

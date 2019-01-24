@@ -1,4 +1,9 @@
 export default `
+  type Chat {
+    #Computed property
+    unreadMessages: Int!
+  }
+  
   type Message {
     #Whoever received the message
     recipients: [Recipient!]!

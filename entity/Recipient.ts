@@ -18,8 +18,8 @@ export class Recipient {
   @ManyToOne(type => Message, message => message.recipients, { primary: true })
   message: Message;
 
-  @ManyToOne(type => Chat, chat => chat.recipients)
-  chat: Chat;
+  //@ManyToOne(type => Chat, chat => chat.recipients)
+  //chat: Chat;
 
   @Column({nullable: true})
   receivedAt: Date;
