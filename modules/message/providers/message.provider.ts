@@ -1,4 +1,4 @@
-import { Injectable } from '@graphql-modules/di'
+import { Injectable, ProviderScope } from '@graphql-modules/di'
 import { PubSub } from 'apollo-server-express'
 import { Connection } from 'typeorm'
 import { User } from "../../../entity/User";
@@ -6,18 +6,24 @@ import { Chat } from "../../../entity/Chat";
 import { ChatProvider } from "../../chat/providers/chat.provider";
 import { Message } from "../../../entity/Message";
 import { MessageType } from "../../../db";
+import { CurrentUserProvider } from '../../auth/providers/current-user.provider';
 
-@Injectable()
+@Injectable({
+  scope: ProviderScope.Session,
+})
 export class MessageProvider {
   constructor(
     private pubsub: PubSub,
     private connection: Connection,
     private chatProvider: ChatProvider,
+    private currentUserProvider: CurrentUserProvider,
   ) {
   }
 
-  async addMessage(currentUser: User, chatId: string, content: string) {
+  async addMessage(chatId: string, content: string) {
     console.log("DEBUG: MessageModule's addMessage");
+
+    const { currentUser } = this.currentUserProvider;
 
     if (content === null || content === '') {
       throw new Error(`Cannot add empty or null messages.`);
@@ -94,7 +100,7 @@ export class MessageProvider {
   }
 
   async _removeMessages(
-    currentUser: User,
+    
     chatId: string,
     {
       messageIds,
@@ -104,6 +110,7 @@ export class MessageProvider {
       all?: boolean
     } = {},
   ) {
+    const { currentUser } = this.currentUserProvider;
     const chat = await this.connection
       .createQueryBuilder(Chat, 'chat')
       .whereInIds(chatId)
@@ -170,7 +177,7 @@ export class MessageProvider {
   }
 
   async removeMessages(
-    currentUser: User,
+    
     chatId: string,
     {
       messageIds,
@@ -180,7 +187,7 @@ export class MessageProvider {
       all?: boolean
     } = {},
   ) {
-    const {deletedIds, removedMessages} = await this._removeMessages(currentUser, chatId, {messageIds, all});
+    const {deletedIds, removedMessages} = await this._removeMessages(chatId, {messageIds, all});
 
     for (let message of removedMessages) {
       await this.connection.getRepository(Message).remove(message);
@@ -189,7 +196,8 @@ export class MessageProvider {
     return deletedIds;
   }
 
-  async _removeChatGetMessages(currentUser: User, chatId: string) {
+  async _removeChatGetMessages(chatId: string) {
+    const { currentUser } = this.currentUserProvider;
     let messages = await this.connection
       .createQueryBuilder(Message, "message")
       .innerJoin('message.chat', 'chat', 'chat.id = :chatId', {chatId})
@@ -204,11 +212,12 @@ export class MessageProvider {
     return messages;
   }
 
-  async removeChat(currentUser: User, chatId: string, messages?: Message[]) {
+  async removeChat(chatId: string, messages?: Message[]) {
+    const { currentUser } = this.currentUserProvider;
     console.log("DEBUG: MessageModule's removeChat");
 
     if (!messages) {
-      messages = await this._removeChatGetMessages(currentUser, chatId);
+      messages = await this._removeChatGetMessages(chatId);
     }
 
     for (let message of messages) {
@@ -223,10 +232,10 @@ export class MessageProvider {
       }
     }
 
-    return await this.chatProvider.removeChat(currentUser, chatId);
+    return await this.chatProvider.removeChat(chatId);
   }
 
-  async getMessageSender(currentUser: User, message: Message) {
+  async getMessageSender(message: Message) {
     const sender = await this.connection
       .createQueryBuilder(User, 'user')
       .innerJoin('user.senderMessages', 'senderMessages', 'senderMessages.id = :messageId', {
@@ -241,7 +250,8 @@ export class MessageProvider {
     return sender;
   }
 
-  async getMessageOwnership(currentUser: User, message: Message) {
+  async getMessageOwnership(message: Message) {
+    const { currentUser } = this.currentUserProvider;
     return !!(await this.connection
       .createQueryBuilder(User, 'user')
       .whereInIds(currentUser.id)
@@ -251,7 +261,7 @@ export class MessageProvider {
       .getCount());
   }
 
-  async getMessageHolders(currentUser: User, message: Message) {
+  async getMessageHolders(message: Message) {
     return await this.connection
       .createQueryBuilder(User, 'user')
       .innerJoin('user.holderMessages', 'holderMessages', 'holderMessages.id = :messageId', {
@@ -260,7 +270,7 @@ export class MessageProvider {
       .getMany();
   }
 
-  async getMessageChat(currentUser: User, message: Message) {
+  async getMessageChat(message: Message) {
     const chat = await this.connection
       .createQueryBuilder(Chat, "chat")
       .innerJoin('chat.messages', 'messages', 'messages.id = :messageId', {
@@ -275,7 +285,8 @@ export class MessageProvider {
     return chat;
   }
 
-  async getChats(currentUser: User) {
+  async getChats() {
+    const { currentUser } = this.currentUserProvider;
     const chats = await this.connection
       .createQueryBuilder(Chat, 'chat')
       .leftJoin('chat.listingMembers', 'listingMembers')
@@ -283,7 +294,7 @@ export class MessageProvider {
       .getMany();
 
     for (let chat of chats) {
-      chat.messages = await this.getChatMessages(currentUser, chat);
+      chat.messages = await this.getChatMessages(chat);
     }
 
     return chats.sort((chatA, chatB) => {
@@ -293,7 +304,8 @@ export class MessageProvider {
     });
   }
 
-  async getChatMessages(currentUser: User, chat: Chat, amount?: number) {
+  async getChatMessages(chat: Chat, amount?: number) {
+    const { currentUser } = this.currentUserProvider;
     if (chat.messages) {
       return amount ? chat.messages.slice(0, amount) : chat.messages;
     }
@@ -313,7 +325,8 @@ export class MessageProvider {
     return (await query.getMany()).reverse();
   }
 
-  async getChatUpdatedAt(currentUser: User, chat: Chat) {
+  async getChatUpdatedAt(chat: Chat) {
+    const { currentUser } = this.currentUserProvider;
     if (chat.messages) {
       return chat.messages.length ? chat.messages[0].createdAt.toDateString() : null;
     }
@@ -330,7 +343,8 @@ export class MessageProvider {
     return latestMessage ? latestMessage.createdAt as any as string : null;
   }
 
-  async filterMessageAdded(currentUser: User, messageAdded: Message) {
+  async filterMessageAdded(messageAdded: Message) {
+    const { currentUser } = this.currentUserProvider;
     let relevantUsers: User[];
 
     if (!messageAdded.chat.name) {

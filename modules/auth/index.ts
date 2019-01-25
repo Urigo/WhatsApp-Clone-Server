@@ -1,41 +1,21 @@
 import { GraphQLModule } from '@graphql-modules/core';
 import { loadResolversFiles, loadSchemaFiles } from '@graphql-modules/sonar';
-import { mergeGraphQLSchemas, mergeResolvers } from '@graphql-modules/epoxy';
 import { Connection } from "typeorm";
-import { Express } from "express";
-import { User } from "../../entity/User";
-import { SubscriptionHandler } from "./providers/subscription-handler"
 import { AuthProvider } from "./providers/auth.provider";
 import { APP } from "../app.symbols";
 import { PubSub } from "apollo-server-express";
+import { CurrentUserProvider } from './providers/current-user.provider';
 
-export interface IAuthModuleConfig {
-  connection?: Connection,
-  app?: Express;
-  pubsub?: PubSub;
-}
-
-export interface IAuthModuleSession {
-  req: {
-    user: User;
-  }
-}
-
-export interface IAuthModuleContext {
-  user: User;
-}
-
-export const AuthModule = new GraphQLModule<IAuthModuleConfig, IAuthModuleSession, IAuthModuleContext>({
+export const AuthModule = new GraphQLModule({
   name: "Auth",
-  providers: ({config: {connection, app, pubsub}}) => [
+  providers: ({config: {connection, app}}) => [
     {provide: Connection, useValue: connection},
     {provide: APP, useValue: app},
-    {provide: PubSub, useValue: pubsub},
+    PubSub,
     AuthProvider,
-    SubscriptionHandler,
+    CurrentUserProvider,
   ],
-  context: session => ({user: session.req && session.req.user}),
-  typeDefs: mergeGraphQLSchemas(loadSchemaFiles(__dirname + '/schema/')),
-  resolvers: mergeResolvers(loadResolversFiles(__dirname + '/resolvers/')),
+  typeDefs: loadSchemaFiles(__dirname + '/schema/'),
+  resolvers: loadResolversFiles(__dirname + '/resolvers/'),
   configRequired: true,
 });

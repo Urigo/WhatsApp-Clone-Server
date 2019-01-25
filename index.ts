@@ -24,12 +24,9 @@ createConnection().then(async connection => {
   app.use(bodyParser.json());
   app.use(passport.initialize());
 
-  const pubsub = new PubSub();
-
   const { schema, context, subscriptions } = AppModule.forRoot({
     connection,
     app,
-    pubsub,
   });
 
   const apollo = new ApolloServer({

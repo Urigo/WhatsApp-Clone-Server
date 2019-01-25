@@ -1,20 +1,25 @@
-import { Injectable } from '@graphql-modules/di'
+import { Injectable, ProviderScope } from '@graphql-modules/di'
 import { PubSub } from 'apollo-server-express'
 import { Connection } from 'typeorm'
 import { User } from "../../../entity/User";
 import { Chat } from "../../../entity/Chat";
 import { UserProvider } from "../../user/providers/user.provider";
+import { CurrentUserProvider } from '../../auth/providers/current-user.provider';
 
-@Injectable()
+@Injectable({
+  scope: ProviderScope.Session
+})
 export class ChatProvider {
   constructor(
     private pubsub: PubSub,
     private connection: Connection,
     private userProvider: UserProvider,
+    private currentUserProvider: CurrentUserProvider,
   ) {
   }
 
-  async getChats(currentUser: User) {
+  async getChats() {
+    const { currentUser } = this.currentUserProvider;
     return this.connection
       .createQueryBuilder(Chat, 'chat')
       .leftJoin('chat.listingMembers', 'listingMembers')
@@ -32,7 +37,8 @@ export class ChatProvider {
     return chat || null;
   }
 
-  async addChat(currentUser: User, userId: string) {
+  async addChat(userId: string) {
+    const { currentUser } = this.currentUserProvider;
     const user = await this.connection
       .createQueryBuilder(User, 'user')
       .whereInIds(userId)
@@ -90,7 +96,6 @@ export class ChatProvider {
   }
 
   async addGroup(
-    currentUser: User,
     userIds: string[],
     {
       groupName,
@@ -100,6 +105,7 @@ export class ChatProvider {
       groupPicture?: string
     } = {},
   ) {
+    const { currentUser } = this.currentUserProvider;
     let users: User[] = [];
     for (let userId of userIds) {
       const user = await this.connection
@@ -135,7 +141,6 @@ export class ChatProvider {
   }
 
   async updateChat(
-    currentUser: User,
     chatId: string,
     {
       name,
@@ -160,6 +165,7 @@ export class ChatProvider {
     // Update the chat
     await this.connection.getRepository(Chat).save(chat);
 
+    const { currentUser } = this.currentUserProvider;
     this.pubsub.publish('chatUpdated', {
       updaterId: currentUser.id,
       chatUpdated: chat,
@@ -168,8 +174,9 @@ export class ChatProvider {
     return chat || null;
   }
 
-  async removeChat(currentUser: User, chatId: string) {
+  async removeChat(chatId: string) {
     console.log("DEBUG: ChatModule's removeChat");
+    const { currentUser } = this.currentUserProvider;
     const chat = await this.connection
       .createQueryBuilder(Chat, 'chat')
       .whereInIds(Number(chatId))
@@ -232,10 +239,12 @@ export class ChatProvider {
     }
   }
 
-  async getChatName(currentUser: User, chat: Chat) {
+  async getChatName(chat: Chat) {
     if (chat.name) {
       return chat.name;
     }
+
+    const { currentUser } = this.currentUserProvider;
 
     const user = await this.connection
       .createQueryBuilder(User, 'user')
@@ -251,7 +260,8 @@ export class ChatProvider {
     return (user && user.name) || null;
   }
 
-  async getChatPicture(currentUser: User, chat: Chat) {
+  async getChatPicture(chat: Chat) {
+    const { currentUser } = this.currentUserProvider;
     if (chat.name) {
       return chat.picture;
     }
@@ -270,7 +280,7 @@ export class ChatProvider {
     return user ? user.picture : null;
   }
 
-  async getChatAllTimeMembers(currentUser: User, chat: Chat) {
+  async getChatAllTimeMembers(chat: Chat) {
     return await this.connection
       .createQueryBuilder(User, 'user')
       .innerJoin(
@@ -282,7 +292,7 @@ export class ChatProvider {
       .getMany()
   }
 
-  async getChatListingMembers(currentUser: User, chat: Chat) {
+  async getChatListingMembers(chat: Chat) {
     return await this.connection
       .createQueryBuilder(User, 'user')
       .innerJoin(
@@ -294,7 +304,7 @@ export class ChatProvider {
       .getMany();
   }
 
-  async getChatActualGroupMembers(currentUser: User, chat: Chat) {
+  async getChatActualGroupMembers(chat: Chat) {
     return await this.connection
       .createQueryBuilder(User, 'user')
       .innerJoin(
@@ -306,7 +316,7 @@ export class ChatProvider {
       .getMany();
   }
 
-  getChatAdmins(currentUser: User, chat: Chat) {
+  getChatAdmins(chat: Chat) {
     return this.connection
       .createQueryBuilder(User, "user")
       .innerJoin('user.adminChats', 'adminChats', 'adminChats.id = :chatId', {
@@ -315,7 +325,7 @@ export class ChatProvider {
       .getMany();
   }
 
-  async getChatOwner(currentUser: User, chat: Chat) {
+  async getChatOwner(chat: Chat) {
     const owner = await this.connection
       .createQueryBuilder(User, 'user')
       .innerJoin('user.ownerChats', 'ownerChats', 'ownerChats.id = :chatId', {
@@ -330,20 +340,22 @@ export class ChatProvider {
     return !!chat.name;
   }
 
-  async filterChatAddedOrUpdated(currentUser: User, chatAddedOrUpdated: Chat, creatorOrUpdaterId: number) {
+  async filterChatAddedOrUpdated(chatAddedOrUpdated: Chat, creatorOrUpdaterId: number) {
+    const { currentUser } = this.currentUserProvider;
     return Number(creatorOrUpdaterId) !== currentUser.id &&
       chatAddedOrUpdated.listingMembers.some((user: User) => user.id === currentUser.id);
   }
 
-  async updateUser(currentUser: User, {
+  async updateUser({
     name,
     picture,
   }: {
     name?: string,
     picture?: string,
   } = {}) {
-    await this.userProvider.updateUser(currentUser, {name, picture});
+    await this.userProvider.updateUser({name, picture});
 
+    const { currentUser } = this.currentUserProvider;
     const data = await this.connection
       .createQueryBuilder(User, 'user')
       .where('user.id = :id', {id: currentUser.id})

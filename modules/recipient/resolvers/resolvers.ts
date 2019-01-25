@@ -1,32 +1,25 @@
-import { InjectFunction } from '@graphql-modules/di';
-import { PubSub } from "apollo-server-express";
-import { Message } from "../../../entity/Message";
-import { IResolvers } from "../../../types/recipient";
+import { IResolvers } from "../../../types";
 import { RecipientProvider } from "../providers/recipient.provider";
 
-export default InjectFunction(PubSub, RecipientProvider)((pubsub, recipientProvider): IResolvers => ({
+export default {
   Mutation: {
-    markAsReceived: async (obj, {chatId}, {user: currentUser}) => false,
-    markAsRead: async (obj, {chatId}, {user: currentUser}) => false,
+    markAsReceived: async (obj, { chatId }) => false,
+    markAsRead: async (obj, { chatId }) => false,
     // We may also need to remove the recipients
-    removeChat: async (obj, {chatId}, {user: currentUser}) => recipientProvider.removeChat(currentUser, chatId),
+    removeChat: async (obj, { chatId }, { injector }) => injector.get(RecipientProvider).removeChat(chatId),
     // We also need to create the recipients
-    addMessage: async (obj, {chatId, content}, {user: currentUser}) =>
-      recipientProvider.addMessage(currentUser, chatId, content),
+    addMessage: async (obj, { chatId, content }, { injector }) => injector.get(RecipientProvider).addMessage(chatId, content),
     // We may also need to remove the recipients
-    removeMessages: async (obj, {chatId, messageIds, all}, {user: currentUser}) =>
-      recipientProvider.removeMessages(currentUser, chatId, {
+    removeMessages: async (obj, { chatId, messageIds, all }, { injector }) => injector.get(RecipientProvider).removeMessages(chatId, {
         messageIds: messageIds || undefined,
         all: all || false,
       }),
   },
   Chat: {
-    unreadMessages: async (chat, args, {user: currentUser}) =>
-      recipientProvider.getChatUnreadMessagesCount(currentUser, chat),
+    unreadMessages: async (chat, args, { injector }) => injector.get(RecipientProvider).getChatUnreadMessagesCount(chat),
   },
   Message: {
-    recipients: async (message: Message, args, {user: currentUser}) =>
-      recipientProvider.getMessageRecipients(currentUser, message),
+    recipients: async (message, args, { injector }) => injector.get(RecipientProvider).getMessageRecipients(message),
   },
   Recipient: {},
-}));
+} as IResolvers;

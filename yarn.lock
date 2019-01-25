@@ -102,21 +102,21 @@
     lodash "^4.17.10"
     to-fast-properties "^2.0.0"
 
-"@graphql-modules/core@^0.3.0":
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/@graphql-modules/core/-/core-0.3.0.tgz#eba778595c9155597834f3672380552da3b9db75"
-  integrity sha512-/b/Iyj9x0JRH+RgY8UnqIXQg6pU0hqRXrTMTNgDK+jm/Ib/FWKstrPEMv7CW+mLiPFWttbD6LBLfaBGizWl/ew==
+"@graphql-modules/core@0.4.0-alpha.5b01f8c8":
+  version "0.4.0-alpha.5b01f8c8"
+  resolved "https://registry.yarnpkg.com/@graphql-modules/core/-/core-0.4.0-alpha.5b01f8c8.tgz#82b11ee18d44ab64e9b9b63f2c4963643a11e6c6"
+  integrity sha512-WLQ/zUbxjMp9gwcSW9Vw3N7FQCNi4jE/vVDam619VKD4sA9WostoYYZYmxiMAgVjd7hzNT+h/ErzKslgAj4+kQ==
   dependencies:
-    "@graphql-modules/di" "0.3.0"
-    "@graphql-modules/epoxy" "0.3.0"
-    dependency-graph "0.8.0"
+    "@graphql-modules/di" "0.4.0-alpha.5b01f8c8"
+    "@graphql-modules/epoxy" "0.4.0-alpha.5b01f8c8"
+    "@graphql-modules/utils" "0.4.0-alpha.5b01f8c8"
     graphql-tools "4.0.3"
     tslib "1.9.3"
 
-"@graphql-modules/di@0.3.0":
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/@graphql-modules/di/-/di-0.3.0.tgz#219f1893461280e8d79737e4342156c324c675f0"
-  integrity sha512-Wn/dkt7Hz6+Kqps6bL5rwj9CEUGpnnCV5i91OKzYHVsrrVzk3ha4pcaGvnK/uoM7tQCeMHQYpzVnn6gBhG2qgQ==
+"@graphql-modules/di@0.4.0-alpha.5b01f8c8":
+  version "0.4.0-alpha.5b01f8c8"
+  resolved "https://registry.yarnpkg.com/@graphql-modules/di/-/di-0.4.0-alpha.5b01f8c8.tgz#76bb9a71e3f62df1d17c666017b487b03371bb95"
+  integrity sha512-lGj4IDsFii3yCenwn0Iuj9IsyI6Cal47Jqko8zcGPtejEPC2NMDSl+cQDi43cfl/OKsqSXL1lwtU4J38eirUWQ==
   dependencies:
     tslib "1.9.3"
 
@@ -129,22 +129,29 @@
     graphql-tools "4.0.3"
     tslib "1.9.3"
 
-"@graphql-modules/epoxy@0.3.0", "@graphql-modules/epoxy@^0.3.0":
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/@graphql-modules/epoxy/-/epoxy-0.3.0.tgz#2ec10d92d871d449458f4740c25cf6f3fa4ffe24"
-  integrity sha512-mwfXUdcWRLb/mrbVbRd4zxT+DWDIIdivwY8VxpoBc15ifOpXAnwCvyNDs7/3TA2HmgHj5SRfN21+EiOE/Ys2dg==
+"@graphql-modules/epoxy@0.4.0-alpha.5b01f8c8":
+  version "0.4.0-alpha.5b01f8c8"
+  resolved "https://registry.yarnpkg.com/@graphql-modules/epoxy/-/epoxy-0.4.0-alpha.5b01f8c8.tgz#2598e283ed4bc7b06245569c51a2d32b1a427775"
+  integrity sha512-TiCyXd9Z1POiYc1eELddJdU4fnAunQ1HWeT2AWglLyR6+/UvPCPn4+m9/Iab1O5AIrTz0ReHKCI4wtSga19/Jw==
   dependencies:
     deepmerge "3.1.0"
     graphql-tools "4.0.3"
     tslib "1.9.3"
 
-"@graphql-modules/sonar@^0.3.0":
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/@graphql-modules/sonar/-/sonar-0.3.0.tgz#3d940b37adace1a9e451081b3fcc3d9bbc2f8b62"
-  integrity sha512-Tb9TLaqJ+sJ/EdJ8KQZwQ74P5nBlSPSP4lU3MtdVUa1JcZnbNsV3W7L71Cb5RpwnofPdK+ipuc9EnOmH+gbcsg==
+"@graphql-modules/sonar@0.4.0-alpha.5b01f8c8":
+  version "0.4.0-alpha.5b01f8c8"
+  resolved "https://registry.yarnpkg.com/@graphql-modules/sonar/-/sonar-0.4.0-alpha.5b01f8c8.tgz#113932eb6cb5e719b62fed544d48271ef841c3e9"
+  integrity sha512-MXBvs6i2exWoCnO/dZPcrnh4GR7c4hc6SYg5w+pjEMISLzOhUyzy0AE0ITWxU+vDrv44U7VUxXaQbo5gq238tA==
   dependencies:
     "@types/glob" "7.1.1"
     glob "7.1.3"
+    tslib "1.9.3"
+
+"@graphql-modules/utils@0.4.0-alpha.5b01f8c8":
+  version "0.4.0-alpha.5b01f8c8"
+  resolved "https://registry.yarnpkg.com/@graphql-modules/utils/-/utils-0.4.0-alpha.5b01f8c8.tgz#0456ab2a2438b87d1cca98d17f61f77e8640c73c"
+  integrity sha512-c5cxfAL24LQJNuXA6jDJlHxpTYFz8v1yv0VGs+V9kpwmPE/zqqjb711mPUYNUj1xEY57uEgbG1gjiEW70vHnkQ==
+  dependencies:
     tslib "1.9.3"
 
 "@protobufjs/aspromise@^1.1.1", "@protobufjs/aspromise@^1.1.2":
@@ -1359,11 +1366,6 @@ depd@~1.1.2:
   resolved "https://registry.yarnpkg.com/depd/-/depd-1.1.2.tgz#9bcd52e14c097763e749b274c4346ed2e560b5a9"
   integrity sha1-m81S4UwJd2PnSbJ0xDRu0uVgtak=
 
-dependency-graph@0.8.0:
-  version "0.8.0"
-  resolved "https://registry.yarnpkg.com/dependency-graph/-/dependency-graph-0.8.0.tgz#2da2d35ed852ecc24a5d6c17788ba57c3708755b"
-  integrity sha512-DCvzSq2UiMsuLnj/9AL484ummEgLtZIcRS7YvtO38QnpX3vqh9nJ8P+zhu8Ja+SmLrBHO2iDbva20jq38qvBkQ==
-
 deprecated-decorator@^0.1.6:
   version "0.1.6"
   resolved "https://registry.yarnpkg.com/deprecated-decorator/-/deprecated-decorator-0.1.6.tgz#00966317b7a12fe92f3cc831f7583af329b86c37"
@@ -1975,13 +1977,6 @@ graphql-codegen-typescript-resolvers@^0.16.0:
   integrity sha512-uaEs7/KH+IPgg8tuRXlkbIAedCn013BBk8qxsbT1ITr0XAzojM80fkpMWtA0oicLOxWbjoxRVQVpeVVYZrhQMQ==
   dependencies:
     graphql-codegen-plugin-helpers "0.16.0"
-    graphql-codegen-typescript-common "0.16.0"
-
-graphql-codegen-typescript-server@^0.16.0:
-  version "0.16.0"
-  resolved "https://registry.yarnpkg.com/graphql-codegen-typescript-server/-/graphql-codegen-typescript-server-0.16.0.tgz#e747ce0e670374884d797d389288c8a52ced1997"
-  integrity sha512-sIhNi7LJM9F6FHPA6Zh4R8JhcGgda324ToIYX9gcU1dHBcHJRyVgzN7jsgOcDnpzIJwPnEa6LzX6MpSssygH5g==
-  dependencies:
     graphql-codegen-typescript-common "0.16.0"
 
 graphql-config@2.2.1:

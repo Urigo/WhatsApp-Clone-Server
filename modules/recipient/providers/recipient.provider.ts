@@ -1,22 +1,24 @@
-import { Injectable } from '@graphql-modules/di'
-import { PubSub } from 'apollo-server-express'
+import { Injectable, ProviderScope } from '@graphql-modules/di'
 import { Connection } from 'typeorm'
 import { MessageProvider } from "../../message/providers/message.provider";
-import { User } from "../../../entity/User";
 import { Chat } from "../../../entity/Chat";
 import { Message } from "../../../entity/Message";
 import { Recipient } from "../../../entity/Recipient";
+import { CurrentUserProvider } from '../../auth/providers/current-user.provider';
 
-@Injectable()
+@Injectable({
+  scope: ProviderScope.Session,
+})
 export class RecipientProvider {
   constructor(
-    private pubsub: PubSub,
+    private currentUserProvider: CurrentUserProvider,
     private connection: Connection,
     private messageProvider: MessageProvider,
   ) {
   }
 
-  getChatUnreadMessagesCount(currentUser: User, chat: Chat) {
+  getChatUnreadMessagesCount(chat: Chat) {
+    const { currentUser } = this.currentUserProvider;
     return this.connection
       .createQueryBuilder(Message, "message")
       .innerJoin('message.chat', 'chat', 'chat.id = :chatId', {chatId: chat.id})
@@ -26,7 +28,7 @@ export class RecipientProvider {
       .getCount();
   }
 
-  async getMessageRecipients(currentUser: User, message: Message) {
+  async getMessageRecipients(message: Message) {
     return await this.connection
       .createQueryBuilder(Recipient, 'recipient')
       .innerJoinAndSelect('recipient.message', 'message', 'message.id = :messageId', {
@@ -37,10 +39,10 @@ export class RecipientProvider {
       .getMany();
   }
 
-  async removeChat(currentUser: User, chatId: string) {
+  async removeChat(chatId: string) {
     console.log("DEBUG: RecipientModule's removeChat");
 
-    const messages = await this.messageProvider._removeChatGetMessages(currentUser, chatId);
+    const messages = await this.messageProvider._removeChatGetMessages(chatId);
 
     for (let message of messages) {
       if (message.holders.length === 0) {
@@ -56,13 +58,14 @@ export class RecipientProvider {
       }
     }
 
-    return await this.messageProvider.removeChat(currentUser, chatId, messages);
+    return await this.messageProvider.removeChat(chatId, messages);
   }
 
-  async addMessage(currentUser: User, chatId: string, content: string) {
+  async addMessage(chatId: string, content: string) {
+    const { currentUser } = this.currentUserProvider;
     console.log("DEBUG: RecipientModule's addMessage");
 
-    const message = await this.messageProvider.addMessage(currentUser, chatId, content);
+    const message = await this.messageProvider.addMessage(chatId, content);
 
     for (let user of message.holders) {
       if (user.id !== currentUser.id) {
@@ -74,7 +77,6 @@ export class RecipientProvider {
   }
 
   async removeMessages(
-    currentUser: User,
     chatId: string,
     {
       messageIds,
@@ -84,7 +86,7 @@ export class RecipientProvider {
       all?: boolean
     } = {},
   ) {
-    const {deletedIds, removedMessages} = await this.messageProvider._removeMessages(currentUser, chatId, {messageIds, all});
+    const {deletedIds, removedMessages} = await this.messageProvider._removeMessages(chatId, {messageIds, all});
 
     for (let message of removedMessages) {
       const recipients = await this.connection

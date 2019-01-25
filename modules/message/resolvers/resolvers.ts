@@ -1,47 +1,45 @@
-import { InjectFunction } from '@graphql-modules/di';
 import { PubSub } from "apollo-server-express";
 import { withFilter } from 'apollo-server-express';
-import { User } from "../../../entity/User";
 import { Message } from "../../../entity/Message";
-import { IResolvers } from "../../../types/message";
+import { IResolvers } from "../../../types";
 import { MessageProvider } from "../providers/message.provider";
 
-export default InjectFunction(PubSub, MessageProvider)((pubsub, messageProvider): IResolvers => ({
+export default {
   Query: {
     // The ordering depends on the messages
-    chats: (obj, args, {user: currentUser}) => messageProvider.getChats(currentUser),
+    chats: (obj, args, { injector }) => injector.get(MessageProvider).getChats(),
   },
   Mutation: {
-    addMessage: async (obj, {chatId, content}, {user: currentUser}) =>
-      messageProvider.addMessage(currentUser, chatId, content),
-    removeMessages: async (obj, {chatId, messageIds, all}, {user: currentUser}) =>
-      messageProvider.removeMessages(currentUser, chatId, {
+    addMessage: async (obj, {chatId, content}, { injector }) =>
+      injector.get(MessageProvider).addMessage(chatId, content),
+    removeMessages: async (obj, {chatId, messageIds, all}, { injector }) =>
+      injector.get(MessageProvider).removeMessages(chatId, {
         messageIds: messageIds || undefined,
         all: all || false,
       }),
     // We may need to also remove the messages
-    removeChat: async (obj, {chatId}, {user: currentUser}) => messageProvider.removeChat(currentUser, chatId),
+    removeChat: async (obj, {chatId}, { injector }) => injector.get(MessageProvider).removeChat(chatId),
   },
   Subscription: {
     messageAdded: {
-      subscribe: withFilter(() => pubsub.asyncIterator('messageAdded'),
-        ({messageAdded}: { messageAdded: Message }, variables, {user: currentUser}: { user: User }) =>
-          messageProvider.filterMessageAdded(currentUser, messageAdded)
+      subscribe: withFilter((root, args, { injector }) => injector.get(PubSub).asyncIterator('messageAdded'),
+        ({messageAdded}: { messageAdded: Message }, variables, { injector }) =>
+          injector.get(MessageProvider).filterMessageAdded(messageAdded)
       ),
     },
   },
   Chat: {
-    messages: async (chat, {amount}, {user: currentUser}) =>
-      messageProvider.getChatMessages(currentUser, chat, amount || 0),
-    updatedAt: async (chat, args, {user: currentUser}) => messageProvider.getChatUpdatedAt(currentUser, chat),
+    messages: async (chat, {amount}, { injector }) =>
+      injector.get(MessageProvider).getChatMessages(chat, amount || 0),
+    updatedAt: async (chat, args, { injector }) => injector.get(MessageProvider).getChatUpdatedAt(chat),
   },
   Message: {
-    sender: async (message, args, {user: currentUser}) =>
-      messageProvider.getMessageSender(currentUser, message),
-    ownership: async (message, args, {user: currentUser}) =>
-      messageProvider.getMessageOwnership(currentUser, message),
-    holders: async (message, args, {user: currentUser}) =>
-      messageProvider.getMessageHolders(currentUser, message),
-    chat: async (message, args, {user: currentUser}) => messageProvider.getMessageChat(currentUser, message),
+    sender: async (message, args, { injector }) =>
+      injector.get(MessageProvider).getMessageSender(message),
+    ownership: async (message, args, { injector }) =>
+      injector.get(MessageProvider).getMessageOwnership(message),
+    holders: async (message, args, { injector }) =>
+      injector.get(MessageProvider).getMessageHolders(message),
+    chat: async (message, args, { injector }) => injector.get(MessageProvider).getMessageChat(message),
   },
-}));
+} as IResolvers;

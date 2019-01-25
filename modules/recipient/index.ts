@@ -1,22 +1,12 @@
 import { GraphQLModule } from '@graphql-modules/core';
 import { loadResolversFiles, loadSchemaFiles } from '@graphql-modules/sonar';
-import { mergeGraphQLSchemas, mergeResolvers } from '@graphql-modules/epoxy';
-import { IUserModuleContext, UserModule } from "../user";
-import { IMessageModuleContext, MessageModule } from "../message";
-import { ChatModule, IChatModuleContext } from "../chat";
+import { UserModule } from "../user";
+import { MessageModule } from "../message";
+import { ChatModule } from "../chat";
 import { RecipientProvider } from "./providers/recipient.provider";
-import { AuthModule, IAuthModuleContext } from "../auth";
+import { AuthModule } from "../auth";
 
-export interface IRecipientModuleConfig {
-}
-
-export interface IRecipientModuleSession {
-}
-
-export interface IRecipientModuleContext extends IAuthModuleContext, IUserModuleContext, IChatModuleContext, IMessageModuleContext {
-}
-
-export const RecipientModule = new GraphQLModule<IRecipientModuleConfig, IRecipientModuleSession, IRecipientModuleContext>({
+export const RecipientModule = new GraphQLModule({
   name: "Recipient",
   imports: [
     AuthModule,
@@ -27,6 +17,6 @@ export const RecipientModule = new GraphQLModule<IRecipientModuleConfig, IRecipi
   providers: [
     RecipientProvider,
   ],
-  typeDefs: mergeGraphQLSchemas(loadSchemaFiles(__dirname + '/schema/')),
-  resolvers: mergeResolvers(loadResolversFiles(__dirname + '/resolvers/')),
+  typeDefs: loadSchemaFiles(__dirname + '/schema/'),
+  resolvers: loadResolversFiles(__dirname + '/resolvers/'),
 });

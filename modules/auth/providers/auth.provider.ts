@@ -8,25 +8,17 @@ import bcrypt from "bcrypt-nodejs";
 import { APP } from "../../app.symbols";
 import { PubSub } from 'apollo-server-express'
 
-export function generateHash(password: string) {
-  return bcrypt.hashSync(password, bcrypt.genSaltSync(8));
-}
-
-export function validPassword(password: string, localPassword: string) {
-  return bcrypt.compareSync(password, localPassword);
-}
-
 @Injectable()
 export class AuthProvider {
   constructor(
-    private connection: Connection,
-    @Inject(APP) private app: Express,
-    private pubsub: PubSub,
+    connection: Connection,
+    @Inject(APP) app: Express,
+    pubsub: PubSub,
   ) {
     passport.use('basic-signin', new basicStrategy.BasicStrategy(
-      async function (username: string, password: string, done: any) {
+      async (username: string, password: string, done: any) => {
         const user = await connection.getRepository(User).findOne({where: { username }});
-        if (user && validPassword(password, user.password)) {
+        if (user && this.validPassword(password, user.password)) {
           return done(null, user);
         }
         return done(null, false);
@@ -34,12 +26,12 @@ export class AuthProvider {
     ));
 
     passport.use('basic-signup', new basicStrategy.BasicStrategy({passReqToCallback: true},
-      async function (req: any, username: string, password: string, done: any) {
+      async (req: any, username: string, password: string, done: any) => {
         const userExists = !!(await connection.getRepository(User).findOne({where: { username }}));
         if (!userExists && password && req.body.name) {
           const user = await connection.manager.save(new User({
             username,
-            password: generateHash(password),
+            password: this.generateHash(password),
             name: req.body.name,
           }));
 
@@ -64,5 +56,12 @@ export class AuthProvider {
     app.post('/signin', function (req, res) {
       res.json(req.user);
     });
+  }
+  generateHash(password: string) {
+    return bcrypt.hashSync(password, bcrypt.genSaltSync(8));
+  }
+
+  validPassword(password: string, localPassword: string) {
+    return bcrypt.compareSync(password, localPassword);
   }
 }

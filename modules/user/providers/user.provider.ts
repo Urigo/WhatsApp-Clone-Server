@@ -1,34 +1,41 @@
-import { Injectable } from '@graphql-modules/di'
+import { Injectable, ProviderScope } from '@graphql-modules/di'
 import { PubSub } from 'apollo-server-express'
 import { Connection } from 'typeorm'
 import { User } from "../../../entity/User";
+import { CurrentUserProvider } from '../../auth/providers/current-user.provider';
 
-@Injectable()
+@Injectable({
+  scope: ProviderScope.Session
+})
 export class UserProvider {
   constructor(
     private pubsub: PubSub,
     private connection: Connection,
+    private currentUserProvider: CurrentUserProvider,
   ) {
   }
 
-  getMe(currentUser: User) {
+  async getMe() {
+    const { currentUser } = this.currentUserProvider;
     return currentUser;
   }
 
-  async getUsers(currentUser: User) {
+  async getUsers() {
+    const { currentUser } = this.currentUserProvider;
     return await this.connection
       .createQueryBuilder(User, 'user')
       .where('user.id != :id', {id: currentUser.id})
       .getMany();
   }
 
-  async updateUser(currentUser: User, {
+  async updateUser({
     name,
     picture,
   }: {
     name?: string,
     picture?: string,
   } = {}) {
+    const { currentUser } = this.currentUserProvider;
     if (name === currentUser.name && picture === currentUser.picture) {
       return currentUser;
     }
@@ -45,7 +52,8 @@ export class UserProvider {
     return currentUser;
   }
 
-  filterUserAddedOrUpdated(currentUser: User, userAddedOrUpdated: User) {
+  filterUserAddedOrUpdated(userAddedOrUpdated: User) {
+    const { currentUser } = this.currentUserProvider;
     return userAddedOrUpdated.id !== currentUser.id;
   }
 }
