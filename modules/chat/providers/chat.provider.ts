@@ -3,12 +3,14 @@ import { PubSub } from 'apollo-server-express'
 import { Connection } from 'typeorm'
 import { User } from "../../../entity/User";
 import { Chat } from "../../../entity/Chat";
+import { UserProvider } from "../../user/providers/user.provider";
 
 @Injectable()
 export class ChatProvider {
   constructor(
     private pubsub: PubSub,
     private connection: Connection,
+    private userProvider: UserProvider,
   ) {
   }
 
@@ -331,5 +333,46 @@ export class ChatProvider {
   async filterChatAddedOrUpdated(currentUser: User, chatAddedOrUpdated: Chat, creatorOrUpdaterId: number) {
     return Number(creatorOrUpdaterId) !== currentUser.id &&
       chatAddedOrUpdated.listingMembers.some((user: User) => user.id === currentUser.id);
+  }
+
+  async updateUser(currentUser: User, {
+    name,
+    picture,
+  }: {
+    name?: string,
+    picture?: string,
+  } = {}) {
+    await this.userProvider.updateUser(currentUser, {name, picture});
+
+    const data = await this.connection
+      .createQueryBuilder(User, 'user')
+      .where('user.id = :id', {id: currentUser.id})
+      // Get a list of the chats who have/had currentUser involved
+      .innerJoinAndSelect(
+        'user.allTimeMemberChats',
+        'allTimeMemberChats',
+        // Groups are unaffected
+        'allTimeMemberChats.name IS NULL',
+      )
+      // We need to notify only those who get the chat listed (except currentUser of course)
+      .innerJoin(
+        'allTimeMemberChats.listingMembers',
+        'listingMembers',
+        'listingMembers.id != :currentUserId',
+        {
+          currentUserId: currentUser.id,
+        })
+      .getOne();
+
+    const chatsAffected = data && data.allTimeMemberChats || [];
+
+    chatsAffected.forEach(chat => {
+      this.pubsub.publish('chatUpdated', {
+        updaterId: currentUser.id,
+        chatUpdated: chat,
+      })
+    });
+
+    return currentUser;
   }
 }

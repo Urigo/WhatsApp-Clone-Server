@@ -1,6 +1,16 @@
 export default `
   type Query {
+    me: User
     users: [User!]
+  }
+  
+  type Mutation {
+    updateUser(name: String, picture: String): User!
+  }
+  
+  type Subscription {
+    userAdded: User
+    userUpdated: User
   }
 
   type User {

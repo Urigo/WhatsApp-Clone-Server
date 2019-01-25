@@ -22,6 +22,10 @@ export default InjectFunction(PubSub, ChatProvider)((pubsub, chatProvider): IRes
       picture: picture || '',
     }),
     removeChat: (obj, {chatId}, {user: currentUser}) => chatProvider.removeChat(currentUser, chatId),
+    updateUser: (obj, {name, picture}, {user: currentUser}) => chatProvider.updateUser(currentUser, {
+      name: name || '',
+      picture: picture || '',
+    }),
   },
   Subscription: {
     chatAdded: {

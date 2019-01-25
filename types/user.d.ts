@@ -11,6 +11,8 @@ export enum MessageType {
 // ====================================================
 
 export interface Query {
+  me?: Maybe<User>;
+
   users?: Maybe<User[]>;
 
   chats: Chat[];
@@ -89,6 +91,8 @@ export interface Recipient {
 }
 
 export interface Mutation {
+  updateUser: User;
+
   addChat?: Maybe<Chat>;
 
   addGroup?: Maybe<Chat>;
@@ -115,6 +119,10 @@ export interface Mutation {
 }
 
 export interface Subscription {
+  userAdded?: Maybe<User>;
+
+  userUpdated?: Maybe<User>;
+
   chatAdded?: Maybe<Chat>;
 
   chatUpdated?: Maybe<Chat>;
@@ -131,6 +139,11 @@ export interface ChatQueryArgs {
 }
 export interface MessagesChatArgs {
   amount?: Maybe<number>;
+}
+export interface UpdateUserMutationArgs {
+  name?: Maybe<string>;
+
+  picture?: Maybe<string>;
 }
 export interface AddChatMutationArgs {
   userId: string;
@@ -254,6 +267,8 @@ export type DirectiveResolverFn<TResult, TArgs = {}, TContext = {}> = (
 
 export namespace QueryResolvers {
   export interface Resolvers<Context = IUserModuleContext, TypeParent = {}> {
+    me?: MeResolver<Maybe<User>, TypeParent, Context>;
+
     users?: UsersResolver<Maybe<User[]>, TypeParent, Context>;
 
     chats?: ChatsResolver<Chat[], TypeParent, Context>;
@@ -261,6 +276,11 @@ export namespace QueryResolvers {
     chat?: ChatResolver<Maybe<Chat>, TypeParent, Context>;
   }
 
+  export type MeResolver<
+    R = Maybe<User>,
+    Parent = {},
+    Context = IUserModuleContext
+  > = Resolver<R, Parent, Context>;
   export type UsersResolver<
     R = Maybe<User[]>,
     Parent = {},
@@ -534,6 +554,8 @@ export namespace RecipientResolvers {
 
 export namespace MutationResolvers {
   export interface Resolvers<Context = IUserModuleContext, TypeParent = {}> {
+    updateUser?: UpdateUserResolver<User, TypeParent, Context>;
+
     addChat?: AddChatResolver<Maybe<Chat>, TypeParent, Context>;
 
     addGroup?: AddGroupResolver<Maybe<Chat>, TypeParent, Context>;
@@ -569,6 +591,17 @@ export namespace MutationResolvers {
     >;
 
     markAsRead?: MarkAsReadResolver<Maybe<boolean>, TypeParent, Context>;
+  }
+
+  export type UpdateUserResolver<
+    R = User,
+    Parent = {},
+    Context = IUserModuleContext
+  > = Resolver<R, Parent, Context, UpdateUserArgs>;
+  export interface UpdateUserArgs {
+    name?: Maybe<string>;
+
+    picture?: Maybe<string>;
   }
 
   export type AddChatResolver<
@@ -704,6 +737,10 @@ export namespace MutationResolvers {
 
 export namespace SubscriptionResolvers {
   export interface Resolvers<Context = IUserModuleContext, TypeParent = {}> {
+    userAdded?: UserAddedResolver<Maybe<User>, TypeParent, Context>;
+
+    userUpdated?: UserUpdatedResolver<Maybe<User>, TypeParent, Context>;
+
     chatAdded?: ChatAddedResolver<Maybe<Chat>, TypeParent, Context>;
 
     chatUpdated?: ChatUpdatedResolver<Maybe<Chat>, TypeParent, Context>;
@@ -711,6 +748,16 @@ export namespace SubscriptionResolvers {
     messageAdded?: MessageAddedResolver<Maybe<Message>, TypeParent, Context>;
   }
 
+  export type UserAddedResolver<
+    R = Maybe<User>,
+    Parent = {},
+    Context = IUserModuleContext
+  > = SubscriptionResolver<R, Parent, Context>;
+  export type UserUpdatedResolver<
+    R = Maybe<User>,
+    Parent = {},
+    Context = IUserModuleContext
+  > = SubscriptionResolver<R, Parent, Context>;
   export type ChatAddedResolver<
     R = Maybe<Chat>,
     Parent = {},

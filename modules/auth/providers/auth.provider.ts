@@ -6,6 +6,7 @@ import basicStrategy from "passport-http";
 import { User } from "../../../entity/User";
 import bcrypt from "bcrypt-nodejs";
 import { APP } from "../../app.symbols";
+import { PubSub } from 'apollo-server-express'
 
 export function generateHash(password: string) {
   return bcrypt.hashSync(password, bcrypt.genSaltSync(8));
@@ -20,6 +21,7 @@ export class AuthProvider {
   constructor(
     private connection: Connection,
     @Inject(APP) private app: Express,
+    private pubsub: PubSub,
   ) {
     passport.use('basic-signin', new basicStrategy.BasicStrategy(
       async function (username: string, password: string, done: any) {
@@ -40,6 +42,11 @@ export class AuthProvider {
             password: generateHash(password),
             name: req.body.name,
           }));
+
+          pubsub.publish('userAdded', {
+            userAdded: user,
+          });
+
           return done(null, user);
         }
         return done(null, false);
