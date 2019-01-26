@@ -1,11 +1,11 @@
 import { Inject, Injectable } from '@graphql-modules/di';
-import { Connection } from "typeorm";
-import { Express } from "express";
-import passport from "passport";
-import basicStrategy from "passport-http";
-import { User } from "../../../entity/User";
-import bcrypt from "bcrypt-nodejs";
-import { APP } from "../../app.symbols";
+import { Connection } from 'typeorm';
+import { Express } from 'express';
+import passport from 'passport';
+import basicStrategy from 'passport-http';
+import { User } from '../../../entity/User';
+import bcrypt from 'bcrypt-nodejs';
+import { APP } from '../../app.symbols';
 import { PubSub } from 'apollo-server-express'
 
 @Injectable()

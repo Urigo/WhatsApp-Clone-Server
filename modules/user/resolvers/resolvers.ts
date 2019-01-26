@@ -1,7 +1,7 @@
-import { PubSub } from "apollo-server-express";
+import { PubSub } from 'apollo-server-express';
 import { withFilter } from 'apollo-server-express';
-import { UserProvider } from "../providers/user.provider";
-import { User } from "../../../entity/User";
+import { UserProvider } from '../providers/user.provider';
+import { User } from '../../../entity/User';
 import { IResolvers } from '../../../types';
 
 export default {

@@ -8,7 +8,7 @@ enum MessageType {
   PICTURE
 }
 
-type Chat {
+extend type Chat {
   messages(amount: Int): [Message]!
   updatedAt: String
 }

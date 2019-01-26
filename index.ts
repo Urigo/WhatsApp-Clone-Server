@@ -1,14 +1,13 @@
-// For TypeORM
-import "reflect-metadata";
-import bodyParser from "body-parser";
+import 'reflect-metadata';
+import bodyParser from 'body-parser';
 import cors from 'cors';
 import express from 'express';
-import { ApolloServer } from "apollo-server-express";
-import passport from "passport";
-import { createServer } from "http";
-import { createConnection } from "typeorm";
-import { addSampleData } from "./db";
-import { AppModule } from "./modules/app.module";
+import { ApolloServer } from 'apollo-server-express';
+import passport from 'passport';
+import { createServer } from 'http';
+import { createConnection } from 'typeorm';
+import { addSampleData } from './db';
+import { AppModule } from './modules/app.module';
 
 createConnection().then(async connection => {
   //await addSampleData(connection);

@@ -1,9 +1,9 @@
 import { Injectable, ProviderScope } from '@graphql-modules/di'
 import { PubSub } from 'apollo-server-express'
 import { Connection } from 'typeorm'
-import { User } from "../../../entity/User";
-import { Chat } from "../../../entity/Chat";
-import { UserProvider } from "../../user/providers/user.provider";
+import { User } from '../../../entity/User';
+import { Chat } from '../../../entity/Chat';
+import { UserProvider } from '../../user/providers/user.provider';
 import { CurrentUserProvider } from '../../auth/providers/current-user.provider';
 
 @Injectable({
@@ -36,7 +36,7 @@ export class ChatProvider {
 
   async getChat(chatId: string) {
     const chat = await this
-    .createQueryBuilder()
+      .createQueryBuilder()
       .whereInIds(chatId)
       .getOne();
 
@@ -54,7 +54,7 @@ export class ChatProvider {
     }
 
     let chat = await this
-    .createQueryBuilder()
+      .createQueryBuilder()
       .where('chat.name IS NULL')
       .innerJoin('chat.allTimeMembers', 'allTimeMembers1', 'allTimeMembers1.id = :currentUserId', {
         currentUserId: this.currentUser.id,
@@ -68,7 +68,7 @@ export class ChatProvider {
     if (chat) {
       // Chat already exists. Both users are already in the userIds array
       const listingMembers = await this.userProvider
-      .createQueryBuilder()
+        .createQueryBuilder()
         .innerJoin(
           'user.listingMemberChats',
           'listingMemberChats',
@@ -316,7 +316,7 @@ export class ChatProvider {
 
   getChatAdmins(chat: Chat) {
     return this.userProvider
-    .createQueryBuilder()
+      .createQueryBuilder()
       .innerJoin('user.adminChats', 'adminChats', 'adminChats.id = :chatId', {
         chatId: chat.id,
       })
@@ -325,7 +325,7 @@ export class ChatProvider {
 
   async getChatOwner(chat: Chat) {
     const owner = await this.userProvider
-    .createQueryBuilder()
+      .createQueryBuilder()
       .innerJoin('user.ownerChats', 'ownerChats', 'ownerChats.id = :chatId', {
         chatId: chat.id,
       })

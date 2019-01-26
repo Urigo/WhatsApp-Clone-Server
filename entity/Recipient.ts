@@ -1,7 +1,7 @@
-import { Entity, ManyToOne, Column } from "typeorm";
-import { Message } from "./Message";
-import { User } from "./User";
-import { Chat } from "./Chat";
+import { Entity, ManyToOne, Column } from 'typeorm';
+import { Message } from './Message';
+import { User } from './User';
+import { Chat } from './Chat';
 
 interface RecipientConstructor {
   user?: User;

@@ -1,5 +1,5 @@
-import { IResolvers } from "../../../types";
-import { RecipientProvider } from "../providers/recipient.provider";
+import { IResolvers } from '../../../types';
+import { RecipientProvider } from '../providers/recipient.provider';
 
 export default {
   Mutation: {
@@ -11,9 +11,9 @@ export default {
     addMessage: async (obj, { chatId, content }, { injector }) => injector.get(RecipientProvider).addMessage(chatId, content),
     // We may also need to remove the recipients
     removeMessages: async (obj, { chatId, messageIds, all }, { injector }) => injector.get(RecipientProvider).removeMessages(chatId, {
-        messageIds: messageIds || undefined,
-        all: all || false,
-      }),
+      messageIds: messageIds || undefined,
+      all: all || false,
+    }),
   },
   Chat: {
     unreadMessages: async (chat, args, { injector }) => injector.get(RecipientProvider).getChatUnreadMessagesCount(chat),

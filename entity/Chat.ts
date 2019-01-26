@@ -7,10 +7,10 @@ import {
   ManyToMany,
   ManyToOne,
   CreateDateColumn
-} from "typeorm";
-import { Message } from "./Message";
-import { User } from "./User";
-import { Recipient } from "./Recipient";
+} from 'typeorm';
+import { Message } from './Message';
+import { User } from './User';
+import { Recipient } from './Recipient';
 
 interface ChatConstructor {
   name?: string;

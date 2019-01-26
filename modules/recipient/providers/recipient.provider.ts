@@ -1,9 +1,9 @@
 import { Injectable, ProviderScope } from '@graphql-modules/di'
 import { Connection } from 'typeorm'
-import { MessageProvider } from "../../message/providers/message.provider";
-import { Chat } from "../../../entity/Chat";
-import { Message } from "../../../entity/Message";
-import { Recipient } from "../../../entity/Recipient";
+import { MessageProvider } from '../../message/providers/message.provider';
+import { Chat } from '../../../entity/Chat';
+import { Message } from '../../../entity/Message';
+import { Recipient } from '../../../entity/Recipient';
 import { CurrentUserProvider } from '../../auth/providers/current-user.provider';
 
 @Injectable({
@@ -26,7 +26,7 @@ export class RecipientProvider {
   getChatUnreadMessagesCount(chat: Chat) {
     return this.messageProvider
       .createQueryBuilder()
-      .innerJoin('message.chat', 'chat', 'chat.id = :chatId', {chatId: chat.id})
+      .innerJoin('message.chat', 'chat', 'chat.id = :chatId', { chatId: chat.id })
       .innerJoin('message.recipients', 'recipients', 'recipients.user.id = :userId AND recipients.readAt IS NULL', {
         userId: this.currentUser.id
       })
@@ -51,7 +51,7 @@ export class RecipientProvider {
     for (let message of messages) {
       if (message.holders.length === 0) {
         const recipients = await this.createQueryBuilder()
-          .innerJoinAndSelect('recipient.message', 'message', 'message.id = :messageId', {messageId: message.id})
+          .innerJoinAndSelect('recipient.message', 'message', 'message.id = :messageId', { messageId: message.id })
           .innerJoinAndSelect('recipient.user', 'user')
           .getMany();
 
@@ -65,14 +65,14 @@ export class RecipientProvider {
   }
 
   async addMessage(chatId: string, content: string) {
-    
+
     console.log("DEBUG: RecipientModule's addMessage");
 
     const message = await this.messageProvider.addMessage(chatId, content);
 
     for (let user of message.holders) {
       if (user.id !== this.currentUser.id) {
-        await this.repository.save(new Recipient({user, message}));
+        await this.repository.save(new Recipient({ user, message }));
       }
     }
 
@@ -89,11 +89,11 @@ export class RecipientProvider {
       all?: boolean
     } = {},
   ) {
-    const {deletedIds, removedMessages} = await this.messageProvider._removeMessages(chatId, {messageIds, all});
+    const { deletedIds, removedMessages } = await this.messageProvider._removeMessages(chatId, { messageIds, all });
 
     for (let message of removedMessages) {
       const recipients = await this.createQueryBuilder()
-        .innerJoinAndSelect('recipient.message', 'message', 'message.id = :messageId', {messageId: message.id})
+        .innerJoinAndSelect('recipient.message', 'message', 'message.id = :messageId', { messageId: message.id })
         .innerJoinAndSelect('recipient.user', 'user')
         .getMany();
 

@@ -1,11 +1,11 @@
-import { GraphQLModule } from "@graphql-modules/core";
-import { Connection } from "typeorm";
-import { Express } from "express";
-import { AuthModule } from "./auth";
-import { UserModule } from "./user";
-import { ChatModule } from "./chat";
-import { MessageModule } from "./message";
-import { RecipientModule } from "./recipient";
+import { GraphQLModule } from '@graphql-modules/core';
+import { Connection } from 'typeorm';
+import { Express } from 'express';
+import { AuthModule } from './auth';
+import { UserModule } from './user';
+import { ChatModule } from './chat';
+import { MessageModule } from './message';
+import { RecipientModule } from './recipient';
 
 export interface IAppModuleConfig {
   connection: Connection,
