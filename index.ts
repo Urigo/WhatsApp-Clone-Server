@@ -3,7 +3,6 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import express from 'express';
 import { ApolloServer } from 'apollo-server-express';
-import passport from 'passport';
 import { createServer } from 'http';
 import { createConnection } from 'typeorm';
 import { addSampleData } from './db';
@@ -18,7 +17,6 @@ createConnection().then(async connection => {
 
   app.use(cors());
   app.use(bodyParser.json());
-  app.use(passport.initialize());
 
   const apollo = new ApolloServer(
     AppModule.forRoot({

@@ -4,7 +4,7 @@ import { Connection } from 'typeorm'
 import { User } from '../../../entity/User';
 import { Chat } from '../../../entity/Chat';
 import { UserProvider } from '../../user/providers/user.provider';
-import { CurrentUserProvider } from '../../auth/providers/current-user.provider';
+import { AuthProvider } from '../../auth/providers/auth.provider';
 
 @Injectable({
   scope: ProviderScope.Session
@@ -14,12 +14,12 @@ export class ChatProvider {
     private pubsub: PubSub,
     private connection: Connection,
     private userProvider: UserProvider,
-    private currentUserProvider: CurrentUserProvider,
+    private authProvider: AuthProvider,
   ) {
   }
 
   repository = this.connection.getRepository(Chat);
-  currentUser = this.currentUserProvider.currentUser;
+  currentUser = this.authProvider.currentUser;
 
   createQueryBuilder() {
     return this.connection.createQueryBuilder(Chat, 'chat');

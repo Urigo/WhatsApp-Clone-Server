@@ -2,7 +2,7 @@ import { Injectable, ProviderScope } from '@graphql-modules/di'
 import { PubSub } from 'apollo-server-express'
 import { Connection } from 'typeorm'
 import { User } from '../../../entity/User';
-import { CurrentUserProvider } from '../../auth/providers/current-user.provider';
+import { AuthProvider } from '../../auth/providers/auth.provider';
 
 @Injectable({
   scope: ProviderScope.Session
@@ -12,11 +12,11 @@ export class UserProvider {
   constructor(
     private pubsub: PubSub,
     private connection: Connection,
-    private currentUserProvider: CurrentUserProvider,
+    private authProvider: AuthProvider,
   ) { }
 
   public repository = this.connection.getRepository(User);
-  private currentUser = this.currentUserProvider.currentUser;
+  private currentUser = this.authProvider.currentUser;
 
   createQueryBuilder() {
     return this.connection.createQueryBuilder(User, 'user');

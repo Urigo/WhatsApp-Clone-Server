@@ -6,7 +6,7 @@ import { Chat } from '../../../entity/Chat';
 import { ChatProvider } from '../../chat/providers/chat.provider';
 import { Message } from '../../../entity/Message';
 import { MessageType } from '../../../db';
-import { CurrentUserProvider } from '../../auth/providers/current-user.provider';
+import { AuthProvider } from '../../auth/providers/auth.provider';
 import { UserProvider } from '../../user/providers/user.provider';
 
 @Injectable({
@@ -17,12 +17,12 @@ export class MessageProvider {
     private pubsub: PubSub,
     private connection: Connection,
     private chatProvider: ChatProvider,
-    private currentUserProvider: CurrentUserProvider,
+    private authProvider: AuthProvider,
     private userProvider: UserProvider,
   ) { }
 
   repository = this.connection.getRepository(Message);
-  currentUser = this.currentUserProvider.currentUser;
+  currentUser = this.authProvider.currentUser;
 
   createQueryBuilder() {
     return this.connection.createQueryBuilder(Message, 'message');

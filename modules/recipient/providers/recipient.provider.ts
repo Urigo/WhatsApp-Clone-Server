@@ -4,20 +4,20 @@ import { MessageProvider } from '../../message/providers/message.provider';
 import { Chat } from '../../../entity/Chat';
 import { Message } from '../../../entity/Message';
 import { Recipient } from '../../../entity/Recipient';
-import { CurrentUserProvider } from '../../auth/providers/current-user.provider';
+import { AuthProvider } from '../../auth/providers/auth.provider';
 
 @Injectable({
   scope: ProviderScope.Session,
 })
 export class RecipientProvider {
   constructor(
-    private currentUserProvider: CurrentUserProvider,
+    private authProvider: AuthProvider,
     private connection: Connection,
     private messageProvider: MessageProvider,
   ) { }
 
   public repository = this.connection.getRepository(Recipient);
-  public currentUser = this.currentUserProvider.currentUser;
+  public currentUser = this.authProvider.currentUser;
 
   createQueryBuilder() {
     return this.connection.createQueryBuilder(Recipient, 'recipient');
