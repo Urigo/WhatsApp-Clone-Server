@@ -15,9 +15,10 @@ export class AuthProvider {
     @Inject(APP) app: Express,
     pubsub: PubSub,
   ) {
+    const userRepository = connection.getRepository(User);
     passport.use('basic-signin', new basicStrategy.BasicStrategy(
-      async (username: string, password: string, done: any) => {
-        const user = await connection.getRepository(User).findOne({where: { username }});
+      async (username, password, done) => {
+        const user = await userRepository.findOne({where: { username }});
         if (user && this.validPassword(password, user.password)) {
           return done(null, user);
         }
@@ -27,7 +28,7 @@ export class AuthProvider {
 
     passport.use('basic-signup', new basicStrategy.BasicStrategy({passReqToCallback: true},
       async (req: any, username: string, password: string, done: any) => {
-        const userExists = !!(await connection.getRepository(User).findOne({where: { username }}));
+        const userExists = !!(await userRepository.findOne({where: { username }}));
         if (!userExists && password && req.body.name) {
           const user = await connection.manager.save(new User({
             username,
@@ -46,16 +47,13 @@ export class AuthProvider {
     ));
 
     app.post('/signup',
-      passport.authenticate('basic-signup', {session: false}),
-      function (req: any, res) {
-        res.json(req.user);
-      });
+      passport.authenticate('basic-signup', {session: false}), 
+        (req, res) => res.json(req.user)
+    );
 
     app.use(passport.authenticate('basic-signin', {session: false}));
 
-    app.post('/signin', function (req, res) {
-      res.json(req.user);
-    });
+    app.post('/signin', (req, res) => res.json(req.user));
   }
   generateHash(password: string) {
     return bcrypt.hashSync(password, bcrypt.genSaltSync(8));

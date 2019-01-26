@@ -12,7 +12,7 @@ export interface IAppModuleConfig {
   app: Express;
 }
 
-export const AppModule = new GraphQLModule({
+export const AppModule = new GraphQLModule<IAppModuleConfig>({
   name: 'App',
   imports: ({config: {connection, app}}) => [
     AuthModule.forRoot({

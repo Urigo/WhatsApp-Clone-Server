@@ -102,21 +102,21 @@
     lodash "^4.17.10"
     to-fast-properties "^2.0.0"
 
-"@graphql-modules/core@0.4.0-alpha.5b01f8c8":
-  version "0.4.0-alpha.5b01f8c8"
-  resolved "https://registry.yarnpkg.com/@graphql-modules/core/-/core-0.4.0-alpha.5b01f8c8.tgz#82b11ee18d44ab64e9b9b63f2c4963643a11e6c6"
-  integrity sha512-WLQ/zUbxjMp9gwcSW9Vw3N7FQCNi4jE/vVDam619VKD4sA9WostoYYZYmxiMAgVjd7hzNT+h/ErzKslgAj4+kQ==
+"@graphql-modules/core@0.4.0-alpha.6abff69b":
+  version "0.4.0-alpha.6abff69b"
+  resolved "https://registry.yarnpkg.com/@graphql-modules/core/-/core-0.4.0-alpha.6abff69b.tgz#c744034ecaf4f73c8e8330bb0e93f4dd98c670f8"
+  integrity sha512-gW6JaPGpT7BvUfNGRx4HDZWuRMBJ93qq5yj2wulFi0/80iyN7OWLqTUK31UyuD00QU0WViLbsaE9vFGma2k51A==
   dependencies:
-    "@graphql-modules/di" "0.4.0-alpha.5b01f8c8"
-    "@graphql-modules/epoxy" "0.4.0-alpha.5b01f8c8"
-    "@graphql-modules/utils" "0.4.0-alpha.5b01f8c8"
+    "@graphql-modules/di" "0.4.0-alpha.6abff69b"
+    "@graphql-modules/epoxy" "0.4.0-alpha.6abff69b"
+    "@graphql-modules/utils" "0.4.0-alpha.6abff69b"
     graphql-tools "4.0.3"
     tslib "1.9.3"
 
-"@graphql-modules/di@0.4.0-alpha.5b01f8c8":
-  version "0.4.0-alpha.5b01f8c8"
-  resolved "https://registry.yarnpkg.com/@graphql-modules/di/-/di-0.4.0-alpha.5b01f8c8.tgz#76bb9a71e3f62df1d17c666017b487b03371bb95"
-  integrity sha512-lGj4IDsFii3yCenwn0Iuj9IsyI6Cal47Jqko8zcGPtejEPC2NMDSl+cQDi43cfl/OKsqSXL1lwtU4J38eirUWQ==
+"@graphql-modules/di@0.4.0-alpha.6abff69b":
+  version "0.4.0-alpha.6abff69b"
+  resolved "https://registry.yarnpkg.com/@graphql-modules/di/-/di-0.4.0-alpha.6abff69b.tgz#ca2ee301bce4abcf2374b4adf375da028934bac6"
+  integrity sha512-Kvi8O9wNFxPweJrLkUq8dXT4oW94sJGJLmFm9TahOvOonvrJ8NWwv4zKrmOxwAo5ru1bXrKVmim0FJ8aRAtTlg==
   dependencies:
     tslib "1.9.3"
 
@@ -129,28 +129,28 @@
     graphql-tools "4.0.3"
     tslib "1.9.3"
 
-"@graphql-modules/epoxy@0.4.0-alpha.5b01f8c8":
-  version "0.4.0-alpha.5b01f8c8"
-  resolved "https://registry.yarnpkg.com/@graphql-modules/epoxy/-/epoxy-0.4.0-alpha.5b01f8c8.tgz#2598e283ed4bc7b06245569c51a2d32b1a427775"
-  integrity sha512-TiCyXd9Z1POiYc1eELddJdU4fnAunQ1HWeT2AWglLyR6+/UvPCPn4+m9/Iab1O5AIrTz0ReHKCI4wtSga19/Jw==
+"@graphql-modules/epoxy@0.4.0-alpha.6abff69b":
+  version "0.4.0-alpha.6abff69b"
+  resolved "https://registry.yarnpkg.com/@graphql-modules/epoxy/-/epoxy-0.4.0-alpha.6abff69b.tgz#24f4cb90facac75bec42fb1b558ea0ec60173788"
+  integrity sha512-m7FD+SLy4KtQ7ikgpcGUrXrWxJdMNl1lSIULmsMfHIyEkwTQEYRHN14FcmUQbD536mCYpYPIQNzS2AAobQmXgQ==
   dependencies:
     deepmerge "3.1.0"
     graphql-tools "4.0.3"
     tslib "1.9.3"
 
-"@graphql-modules/sonar@0.4.0-alpha.5b01f8c8":
-  version "0.4.0-alpha.5b01f8c8"
-  resolved "https://registry.yarnpkg.com/@graphql-modules/sonar/-/sonar-0.4.0-alpha.5b01f8c8.tgz#113932eb6cb5e719b62fed544d48271ef841c3e9"
-  integrity sha512-MXBvs6i2exWoCnO/dZPcrnh4GR7c4hc6SYg5w+pjEMISLzOhUyzy0AE0ITWxU+vDrv44U7VUxXaQbo5gq238tA==
+"@graphql-modules/sonar@0.4.0-alpha.6abff69b":
+  version "0.4.0-alpha.6abff69b"
+  resolved "https://registry.yarnpkg.com/@graphql-modules/sonar/-/sonar-0.4.0-alpha.6abff69b.tgz#5cc0111de13f002bde9a40f97b84977a0150b386"
+  integrity sha512-N9vrRzwSxBDXGIwbV4y2jeCaACt3xto95VQjLh1iZcLtaIhWtN/9t7PQXd/ZtMbAyIS5btnyjdMvTYoImU46Mg==
   dependencies:
     "@types/glob" "7.1.1"
     glob "7.1.3"
     tslib "1.9.3"
 
-"@graphql-modules/utils@0.4.0-alpha.5b01f8c8":
-  version "0.4.0-alpha.5b01f8c8"
-  resolved "https://registry.yarnpkg.com/@graphql-modules/utils/-/utils-0.4.0-alpha.5b01f8c8.tgz#0456ab2a2438b87d1cca98d17f61f77e8640c73c"
-  integrity sha512-c5cxfAL24LQJNuXA6jDJlHxpTYFz8v1yv0VGs+V9kpwmPE/zqqjb711mPUYNUj1xEY57uEgbG1gjiEW70vHnkQ==
+"@graphql-modules/utils@0.4.0-alpha.6abff69b":
+  version "0.4.0-alpha.6abff69b"
+  resolved "https://registry.yarnpkg.com/@graphql-modules/utils/-/utils-0.4.0-alpha.6abff69b.tgz#04579d664767379e1207b664e7a797843739efa9"
+  integrity sha512-6/X610J+TZejGztmRYozqgxlMA9y/hrmJRqEpfDHHiTJkajchEYDfo+u96nYQLw5rAy4nzvjYf/ISfOg+rpzJw==
   dependencies:
     tslib "1.9.3"
 

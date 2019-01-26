@@ -7,6 +7,7 @@ import { ChatProvider } from "../../chat/providers/chat.provider";
 import { Message } from "../../../entity/Message";
 import { MessageType } from "../../../db";
 import { CurrentUserProvider } from '../../auth/providers/current-user.provider';
+import { UserProvider } from '../../user/providers/user.provider';
 
 @Injectable({
   scope: ProviderScope.Session,
@@ -17,20 +18,25 @@ export class MessageProvider {
     private connection: Connection,
     private chatProvider: ChatProvider,
     private currentUserProvider: CurrentUserProvider,
-  ) {
+    private userProvider: UserProvider,
+  ) { }
+
+  repository = this.connection.getRepository(Message);
+  currentUser = this.currentUserProvider.currentUser;
+
+  createQueryBuilder(){
+    return this.connection.createQueryBuilder(Message, 'message');
   }
 
   async addMessage(chatId: string, content: string) {
     console.log("DEBUG: MessageModule's addMessage");
 
-    const { currentUser } = this.currentUserProvider;
-
     if (content === null || content === '') {
       throw new Error(`Cannot add empty or null messages.`);
     }
 
-    let chat = await this.connection
-      .createQueryBuilder(Chat, 'chat')
+    let chat = await this.chatProvider
+      .createQueryBuilder()
       .whereInIds(chatId)
       .innerJoinAndSelect('chat.allTimeMembers', 'allTimeMembers')
       .innerJoinAndSelect('chat.listingMembers', 'listingMembers')
@@ -45,12 +51,12 @@ export class MessageProvider {
 
     if (!chat.name) {
       // Chat
-      if (!chat.listingMembers.map(user => user.id).includes(currentUser.id)) {
+      if (!chat.listingMembers.map(user => user.id).includes(this.currentUser.id)) {
         throw new Error(`The chat ${chatId} must be listed for the current user in order to add a message.`);
       }
 
       // Receiver's user
-      const user = chat.allTimeMembers.find(user => user.id !== currentUser.id);
+      const user = chat.allTimeMembers.find(user => user.id !== this.currentUser.id);
 
       if (!user) {
         throw new Error(`Cannot find receiver's user.`);
@@ -60,10 +66,10 @@ export class MessageProvider {
         // Chat is not listed for the receiver user. Add him to the listingIds
         chat.listingMembers.push(user);
 
-        await this.connection.getRepository(Chat).save(chat);
+        await this.chatProvider.repository.save(chat);
 
         this.pubsub.publish('chatAdded', {
-          creatorId: currentUser.id,
+          creatorId: this.currentUser.id,
           chatAdded: chat,
         });
       }
@@ -71,16 +77,16 @@ export class MessageProvider {
       holders = chat.listingMembers;
     } else {
       // Group
-      if (!chat.actualGroupMembers || !chat.actualGroupMembers.find(user => user.id === currentUser.id)) {
+      if (!chat.actualGroupMembers || !chat.actualGroupMembers.find(user => user.id === this.currentUser.id)) {
         throw new Error(`The user is not a member of the group ${chatId}. Cannot add message.`);
       }
 
       holders = chat.actualGroupMembers;
     }
 
-    const message = await this.connection.getRepository(Message).save(new Message({
+    const message = await this.repository.save(new Message({
       chat,
-      sender: currentUser,
+      sender: this.currentUser,
       content,
       type: MessageType.TEXT,
       holders,
@@ -110,9 +116,8 @@ export class MessageProvider {
       all?: boolean
     } = {},
   ) {
-    const { currentUser } = this.currentUserProvider;
-    const chat = await this.connection
-      .createQueryBuilder(Chat, 'chat')
+    const chat = await this.chatProvider
+      .createQueryBuilder()
       .whereInIds(chatId)
       .innerJoinAndSelect('chat.listingMembers', 'listingMembers')
       .innerJoinAndSelect('chat.messages', 'messages')
@@ -123,7 +128,7 @@ export class MessageProvider {
       throw new Error(`Cannot find chat ${chatId}.`);
     }
 
-    if (!chat.listingMembers.find(user => user.id === currentUser.id)) {
+    if (!chat.listingMembers.find(user => user.id === this.currentUser.id)) {
       throw new Error(`The chat/group ${chatId} is not listed for the current user so there is nothing to delete.`);
     }
 
@@ -144,13 +149,13 @@ export class MessageProvider {
       if (all || messageIds!.map(Number).includes(message.id)) {
         deletedIds.push(String(message.id));
         // Remove the current user from the message holders
-        message.holders = message.holders.filter(user => user.id !== currentUser.id);
+        message.holders = message.holders.filter(user => user.id !== this.currentUser.id);
 
       }
 
       if (message.holders.length !== 0) {
         // Remove the current user from the message holders
-        await this.connection.getRepository(Message).save(message);
+        await this.repository.save(message);
         filtered.push(message);
       } else {
         // Message is flagged for removal
@@ -197,23 +202,20 @@ export class MessageProvider {
   }
 
   async _removeChatGetMessages(chatId: string) {
-    const { currentUser } = this.currentUserProvider;
-    let messages = await this.connection
-      .createQueryBuilder(Message, "message")
+    let messages = await this.createQueryBuilder()
       .innerJoin('message.chat', 'chat', 'chat.id = :chatId', {chatId})
       .leftJoinAndSelect('message.holders', 'holders')
       .getMany();
 
     messages = messages.map(message => ({
       ...message,
-      holders: message.holders.filter(user => user.id !== currentUser.id),
+      holders: message.holders.filter(user => user.id !== this.currentUser.id),
     }));
 
     return messages;
   }
 
   async removeChat(chatId: string, messages?: Message[]) {
-    const { currentUser } = this.currentUserProvider;
     console.log("DEBUG: MessageModule's removeChat");
 
     if (!messages) {
@@ -221,14 +223,14 @@ export class MessageProvider {
     }
 
     for (let message of messages) {
-      message.holders = message.holders.filter(user => user.id !== currentUser.id);
+      message.holders = message.holders.filter(user => user.id !== this.currentUser.id);
 
       if (message.holders.length !== 0) {
         // Remove the current user from the message holders
-        await this.connection.getRepository(Message).save(message);
+        await this.repository.save(message);
       } else {
         // Simply remove the message
-        await this.connection.getRepository(Message).remove(message);
+        await this.repository.remove(message);
       }
     }
 
@@ -236,8 +238,8 @@ export class MessageProvider {
   }
 
   async getMessageSender(message: Message) {
-    const sender = await this.connection
-      .createQueryBuilder(User, 'user')
+    const sender = await this.userProvider
+      .createQueryBuilder()
       .innerJoin('user.senderMessages', 'senderMessages', 'senderMessages.id = :messageId', {
         messageId: message.id,
       })
@@ -251,10 +253,10 @@ export class MessageProvider {
   }
 
   async getMessageOwnership(message: Message) {
-    const { currentUser } = this.currentUserProvider;
-    return !!(await this.connection
-      .createQueryBuilder(User, 'user')
-      .whereInIds(currentUser.id)
+    
+    return !!(await this.userProvider
+      .createQueryBuilder()
+      .whereInIds(this.currentUser.id)
       .innerJoin('user.senderMessages', 'senderMessages', 'senderMessages.id = :messageId', {
         messageId: message.id,
       })
@@ -262,8 +264,8 @@ export class MessageProvider {
   }
 
   async getMessageHolders(message: Message) {
-    return await this.connection
-      .createQueryBuilder(User, 'user')
+    return await this.userProvider
+      .createQueryBuilder()
       .innerJoin('user.holderMessages', 'holderMessages', 'holderMessages.id = :messageId', {
         messageId: message.id,
       })
@@ -271,8 +273,8 @@ export class MessageProvider {
   }
 
   async getMessageChat(message: Message) {
-    const chat = await this.connection
-      .createQueryBuilder(Chat, "chat")
+    const chat = await this.chatProvider
+      .createQueryBuilder()
       .innerJoin('chat.messages', 'messages', 'messages.id = :messageId', {
         messageId: message.id
       })
@@ -286,11 +288,10 @@ export class MessageProvider {
   }
 
   async getChats() {
-    const { currentUser } = this.currentUserProvider;
-    const chats = await this.connection
-      .createQueryBuilder(Chat, 'chat')
+    const chats = await this.chatProvider
+    .createQueryBuilder()
       .leftJoin('chat.listingMembers', 'listingMembers')
-      .where('listingMembers.id = :id', {id: currentUser.id})
+      .where('listingMembers.id = :id', {id: this.currentUser.id})
       .getMany();
 
     for (let chat of chats) {
@@ -305,16 +306,14 @@ export class MessageProvider {
   }
 
   async getChatMessages(chat: Chat, amount?: number) {
-    const { currentUser } = this.currentUserProvider;
     if (chat.messages) {
       return amount ? chat.messages.slice(0, amount) : chat.messages;
     }
 
-    let query = this.connection
-      .createQueryBuilder(Message, 'message')
+    let query = this.createQueryBuilder()
       .innerJoin('message.chat', 'chat', 'chat.id = :chatId', {chatId: chat.id})
       .innerJoin('message.holders', 'holders', 'holders.id = :userId', {
-        userId: currentUser.id,
+        userId: this.currentUser.id,
       })
       .orderBy({'message.createdAt': {order: 'DESC', nulls: 'NULLS LAST'}});
 
@@ -326,16 +325,14 @@ export class MessageProvider {
   }
 
   async getChatUpdatedAt(chat: Chat) {
-    const { currentUser } = this.currentUserProvider;
     if (chat.messages) {
       return chat.messages.length ? chat.messages[0].createdAt.toDateString() : null;
     }
 
-    const latestMessage = await this.connection
-      .createQueryBuilder(Message, 'message')
+    const latestMessage = await this.createQueryBuilder()
       .innerJoin('message.chat', 'chat', 'chat.id = :chatId', {chatId: chat.id})
       .innerJoin('message.holders', 'holders', 'holders.id = :userId', {
-        userId: currentUser.id,
+        userId: this.currentUser.id,
       })
       .orderBy({'message.createdAt': 'DESC'})
       .getOne();
@@ -344,13 +341,13 @@ export class MessageProvider {
   }
 
   async filterMessageAdded(messageAdded: Message) {
-    const { currentUser } = this.currentUserProvider;
+    
     let relevantUsers: User[];
 
     if (!messageAdded.chat.name) {
       // Chat
-      relevantUsers = (await this.connection
-        .createQueryBuilder(User, 'user')
+      relevantUsers = (await this.userProvider
+        .createQueryBuilder()
         .innerJoin(
           'user.listingMemberChats',
           'listingMemberChats',
@@ -361,8 +358,8 @@ export class MessageProvider {
         .filter(user => user.id != messageAdded.sender.id);
     } else {
       // Group
-      relevantUsers = (await this.connection
-        .createQueryBuilder(User, 'user')
+      relevantUsers = (await this.userProvider
+        .createQueryBuilder()
         .innerJoin(
           'user.actualGroupMemberChats',
           'actualGroupMemberChats',
@@ -373,6 +370,6 @@ export class MessageProvider {
         .filter(user => user.id != messageAdded.sender.id);
     }
 
-    return relevantUsers.some(user => user.id === currentUser.id);
+    return relevantUsers.some(user => user.id === this.currentUser.id);
   }
 }

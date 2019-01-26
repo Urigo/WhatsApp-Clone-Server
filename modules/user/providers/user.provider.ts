@@ -8,24 +8,26 @@ import { CurrentUserProvider } from '../../auth/providers/current-user.provider'
   scope: ProviderScope.Session
 })
 export class UserProvider {
+
   constructor(
     private pubsub: PubSub,
     private connection: Connection,
     private currentUserProvider: CurrentUserProvider,
-  ) {
+  ) { }
+
+  public repository = this.connection.getRepository(User);
+  private currentUser = this.currentUserProvider.currentUser;
+
+  createQueryBuilder() {
+    return this.connection.createQueryBuilder(User, 'user');
   }
 
-  async getMe() {
-    const { currentUser } = this.currentUserProvider;
-    return currentUser;
+  getMe() {
+    return this.currentUser;
   }
 
-  async getUsers() {
-    const { currentUser } = this.currentUserProvider;
-    return await this.connection
-      .createQueryBuilder(User, 'user')
-      .where('user.id != :id', {id: currentUser.id})
-      .getMany();
+  getUsers() {
+    return this.createQueryBuilder().where('user.id != :id', {id: this.currentUser.id}).getMany();
   }
 
   async updateUser({
@@ -35,25 +37,23 @@ export class UserProvider {
     name?: string,
     picture?: string,
   } = {}) {
-    const { currentUser } = this.currentUserProvider;
-    if (name === currentUser.name && picture === currentUser.picture) {
-      return currentUser;
+    if (name === this.currentUser.name && picture === this.currentUser.picture) {
+      return this.currentUser;
     }
 
-    currentUser.name = name || currentUser.name;
-    currentUser.picture = picture || currentUser.picture;
+    this.currentUser.name = name || this.currentUser.name;
+    this.currentUser.picture = picture || this.currentUser.picture;
 
-    await this.connection.getRepository(User).save(currentUser);
+    await this.repository.save(this.currentUser);
 
     this.pubsub.publish('userUpdated', {
-      userUpdated: currentUser,
+      userUpdated: this.currentUser,
     });
 
-    return currentUser;
+    return this.currentUser;
   }
 
   filterUserAddedOrUpdated(userAddedOrUpdated: User) {
-    const { currentUser } = this.currentUserProvider;
-    return userAddedOrUpdated.id !== currentUser.id;
+    return userAddedOrUpdated.id !== this.currentUser.id;
   }
 }

@@ -18,19 +18,25 @@ export class ChatProvider {
   ) {
   }
 
+  repository = this.connection.getRepository(Chat);
+  currentUser = this.currentUserProvider.currentUser;
+
+  createQueryBuilder() {
+    return this.connection.createQueryBuilder(Chat, 'chat');
+  }
+
   async getChats() {
-    const { currentUser } = this.currentUserProvider;
-    return this.connection
-      .createQueryBuilder(Chat, 'chat')
+    return this
+      .createQueryBuilder()
       .leftJoin('chat.listingMembers', 'listingMembers')
-      .where('listingMembers.id = :id', {id: currentUser.id})
+      .where('listingMembers.id = :id', { id: this.currentUser.id })
       .orderBy('chat.createdAt', 'DESC')
       .getMany();
   }
 
   async getChat(chatId: string) {
-    const chat = await this.connection
-      .createQueryBuilder(Chat, 'chat')
+    const chat = await this
+    .createQueryBuilder()
       .whereInIds(chatId)
       .getOne();
 
@@ -38,9 +44,8 @@ export class ChatProvider {
   }
 
   async addChat(userId: string) {
-    const { currentUser } = this.currentUserProvider;
-    const user = await this.connection
-      .createQueryBuilder(User, 'user')
+    const user = await this.userProvider
+      .createQueryBuilder()
       .whereInIds(userId)
       .getOne();
 
@@ -48,11 +53,11 @@ export class ChatProvider {
       throw new Error(`User ${userId} doesn't exist.`);
     }
 
-    let chat = await this.connection
-      .createQueryBuilder(Chat, 'chat')
+    let chat = await this
+    .createQueryBuilder()
       .where('chat.name IS NULL')
       .innerJoin('chat.allTimeMembers', 'allTimeMembers1', 'allTimeMembers1.id = :currentUserId', {
-        currentUserId: currentUser.id,
+        currentUserId: this.currentUser.id,
       })
       .innerJoin('chat.allTimeMembers', 'allTimeMembers2', 'allTimeMembers2.id = :userId', {
         userId: userId,
@@ -62,19 +67,19 @@ export class ChatProvider {
 
     if (chat) {
       // Chat already exists. Both users are already in the userIds array
-      const listingMembers = await this.connection
-        .createQueryBuilder(User, 'user')
+      const listingMembers = await this.userProvider
+      .createQueryBuilder()
         .innerJoin(
           'user.listingMemberChats',
           'listingMemberChats',
           'listingMemberChats.id = :chatId',
-          {chatId: chat.id},
+          { chatId: chat.id },
         )
         .getMany();
 
-      if (!listingMembers.find(user => user.id === currentUser.id)) {
+      if (!listingMembers.find(user => user.id === this.currentUser.id)) {
         // The chat isn't listed for the current user. Add him to the memberIds
-        chat.listingMembers.push(currentUser);
+        chat.listingMembers.push(this.currentUser);
         chat = await this.connection.getRepository(Chat).save(chat);
 
         return chat || null;
@@ -83,11 +88,11 @@ export class ChatProvider {
       }
     } else {
       // Create the chat
-      chat = await this.connection.getRepository(Chat).save(
+      chat = await this.repository.save(
         new Chat({
-          allTimeMembers: [currentUser, user],
+          allTimeMembers: [this.currentUser, user],
           // Chat will not be listed to the other user until the first message gets written
-          listingMembers: [currentUser],
+          listingMembers: [this.currentUser],
         }),
       );
 
@@ -105,11 +110,10 @@ export class ChatProvider {
       groupPicture?: string
     } = {},
   ) {
-    const { currentUser } = this.currentUserProvider;
     let users: User[] = [];
     for (let userId of userIds) {
-      const user = await this.connection
-        .createQueryBuilder(User, 'user')
+      const user = await this.userProvider
+        .createQueryBuilder()
         .whereInIds(userId)
         .getOne();
 
@@ -120,20 +124,20 @@ export class ChatProvider {
       users.push(user);
     }
 
-    const chat = await this.connection.getRepository(Chat).save(
+    const chat = await this.repository.save(
       new Chat({
         name: groupName,
-        admins: [currentUser],
+        admins: [this.currentUser],
         picture: groupPicture || undefined,
-        owner: currentUser,
-        allTimeMembers: [...users, currentUser],
-        listingMembers: [...users, currentUser],
-        actualGroupMembers: [...users, currentUser],
+        owner: this.currentUser,
+        allTimeMembers: [...users, this.currentUser],
+        listingMembers: [...users, this.currentUser],
+        actualGroupMembers: [...users, this.currentUser],
       }),
     );
 
     this.pubsub.publish('chatAdded', {
-      creatorId: currentUser.id,
+      creatorId: this.currentUser.id,
       chatAdded: chat,
     });
 
@@ -150,8 +154,7 @@ export class ChatProvider {
       picture?: string
     } = {},
   ) {
-    const chat = await this.connection
-      .createQueryBuilder(Chat, 'chat')
+    const chat = await this.createQueryBuilder()
       .whereInIds(chatId)
       .getOne();
 
@@ -160,14 +163,13 @@ export class ChatProvider {
 
     name = name || chat.name;
     picture = picture || chat.picture;
-    Object.assign(chat, {name, picture});
+    Object.assign(chat, { name, picture });
 
     // Update the chat
-    await this.connection.getRepository(Chat).save(chat);
+    await this.repository.save(chat);
 
-    const { currentUser } = this.currentUserProvider;
     this.pubsub.publish('chatUpdated', {
-      updaterId: currentUser.id,
+      updaterId: this.currentUser.id,
       chatUpdated: chat,
     });
 
@@ -176,9 +178,7 @@ export class ChatProvider {
 
   async removeChat(chatId: string) {
     console.log("DEBUG: ChatModule's removeChat");
-    const { currentUser } = this.currentUserProvider;
-    const chat = await this.connection
-      .createQueryBuilder(Chat, 'chat')
+    const chat = await this.createQueryBuilder()
       .whereInIds(Number(chatId))
       .innerJoinAndSelect('chat.listingMembers', 'listingMembers')
       .leftJoinAndSelect('chat.actualGroupMembers', 'actualGroupMembers')
@@ -192,12 +192,12 @@ export class ChatProvider {
 
     if (!chat.name) {
       // Chat
-      if (!chat.listingMembers.find(user => user.id === currentUser.id)) {
+      if (!chat.listingMembers.find(user => user.id === this.currentUser.id)) {
         throw new Error(`The user is not a listing member of the chat ${chatId}.`)
       }
 
       // Remove the current user from who gets the chat listed. The chat will no longer appear in his list
-      chat.listingMembers = chat.listingMembers.filter(user => user.id !== currentUser.id);
+      chat.listingMembers = chat.listingMembers.filter(user => user.id !== this.currentUser.id);
 
       // Check how many members are left
       if (chat.listingMembers.length === 0) {
@@ -213,7 +213,7 @@ export class ChatProvider {
       // Group
 
       // Remove the current user from who gets the group listed. The group will no longer appear in his list
-      chat.listingMembers = chat.listingMembers.filter(user => user.id !== currentUser.id);
+      chat.listingMembers = chat.listingMembers.filter(user => user.id !== this.currentUser.id);
 
       // Check how many members (including previous ones who can still access old messages) are left
       if (chat.listingMembers.length === 0) {
@@ -224,10 +224,10 @@ export class ChatProvider {
 
         // Remove the current user from the chat members. He is no longer a member of the group
         chat.actualGroupMembers = chat.actualGroupMembers && chat.actualGroupMembers.filter(user =>
-          user.id !== currentUser.id
+          user.id !== this.currentUser.id
         );
         // Remove the current user from the chat admins
-        chat.admins = chat.admins && chat.admins.filter(user => user.id !== currentUser.id);
+        chat.admins = chat.admins && chat.admins.filter(user => user.id !== this.currentUser.id);
         // If there are no more admins left the group goes read only
         // A null owner means the group is read-only
         chat.owner = chat.admins && chat.admins[0] || null;
@@ -244,16 +244,14 @@ export class ChatProvider {
       return chat.name;
     }
 
-    const { currentUser } = this.currentUserProvider;
-
-    const user = await this.connection
-      .createQueryBuilder(User, 'user')
-      .where('user.id != :userId', {userId: currentUser.id})
+    const user = await this.userProvider
+      .createQueryBuilder()
+      .where('user.id != :userId', { userId: this.currentUser.id })
       .innerJoin(
         'user.allTimeMemberChats',
         'allTimeMemberChats',
         'allTimeMemberChats.id = :chatId',
-        {chatId: chat.id},
+        { chatId: chat.id },
       )
       .getOne();
 
@@ -261,64 +259,64 @@ export class ChatProvider {
   }
 
   async getChatPicture(chat: Chat) {
-    const { currentUser } = this.currentUserProvider;
+
     if (chat.name) {
       return chat.picture;
     }
 
-    const user = await this.connection
-      .createQueryBuilder(User, 'user')
-      .where('user.id != :userId', {userId: currentUser.id})
+    const user = await this.userProvider
+      .createQueryBuilder()
+      .where('user.id != :userId', { userId: this.currentUser.id })
       .innerJoin(
         'user.allTimeMemberChats',
         'allTimeMemberChats',
         'allTimeMemberChats.id = :chatId',
-        {chatId: chat.id},
+        { chatId: chat.id },
       )
       .getOne();
 
     return user ? user.picture : null;
   }
 
-  async getChatAllTimeMembers(chat: Chat) {
-    return await this.connection
-      .createQueryBuilder(User, 'user')
+  getChatAllTimeMembers(chat: Chat) {
+    return this.userProvider
+      .createQueryBuilder()
       .innerJoin(
         'user.listingMemberChats',
         'listingMemberChats',
         'listingMemberChats.id = :chatId',
-        {chatId: chat.id},
+        { chatId: chat.id },
       )
       .getMany()
   }
 
-  async getChatListingMembers(chat: Chat) {
-    return await this.connection
-      .createQueryBuilder(User, 'user')
+  getChatListingMembers(chat: Chat) {
+    return this.userProvider
+      .createQueryBuilder()
       .innerJoin(
         'user.listingMemberChats',
         'listingMemberChats',
         'listingMemberChats.id = :chatId',
-        {chatId: chat.id},
+        { chatId: chat.id },
       )
       .getMany();
   }
 
-  async getChatActualGroupMembers(chat: Chat) {
-    return await this.connection
-      .createQueryBuilder(User, 'user')
+  getChatActualGroupMembers(chat: Chat) {
+    return this.userProvider
+      .createQueryBuilder()
       .innerJoin(
         'user.actualGroupMemberChats',
         'actualGroupMemberChats',
         'actualGroupMemberChats.id = :chatId',
-        {chatId: chat.id},
+        { chatId: chat.id },
       )
       .getMany();
   }
 
   getChatAdmins(chat: Chat) {
-    return this.connection
-      .createQueryBuilder(User, "user")
+    return this.userProvider
+    .createQueryBuilder()
       .innerJoin('user.adminChats', 'adminChats', 'adminChats.id = :chatId', {
         chatId: chat.id,
       })
@@ -326,8 +324,8 @@ export class ChatProvider {
   }
 
   async getChatOwner(chat: Chat) {
-    const owner = await this.connection
-      .createQueryBuilder(User, 'user')
+    const owner = await this.userProvider
+    .createQueryBuilder()
       .innerJoin('user.ownerChats', 'ownerChats', 'ownerChats.id = :chatId', {
         chatId: chat.id,
       })
@@ -341,9 +339,9 @@ export class ChatProvider {
   }
 
   async filterChatAddedOrUpdated(chatAddedOrUpdated: Chat, creatorOrUpdaterId: number) {
-    const { currentUser } = this.currentUserProvider;
-    return Number(creatorOrUpdaterId) !== currentUser.id &&
-      chatAddedOrUpdated.listingMembers.some((user: User) => user.id === currentUser.id);
+
+    return Number(creatorOrUpdaterId) !== this.currentUser.id &&
+      chatAddedOrUpdated.listingMembers.some((user: User) => user.id === this.currentUser.id);
   }
 
   async updateUser({
@@ -353,12 +351,12 @@ export class ChatProvider {
     name?: string,
     picture?: string,
   } = {}) {
-    await this.userProvider.updateUser({name, picture});
+    await this.userProvider.updateUser({ name, picture });
 
-    const { currentUser } = this.currentUserProvider;
+
     const data = await this.connection
       .createQueryBuilder(User, 'user')
-      .where('user.id = :id', {id: currentUser.id})
+      .where('user.id = :id', { id: this.currentUser.id })
       // Get a list of the chats who have/had currentUser involved
       .innerJoinAndSelect(
         'user.allTimeMemberChats',
@@ -372,7 +370,7 @@ export class ChatProvider {
         'listingMembers',
         'listingMembers.id != :currentUserId',
         {
-          currentUserId: currentUser.id,
+          currentUserId: this.currentUser.id,
         })
       .getOne();
 
@@ -380,11 +378,11 @@ export class ChatProvider {
 
     chatsAffected.forEach(chat => {
       this.pubsub.publish('chatUpdated', {
-        updaterId: currentUser.id,
+        updaterId: this.currentUser.id,
         chatUpdated: chat,
       })
     });
 
-    return currentUser;
+    return this.currentUser;
   }
 }

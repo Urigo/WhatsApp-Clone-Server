@@ -14,23 +14,27 @@ export class RecipientProvider {
     private currentUserProvider: CurrentUserProvider,
     private connection: Connection,
     private messageProvider: MessageProvider,
-  ) {
+  ) { }
+
+  public repository = this.connection.getRepository(Recipient);
+  public currentUser = this.currentUserProvider.currentUser;
+
+  createQueryBuilder() {
+    return this.connection.createQueryBuilder(Recipient, 'recipient');
   }
 
   getChatUnreadMessagesCount(chat: Chat) {
-    const { currentUser } = this.currentUserProvider;
-    return this.connection
-      .createQueryBuilder(Message, "message")
+    return this.messageProvider
+      .createQueryBuilder()
       .innerJoin('message.chat', 'chat', 'chat.id = :chatId', {chatId: chat.id})
       .innerJoin('message.recipients', 'recipients', 'recipients.user.id = :userId AND recipients.readAt IS NULL', {
-        userId: currentUser.id
+        userId: this.currentUser.id
       })
       .getCount();
   }
 
-  async getMessageRecipients(message: Message) {
-    return await this.connection
-      .createQueryBuilder(Recipient, 'recipient')
+  getMessageRecipients(message: Message) {
+    return this.createQueryBuilder()
       .innerJoinAndSelect('recipient.message', 'message', 'message.id = :messageId', {
         messageId: message.id,
       })
@@ -46,14 +50,13 @@ export class RecipientProvider {
 
     for (let message of messages) {
       if (message.holders.length === 0) {
-        const recipients = await this.connection
-          .createQueryBuilder(Recipient, "recipient")
+        const recipients = await this.createQueryBuilder()
           .innerJoinAndSelect('recipient.message', 'message', 'message.id = :messageId', {messageId: message.id})
           .innerJoinAndSelect('recipient.user', 'user')
           .getMany();
 
         for (let recipient of recipients) {
-          await this.connection.getRepository(Recipient).remove(recipient);
+          await this.repository.remove(recipient);
         }
       }
     }
@@ -62,14 +65,14 @@ export class RecipientProvider {
   }
 
   async addMessage(chatId: string, content: string) {
-    const { currentUser } = this.currentUserProvider;
+    
     console.log("DEBUG: RecipientModule's addMessage");
 
     const message = await this.messageProvider.addMessage(chatId, content);
 
     for (let user of message.holders) {
-      if (user.id !== currentUser.id) {
-        await this.connection.getRepository(Recipient).save(new Recipient({user, message}));
+      if (user.id !== this.currentUser.id) {
+        await this.repository.save(new Recipient({user, message}));
       }
     }
 
@@ -89,17 +92,16 @@ export class RecipientProvider {
     const {deletedIds, removedMessages} = await this.messageProvider._removeMessages(chatId, {messageIds, all});
 
     for (let message of removedMessages) {
-      const recipients = await this.connection
-        .createQueryBuilder(Recipient, 'recipient')
+      const recipients = await this.createQueryBuilder()
         .innerJoinAndSelect('recipient.message', 'message', 'message.id = :messageId', {messageId: message.id})
         .innerJoinAndSelect('recipient.user', 'user')
         .getMany();
 
       for (let recipient of recipients) {
-        await this.connection.getRepository(Recipient).remove(recipient);
+        await this.repository.remove(recipient);
       }
 
-      await this.connection.getRepository(Message).remove(message);
+      await this.messageProvider.repository.remove(message);
     }
 
     return deletedIds;
