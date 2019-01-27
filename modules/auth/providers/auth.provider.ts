@@ -38,7 +38,6 @@ export class AuthProvider implements OnRequest, OnConnect {
     }
   }
 
-
   getUserByUsername(username: string) {
     return this.connection.getRepository(User).findOne({where: { username }});
   }

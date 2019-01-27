@@ -165,16 +165,16 @@ export class MessageProvider {
           .getMany();
 
         for (let recipient of recipients) {
-          await this.connection.getRepository(Recipient).remove(recipient);
+          await this.recipientProvider.repository.remove(recipient);
         }*/
 
-        //await this.connection.getRepository(Message).remove(message);
+        //await this.repository.remove(message);
       }
 
       return filtered;
     }, Promise.resolve([]));
 
-    //await this.connection.getRepository(Chat).save(chat);
+    //await this.chatProvider.repository.save(chat);
 
     return { deletedIds, removedMessages };
   }
@@ -193,7 +193,7 @@ export class MessageProvider {
     const { deletedIds, removedMessages } = await this._removeMessages(chatId, { messageIds, all });
 
     for (let message of removedMessages) {
-      await this.connection.getRepository(Message).remove(message);
+      await this.repository.remove(message);
     }
 
     return deletedIds;

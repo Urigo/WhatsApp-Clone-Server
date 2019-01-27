@@ -17,9 +17,9 @@ export interface IAppModuleConfig {
 export const AuthModule = new GraphQLModule<IAppModuleConfig>({
   name: "Auth",
   providers: ({config: {connection, app}}) => [
-    {provide: Connection, useValue: connection},
-    {provide: APP, useValue: app},
-    PubSub,
+    {provide: Connection, useValue: connection, scope: ProviderScope.Application},
+    {provide: APP, useValue: app, scope: ProviderScope.Application},
+    {provide: PubSub, useFactory: () => new PubSub(), scope: ProviderScope.Application},
     AuthProvider,
   ],
   defaultProviderScope: ProviderScope.Session,

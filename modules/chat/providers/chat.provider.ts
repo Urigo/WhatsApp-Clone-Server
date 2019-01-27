@@ -78,7 +78,7 @@ export class ChatProvider {
       if (!listingMembers.find(user => user.id === this.currentUser.id)) {
         // The chat isn't listed for the current user. Add him to the memberIds
         chat.listingMembers.push(this.currentUser);
-        chat = await this.connection.getRepository(Chat).save(chat);
+        chat = await this.repository.save(chat);
 
         return chat || null;
       } else {
@@ -200,10 +200,10 @@ export class ChatProvider {
       // Check how many members are left
       if (chat.listingMembers.length === 0) {
         // Delete the chat
-        await this.connection.getRepository(Chat).remove(chat);
+        await this.repository.remove(chat);
       } else {
         // Update the chat
-        await this.connection.getRepository(Chat).save(chat);
+        await this.repository.save(chat);
       }
 
       return chatId;
@@ -216,7 +216,7 @@ export class ChatProvider {
       // Check how many members (including previous ones who can still access old messages) are left
       if (chat.listingMembers.length === 0) {
         // Remove the group
-        await this.connection.getRepository(Chat).remove(chat);
+        await this.repository.remove(chat);
       } else {
         // Update the group
 
@@ -230,7 +230,7 @@ export class ChatProvider {
         // A null owner means the group is read-only
         chat.owner = chat.admins && chat.admins[0] || null;
 
-        await this.connection.getRepository(Chat).save(chat);
+        await this.repository.save(chat);
       }
 
       return chatId;
