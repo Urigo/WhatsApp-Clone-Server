@@ -1,4 +1,4 @@
-import { Injectable, ProviderScope } from '@graphql-modules/di'
+import { Injectable } from '@graphql-modules/di'
 import { PubSub } from 'apollo-server-express'
 import { Connection } from 'typeorm'
 import { User } from '../../../entity/User';
@@ -6,9 +6,7 @@ import { Chat } from '../../../entity/Chat';
 import { UserProvider } from '../../user/providers/user.provider';
 import { AuthProvider } from '../../auth/providers/auth.provider';
 
-@Injectable({
-  scope: ProviderScope.Session
-})
+@Injectable()
 export class ChatProvider {
   constructor(
     private pubsub: PubSub,

@@ -8,7 +8,7 @@ import multer from 'multer';
 import tmp from 'tmp';
 import cloudinary from 'cloudinary';
 import { APP } from '../app.symbols';
-import { InjectFunction } from '@graphql-modules/di';
+import { InjectFunction, ProviderScope } from '@graphql-modules/di';
 export const CLOUDINARY_URL = process.env.CLOUDINARY_URL || '';
 
 export const UserModule = new GraphQLModule({
@@ -19,6 +19,7 @@ export const UserModule = new GraphQLModule({
   providers: [
     UserProvider,
   ],
+  defaultProviderScope: ProviderScope.Session,
   typeDefs: loadSchemaFiles(__dirname + '/schema/'),
   resolvers: loadResolversFiles(__dirname + '/resolvers/'),
   middleware: InjectFunction(UserProvider, APP)((userProvider, app: Express) => {

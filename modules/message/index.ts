@@ -4,6 +4,7 @@ import { UserModule } from '../user';
 import { ChatModule } from '../chat';
 import { MessageProvider } from './providers/message.provider';
 import { AuthModule } from '../auth';
+import { ProviderScope } from '@graphql-modules/di';
 
 export const MessageModule = new GraphQLModule({
   name: "Message",
@@ -15,6 +16,7 @@ export const MessageModule = new GraphQLModule({
   providers: [
     MessageProvider,
   ],
+  defaultProviderScope: ProviderScope.Session,
   typeDefs: loadSchemaFiles(__dirname + '/schema/'),
   resolvers: loadResolversFiles(__dirname + '/resolvers/'),
 });

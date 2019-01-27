@@ -7,7 +7,7 @@ import { APP } from '../app.symbols';
 import { PubSub } from 'apollo-server-express';
 import passport from 'passport';
 import basicStrategy from 'passport-http';
-import { InjectFunction } from '@graphql-modules/di';
+import { InjectFunction, ProviderScope } from '@graphql-modules/di';
 
 export interface IAppModuleConfig {
   connection: Connection,
@@ -22,6 +22,7 @@ export const AuthModule = new GraphQLModule<IAppModuleConfig>({
     PubSub,
     AuthProvider,
   ],
+  defaultProviderScope: ProviderScope.Session,
   typeDefs: loadSchemaFiles(__dirname + '/schema/'),
   resolvers: loadResolversFiles(__dirname + '/resolvers/'),
   configRequired: true,

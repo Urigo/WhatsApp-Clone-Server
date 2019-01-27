@@ -9,9 +9,7 @@ import { MessageType } from '../../../db';
 import { AuthProvider } from '../../auth/providers/auth.provider';
 import { UserProvider } from '../../user/providers/user.provider';
 
-@Injectable({
-  scope: ProviderScope.Session,
-})
+@Injectable()
 export class MessageProvider {
   constructor(
     private pubsub: PubSub,

@@ -5,9 +5,7 @@ import { User } from '../../../entity/User';
 import { AuthProvider } from '../../auth/providers/auth.provider';
 import cloudinary from 'cloudinary';
 
-@Injectable({
-  scope: ProviderScope.Session
-})
+@Injectable()
 export class UserProvider {
 
   constructor(

@@ -18,12 +18,9 @@ createConnection().then(async connection => {
   app.use(cors());
   app.use(bodyParser.json());
 
-  const apollo = new ApolloServer(
-    AppModule.forRoot({
-      connection,
-      app,
-    })
-  );
+  const { schema, context, subscriptions } = AppModule.forRoot({ connection, app, });
+
+  const apollo = new ApolloServer({ schema, context, subscriptions });
 
   apollo.applyMiddleware({
     app,
