@@ -1,11 +1,13 @@
-import { Injectable } from '@graphql-modules/di';
+import { Injectable, ProviderScope } from '@graphql-modules/di';
+import { ModuleSessionInfo, OnRequest, OnConnect } from '@graphql-modules/core';
 import { Connection } from 'typeorm';
 import { User } from '../../../entity/User';
 import bcrypt from 'bcrypt-nodejs';
 import { PubSub } from 'apollo-server-express'
-import { ModuleSessionInfo, OnRequest, OnConnect } from '@graphql-modules/core';
 
-@Injectable()
+@Injectable({
+  scope: ProviderScope.Session
+})
 export class AuthProvider implements OnRequest, OnConnect {
 
   currentUser: User;

@@ -305,7 +305,7 @@ export class MessageProvider {
 
   async getChatMessages(chat: Chat, amount?: number) {
     if (chat.messages) {
-      return amount ? chat.messages.slice(0, amount) : chat.messages;
+      return amount ? chat.messages.slice(-amount) : chat.messages;
     }
 
     let query = this.createQueryBuilder()

@@ -17,12 +17,11 @@ export interface IAppModuleConfig {
 export const AuthModule = new GraphQLModule<IAppModuleConfig>({
   name: "Auth",
   providers: ({config: {connection, app}}) => [
-    {provide: Connection, useValue: connection, scope: ProviderScope.Application},
-    {provide: APP, useValue: app, scope: ProviderScope.Application},
-    {provide: PubSub, useFactory: () => new PubSub(), scope: ProviderScope.Application},
+    {provide: Connection, useValue: connection},
+    {provide: APP, useValue: app},
+    PubSub,
     AuthProvider,
   ],
-  defaultProviderScope: ProviderScope.Session,
   typeDefs: loadSchemaFiles(__dirname + '/schema/'),
   resolvers: loadResolversFiles(__dirname + '/resolvers/'),
   configRequired: true,
