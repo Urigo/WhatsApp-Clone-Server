@@ -23,6 +23,7 @@ export const AuthModule = new GraphQLModule<IAppModuleConfig>({
   ],
   typeDefs: loadSchemaFiles(__dirname + '/schema/'),
   resolvers: loadResolversFiles(__dirname + '/resolvers/'),
+  configRequired: true,
   middleware: ({ injector }) => {
     const app = injector.get<Express>(APP);
     app.use(passport.initialize());
