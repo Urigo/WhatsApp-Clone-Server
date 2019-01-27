@@ -1,4 +1,4 @@
 import 'reflect-metadata';
 import { AppModule } from './modules/app.module';
 
-export const { schema } = AppModule.forRoot({} as any);
+export default AppModule.forRoot({} as any).typeDefs;

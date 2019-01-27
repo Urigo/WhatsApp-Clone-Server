@@ -3,6 +3,7 @@ import { PubSub } from 'apollo-server-express'
 import { Connection } from 'typeorm'
 import { User } from '../../../entity/User';
 import { AuthProvider } from '../../auth/providers/auth.provider';
+import cloudinary from 'cloudinary';
 
 @Injectable({
   scope: ProviderScope.Session
@@ -55,5 +56,17 @@ export class UserProvider {
 
   filterUserAddedOrUpdated(userAddedOrUpdated: User) {
     return userAddedOrUpdated.id !== this.currentUser.id;
+  }
+
+  uploadProfilePic(filePath: string) {
+    return new Promise((resolve, reject) => {
+      cloudinary.v2.uploader.upload(filePath, (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      })
+    });
   }
 }

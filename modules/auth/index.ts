@@ -7,6 +7,7 @@ import { APP } from '../app.symbols';
 import { PubSub } from 'apollo-server-express';
 import passport from 'passport';
 import basicStrategy from 'passport-http';
+import { InjectFunction } from '@graphql-modules/di';
 
 export interface IAppModuleConfig {
   connection: Connection,
@@ -24,14 +25,9 @@ export const AuthModule = new GraphQLModule<IAppModuleConfig>({
   typeDefs: loadSchemaFiles(__dirname + '/schema/'),
   resolvers: loadResolversFiles(__dirname + '/resolvers/'),
   configRequired: true,
-  middleware: ({ injector }) => {
-    const app = injector.get<Express>(APP);
-    app.use(passport.initialize());
+  middleware: InjectFunction(AuthProvider, APP)((authProvider, app: Express) => {
     passport.use('basic-signin', new basicStrategy.BasicStrategy(
-      { passReqToCallback: true },
-      async (req: Express.Request, username: string, password: string, done: any) => {
-        const sessionInjector = injector.getSessionInjector({ req });
-        const authProvider = sessionInjector.get(AuthProvider);
+      async (username: string, password: string, done: any) => {
         done(
           null, 
           await authProvider.signIn(username, password)
@@ -41,8 +37,6 @@ export const AuthModule = new GraphQLModule<IAppModuleConfig>({
 
     passport.use('basic-signup', new basicStrategy.BasicStrategy({passReqToCallback: true},
       async (req: Express.Request & { body: { name?: string }}, username: string, password: string, done: any) => {
-        const sessionInjector = injector.getSessionInjector({ req });
-        const authProvider = sessionInjector.get(AuthProvider);
         const name = req.body.name;
         return done(null, !!name && await authProvider.signUp(username, password, name));
       }
@@ -57,5 +51,5 @@ export const AuthModule = new GraphQLModule<IAppModuleConfig>({
 
     app.post('/signin', (req, res) => res.json(req.user));
     return {};
-  },
+  }),
 });

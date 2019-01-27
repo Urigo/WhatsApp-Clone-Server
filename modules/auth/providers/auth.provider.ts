@@ -11,7 +11,6 @@ import { ModuleSessionInfo, OnRequest, OnConnect } from '@graphql-modules/core';
 export class AuthProvider implements OnRequest, OnConnect {
 
   currentUser: User;
-  userRepository = this.connection.getRepository(User);
   constructor(
     private connection: Connection,
     private pubsub: PubSub,
@@ -43,7 +42,7 @@ export class AuthProvider implements OnRequest, OnConnect {
 
 
   getUserByUsername(username: string) {
-    return this.userRepository.findOne({where: { username }});
+    return this.connection.getRepository(User).findOne({where: { username }});
   }
 
   async signIn(username: string, password: string): Promise<User | false> {
