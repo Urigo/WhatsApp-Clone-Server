@@ -11,7 +11,7 @@ import { AppModule } from './modules/app.module';
 createConnection().then(async connection => {
   //await addSampleData(connection);
 
-  const PORT = 3000;
+  const PORT = 4000;
 
   const app = express();
 

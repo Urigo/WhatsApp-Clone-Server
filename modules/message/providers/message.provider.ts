@@ -322,6 +322,16 @@ export class MessageProvider {
     return (await query.getMany()).reverse();
   }
 
+  async getChatLastMessage(chat: Chat) {
+    if (chat.messages) {
+      return chat.messages.length ? chat.messages[chat.messages.length - 1] : null;
+    }
+
+    const messages = await this.getChatMessages(chat, 1);
+
+    return messages && messages.length ? messages[0] : null;
+  }
+
   async getChatUpdatedAt(chat: Chat) {
     if (chat.messages) {
       return chat.messages.length ? chat.messages[0].createdAt.toDateString() : null;

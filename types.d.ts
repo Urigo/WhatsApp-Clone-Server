@@ -163,6 +163,8 @@ export namespace ChatResolvers {
 
     messages?: MessagesResolver<(Maybe<Message>)[], TypeParent, Context>;
 
+    lastMessage?: LastMessageResolver<Maybe<Message>, TypeParent, Context>;
+
     updatedAt?: UpdatedAtResolver<Maybe<string>, TypeParent, Context>;
 
     unreadMessages?: UnreadMessagesResolver<number, TypeParent, Context>;
@@ -227,6 +229,11 @@ export namespace ChatResolvers {
     amount?: Maybe<number>;
   }
 
+  export type LastMessageResolver<
+    R = Maybe<Message>,
+    Parent = Chat,
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context>;
   export type UpdatedAtResolver<
     R = Maybe<string>,
     Parent = Chat,

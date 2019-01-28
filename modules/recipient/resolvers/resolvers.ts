@@ -21,5 +21,7 @@ export default {
   Message: {
     recipients: async (message, args, { injector }) => injector.get(RecipientProvider).getMessageRecipients(message),
   },
-  Recipient: {},
+  Recipient: {
+    chat: async (recipient, args, { injector }) => injector.get(RecipientProvider).getRecipientChat(recipient),
+  },
 } as IResolvers;

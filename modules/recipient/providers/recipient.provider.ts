@@ -39,8 +39,15 @@ export class RecipientProvider {
         messageId: message.id,
       })
       .innerJoinAndSelect('recipient.user', 'user')
-      .innerJoinAndSelect('recipient.chat', 'chat')
       .getMany();
+  }
+
+  async getRecipientChat(recipient: Recipient) {
+    if (recipient.message.chat) {
+      return recipient.message.chat;
+    }
+
+    return this.messageProvider.getMessageChat(recipient.message);
   }
 
   async removeChat(chatId: string) {

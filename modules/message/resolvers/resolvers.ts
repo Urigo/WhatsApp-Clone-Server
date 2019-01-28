@@ -31,6 +31,8 @@ export default {
   Chat: {
     messages: async (chat, { amount }, { injector }) =>
       injector.get(MessageProvider).getChatMessages(chat, amount || 0),
+    lastMessage: async (chat, args, { injector }) =>
+      injector.get(MessageProvider).getChatLastMessage(chat),
     updatedAt: async (chat, args, { injector }) => injector.get(MessageProvider).getChatUpdatedAt(chat),
   },
   Message: {

@@ -10,6 +10,7 @@ enum MessageType {
 
 extend type Chat {
   messages(amount: Int): [Message]!
+  lastMessage: Message
   updatedAt: String
 }
 
