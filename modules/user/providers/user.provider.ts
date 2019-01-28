@@ -1,79 +1,70 @@
-import { Inject, Injectable } from '@graphql-modules/di'
+import { Injectable, ProviderScope } from '@graphql-modules/di'
 import { PubSub } from 'apollo-server-express'
 import { Connection } from 'typeorm'
-import { User } from "../../../entity/User";
-import { APP } from "../../app.symbols";
-import { Express } from "express";
-import multer from 'multer';
-import tmp from 'tmp';
-import '../../../types/cloudinary';
+import { User } from '../../../entity/User';
+import { AuthProvider } from '../../auth/providers/auth.provider';
 import cloudinary from 'cloudinary';
-export const CLOUDINARY_URL = process.env.CLOUDINARY_URL || '';
 
 @Injectable()
 export class UserProvider {
+
   constructor(
     private pubsub: PubSub,
     private connection: Connection,
-    @Inject(APP) private app: Express,
-  ) {
-    const match = CLOUDINARY_URL.match(/cloudinary:\/\/(\d+):(\w+)@(\.+)/);
+    private authProvider: AuthProvider,
+  ) { }
 
-    if (match) {
-      const [api_key, api_secret, cloud_name] = match.slice(1);
-      cloudinary.config({ api_key, api_secret, cloud_name });
-    }
+  public repository = this.connection.getRepository(User);
+  private currentUser = this.authProvider.currentUser;
 
-    const upload = multer({
-      dest: tmp.dirSync({ unsafeCleanup: true }).name,
-    });
-
-    app.post('/upload-profile-pic', upload.single('file'), (req: any, res, done) => {
-      cloudinary.v2.uploader.upload(req.file.path, (error, result) => {
-        if (error) {
-          done(error);
-        } else {
-          res.json(result);
-        }
-      })
-    });
+  createQueryBuilder() {
+    return this.connection.createQueryBuilder(User, 'user');
   }
 
-  getMe(currentUser: User) {
-    return currentUser;
+  getMe() {
+    return this.currentUser;
   }
 
-  async getUsers(currentUser: User) {
-    return await this.connection
-      .createQueryBuilder(User, 'user')
-      .where('user.id != :id', {id: currentUser.id})
-      .getMany();
+  getUsers() {
+    return this.createQueryBuilder().where('user.id != :id', {id: this.currentUser.id}).getMany();
   }
 
-  async updateUser(currentUser: User, {
+  async updateUser({
     name,
     picture,
   }: {
     name?: string,
     picture?: string,
   } = {}) {
-    if (name === currentUser.name && picture === currentUser.picture) {
-      return currentUser;
+    if (name === this.currentUser.name && picture === this.currentUser.picture) {
+      return this.currentUser;
     }
 
-    currentUser.name = name || currentUser.name;
-    currentUser.picture = picture || currentUser.picture;
+    this.currentUser.name = name || this.currentUser.name;
+    this.currentUser.picture = picture || this.currentUser.picture;
 
-    await this.connection.getRepository(User).save(currentUser);
+    await this.repository.save(this.currentUser);
 
     this.pubsub.publish('userUpdated', {
-      userUpdated: currentUser,
+      userUpdated: this.currentUser,
     });
 
-    return currentUser;
+    return this.currentUser;
   }
 
-  filterUserAddedOrUpdated(currentUser: User, userAddedOrUpdated: User) {
-    return userAddedOrUpdated.id !== currentUser.id;
+  filterUserAddedOrUpdated(userAddedOrUpdated: User) {
+    return userAddedOrUpdated.id !== this.currentUser.id;
+  }
+
+  uploadProfilePic(filePath: string) {
+    return new Promise((resolve, reject) => {
+      cloudinary.v2.uploader.upload(filePath, (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      })
+    });
   }
 }

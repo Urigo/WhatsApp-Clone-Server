@@ -1,68 +1,82 @@
-import { Inject, Injectable } from '@graphql-modules/di';
-import { Connection } from "typeorm";
-import { Express } from "express";
-import passport from "passport";
-import basicStrategy from "passport-http";
-import { User } from "../../../entity/User";
-import bcrypt from "bcrypt-nodejs";
-import { APP } from "../../app.symbols";
+import { Injectable, ProviderScope } from '@graphql-modules/di';
+import { ModuleSessionInfo, OnRequest, OnConnect } from '@graphql-modules/core';
+import { Connection } from 'typeorm';
+import { User } from '../../../entity/User';
+import bcrypt from 'bcrypt-nodejs';
 import { PubSub } from 'apollo-server-express'
 
-export function generateHash(password: string) {
-  return bcrypt.hashSync(password, bcrypt.genSaltSync(8));
-}
+@Injectable({
+  scope: ProviderScope.Session
+})
+export class AuthProvider implements OnRequest, OnConnect {
 
-export function validPassword(password: string, localPassword: string) {
-  return bcrypt.compareSync(password, localPassword);
-}
-
-@Injectable()
-export class AuthProvider {
+  currentUser: User;
   constructor(
     private connection: Connection,
-    @Inject(APP) private app: Express,
     private pubsub: PubSub,
-  ) {
-    passport.use('basic-signin', new basicStrategy.BasicStrategy(
-      async function (username: string, password: string, done: any) {
-        const user = await connection.getRepository(User).findOne({where: { username }});
-        if (user && validPassword(password, user.password)) {
-          return done(null, user);
-        }
-        return done(null, false);
+  ) { }
+
+  onRequest({ session }: ModuleSessionInfo) {
+    if ('req' in session) {
+      this.currentUser = session.req.user;
+    }
+  }
+
+  async onConnect(connectionParams: { authToken?: string }) {
+    if (connectionParams.authToken) {
+      // Create a buffer and tell it the data coming in is base64
+      const buf = new Buffer(connectionParams.authToken.split(' ')[1], 'base64');
+      // Read it back out as a string
+      const [username, password]: string[] = buf.toString().split(':');
+      const user = await this.signIn(username, password);
+      if (user) {
+        // Set context for the WebSocket
+        this.currentUser = user;
+      } else {
+        throw new Error('Wrong credentials!');
       }
-    ));
+    } else {
+      throw new Error('Missing auth token!');
+    }
+  }
 
-    passport.use('basic-signup', new basicStrategy.BasicStrategy({passReqToCallback: true},
-      async function (req: any, username: string, password: string, done: any) {
-        const userExists = !!(await connection.getRepository(User).findOne({where: { username }}));
-        if (!userExists && password && req.body.name) {
-          const user = await connection.manager.save(new User({
-            username,
-            password: generateHash(password),
-            name: req.body.name,
-          }));
+  getUserByUsername(username: string) {
+    return this.connection.getRepository(User).findOne({where: { username }});
+  }
 
-          pubsub.publish('userAdded', {
-            userAdded: user,
-          });
+  async signIn(username: string, password: string): Promise<User | false> {
+    const user = await this.getUserByUsername(username);
+    if (user && this.validPassword(password, user.password)) {
+      return user;
+    } else {
+      return false;
+    }
+  }
 
-          return done(null, user);
-        }
-        return done(null, false);
-      }
-    ));
-
-    app.post('/signup',
-      passport.authenticate('basic-signup', {session: false}),
-      function (req: any, res) {
-        res.json(req.user);
+  async signUp(username: string, password: string, name: string): Promise<User | false> {
+    const userExists = !!(await this.getUserByUsername(username));
+    if (!userExists) {
+      const user = this.connection.manager.save(
+        new User({
+          username,
+          password: this.generateHash(password),
+          name,
+        })
+      )
+      this.pubsub.publish('userAdded', {
+        userAdded: user,
       });
+      return user;
+    } else {
+      return false;
+    }
+  }
 
-    app.use(passport.authenticate('basic-signin', {session: false}));
+  generateHash(password: string) {
+    return bcrypt.hashSync(password, bcrypt.genSaltSync(8));
+  }
 
-    app.post('/signin', function (req, res) {
-      res.json(req.user);
-    });
+  validPassword(password: string, localPassword: string) {
+    return bcrypt.compareSync(password, localPassword);
   }
 }

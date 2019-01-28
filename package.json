@@ -3,9 +3,12 @@
   "description": "A newly created Tortilla project",
   "private": true,
   "scripts": {
-    "start": "npm run build:live",
-    "build:live": "nodemon --exec ./node_modules/.bin/ts-node -- ./index.ts",
-    "generator": "gql-gen --config codegen.js"
+    "generate": "gql-gen",
+    "generate:watch": "nodemon --exec yarn generate -e graphql",
+    "start:server": "ts-node index.ts",
+    "start:server:watch": "nodemon --exec yarn start:server -e ts",
+    "dev": "concurrently \"yarn generate:watch\" \"yarn start:server:watch\"",
+    "start": "yarn generate && yarn start:server"
   },
   "devDependencies": {
     "@types/bcrypt-nodejs": "^0.0.30",
@@ -19,17 +22,17 @@
     "@types/passport-http": "^0.3.7",
     "@types/pg": "^7.4.11",
     "@types/tmp": "^0.0.33",
+    "concurrently": "^4.1.0",
+    "graphql-code-generator": "^0.15.2",
     "graphql-codegen-typescript-common": "^0.16.0",
     "graphql-codegen-typescript-resolvers": "^0.16.0",
-    "graphql-codegen-typescript-server": "^0.16.0",
     "nodemon": "^1.18.9",
     "ts-node": "^7.0.1",
     "typescript": "^3.2.2"
   },
   "dependencies": {
-    "@graphql-modules/core": "^0.3.0",
-    "@graphql-modules/epoxy": "^0.3.0",
-    "@graphql-modules/sonar": "^0.3.0",
+    "@graphql-modules/core": "0.4.0-alpha.c6bb119d",
+    "@graphql-modules/sonar": "0.4.0-alpha.c6bb119d",
     "apollo-server-express": "^2.3.1",
     "bcrypt-nodejs": "^0.0.3",
     "body-parser": "^1.18.3",
@@ -37,7 +40,6 @@
     "cors": "^2.8.5",
     "express": "^4.16.4",
     "graphql": "^14.0.2",
-    "graphql-code-generator": "^0.15.2",
     "moment": "^2.23.0",
     "multer": "^1.4.1",
     "passport": "^0.4.0",

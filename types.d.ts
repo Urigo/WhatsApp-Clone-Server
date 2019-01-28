@@ -5,216 +5,17 @@ export enum MessageType {
   Text = "TEXT",
   Picture = "PICTURE"
 }
-
-// ====================================================
-// Types
-// ====================================================
-
-export interface Query {
-  me?: Maybe<User>;
-
-  users?: Maybe<User[]>;
-
-  chats: Chat[];
-
-  chat?: Maybe<Chat>;
-}
-
-export interface User {
-  id: string;
-
-  name?: Maybe<string>;
-
-  picture?: Maybe<string>;
-
-  phone?: Maybe<string>;
-}
-
-export interface Chat {
-  id: string;
-
-  createdAt: string;
-
-  name?: Maybe<string>;
-
-  picture?: Maybe<string>;
-
-  allTimeMembers: User[];
-
-  listingMembers: User[];
-
-  actualGroupMembers?: Maybe<User[]>;
-
-  admins?: Maybe<User[]>;
-
-  owner?: Maybe<User>;
-
-  isGroup: boolean;
-
-  messages: (Maybe<Message>)[];
-
-  updatedAt?: Maybe<string>;
-
-  unreadMessages: number;
-}
-
-export interface Message {
-  id: string;
-
-  sender: User;
-
-  chat: Chat;
-
-  content: string;
-
-  createdAt: string;
-
-  type: number;
-
-  holders: User[];
-
-  ownership: boolean;
-
-  recipients: Recipient[];
-}
-
-export interface Recipient {
-  user: User;
-
-  message: Message;
-
-  chat: Chat;
-
-  receivedAt?: Maybe<string>;
-
-  readAt?: Maybe<string>;
-}
-
-export interface Mutation {
-  updateUser: User;
-
-  addChat?: Maybe<Chat>;
-
-  addGroup?: Maybe<Chat>;
-
-  updateChat?: Maybe<Chat>;
-
-  removeChat?: Maybe<string>;
-
-  addAdmins: (Maybe<string>)[];
-
-  removeAdmins: (Maybe<string>)[];
-
-  addMembers: (Maybe<string>)[];
-
-  removeMembers: (Maybe<string>)[];
-
-  addMessage?: Maybe<Message>;
-
-  removeMessages: (Maybe<string>)[];
-
-  markAsReceived?: Maybe<boolean>;
-
-  markAsRead?: Maybe<boolean>;
-}
-
-export interface Subscription {
-  userAdded?: Maybe<User>;
-
-  userUpdated?: Maybe<User>;
-
-  chatAdded?: Maybe<Chat>;
-
-  chatUpdated?: Maybe<Chat>;
-
-  messageAdded?: Maybe<Message>;
-}
-
-// ====================================================
-// Arguments
-// ====================================================
-
-export interface ChatQueryArgs {
-  chatId: string;
-}
-export interface MessagesChatArgs {
-  amount?: Maybe<number>;
-}
-export interface UpdateUserMutationArgs {
-  name?: Maybe<string>;
-
-  picture?: Maybe<string>;
-}
-export interface AddChatMutationArgs {
-  userId: string;
-}
-export interface AddGroupMutationArgs {
-  userIds: string[];
-
-  groupName: string;
-
-  groupPicture?: Maybe<string>;
-}
-export interface UpdateChatMutationArgs {
-  chatId: string;
-
-  name?: Maybe<string>;
-
-  picture?: Maybe<string>;
-}
-export interface RemoveChatMutationArgs {
-  chatId: string;
-}
-export interface AddAdminsMutationArgs {
-  groupId: string;
-
-  userIds: string[];
-}
-export interface RemoveAdminsMutationArgs {
-  groupId: string;
-
-  userIds: string[];
-}
-export interface AddMembersMutationArgs {
-  groupId: string;
-
-  userIds: string[];
-}
-export interface RemoveMembersMutationArgs {
-  groupId: string;
-
-  userIds: string[];
-}
-export interface AddMessageMutationArgs {
-  chatId: string;
-
-  content: string;
-}
-export interface RemoveMessagesMutationArgs {
-  chatId: string;
-
-  messageIds?: Maybe<string[]>;
-
-  all?: Maybe<boolean>;
-}
-export interface MarkAsReceivedMutationArgs {
-  chatId: string;
-}
-export interface MarkAsReadMutationArgs {
-  chatId: string;
-}
-
 import { GraphQLResolveInfo } from "graphql";
 
-import { Chat } from "../entity/Chat";
+import { Chat } from "./entity/Chat";
 
-import { Message } from "../entity/Message";
+import { Message } from "./entity/Message";
 
-import { Recipient } from "../entity/Recipient";
+import { Recipient } from "./entity/Recipient";
 
-import { User } from "../entity/User";
+import { User } from "./entity/User";
 
-import { IUserModuleContext } from "../modules/user/index";
+import { ModuleContext } from "@graphql-modules/core";
 
 export type Resolver<Result, Parent = {}, Context = {}, Args = {}> = (
   parent: Parent,
@@ -266,7 +67,7 @@ export type DirectiveResolverFn<TResult, TArgs = {}, TContext = {}> = (
 ) => TResult | Promise<TResult>;
 
 export namespace QueryResolvers {
-  export interface Resolvers<Context = IUserModuleContext, TypeParent = {}> {
+  export interface Resolvers<Context = ModuleContext, TypeParent = {}> {
     me?: MeResolver<Maybe<User>, TypeParent, Context>;
 
     users?: UsersResolver<Maybe<User[]>, TypeParent, Context>;
@@ -279,22 +80,22 @@ export namespace QueryResolvers {
   export type MeResolver<
     R = Maybe<User>,
     Parent = {},
-    Context = IUserModuleContext
+    Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type UsersResolver<
     R = Maybe<User[]>,
     Parent = {},
-    Context = IUserModuleContext
+    Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type ChatsResolver<
     R = Chat[],
     Parent = {},
-    Context = IUserModuleContext
+    Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type ChatResolver<
     R = Maybe<Chat>,
     Parent = {},
-    Context = IUserModuleContext
+    Context = ModuleContext
   > = Resolver<R, Parent, Context, ChatArgs>;
   export interface ChatArgs {
     chatId: string;
@@ -302,7 +103,7 @@ export namespace QueryResolvers {
 }
 
 export namespace UserResolvers {
-  export interface Resolvers<Context = IUserModuleContext, TypeParent = User> {
+  export interface Resolvers<Context = ModuleContext, TypeParent = User> {
     id?: IdResolver<string, TypeParent, Context>;
 
     name?: NameResolver<Maybe<string>, TypeParent, Context>;
@@ -315,27 +116,27 @@ export namespace UserResolvers {
   export type IdResolver<
     R = string,
     Parent = User,
-    Context = IUserModuleContext
+    Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type NameResolver<
     R = Maybe<string>,
     Parent = User,
-    Context = IUserModuleContext
+    Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type PictureResolver<
     R = Maybe<string>,
     Parent = User,
-    Context = IUserModuleContext
+    Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type PhoneResolver<
     R = Maybe<string>,
     Parent = User,
-    Context = IUserModuleContext
+    Context = ModuleContext
   > = Resolver<R, Parent, Context>;
 }
 
 export namespace ChatResolvers {
-  export interface Resolvers<Context = IUserModuleContext, TypeParent = Chat> {
+  export interface Resolvers<Context = ModuleContext, TypeParent = Chat> {
     id?: IdResolver<string, TypeParent, Context>;
 
     createdAt?: CreatedAtResolver<string, TypeParent, Context>;
@@ -370,57 +171,57 @@ export namespace ChatResolvers {
   export type IdResolver<
     R = string,
     Parent = Chat,
-    Context = IUserModuleContext
+    Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type CreatedAtResolver<
     R = string,
     Parent = Chat,
-    Context = IUserModuleContext
+    Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type NameResolver<
     R = Maybe<string>,
     Parent = Chat,
-    Context = IUserModuleContext
+    Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type PictureResolver<
     R = Maybe<string>,
     Parent = Chat,
-    Context = IUserModuleContext
+    Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type AllTimeMembersResolver<
     R = User[],
     Parent = Chat,
-    Context = IUserModuleContext
+    Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type ListingMembersResolver<
     R = User[],
     Parent = Chat,
-    Context = IUserModuleContext
+    Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type ActualGroupMembersResolver<
     R = Maybe<User[]>,
     Parent = Chat,
-    Context = IUserModuleContext
+    Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type AdminsResolver<
     R = Maybe<User[]>,
     Parent = Chat,
-    Context = IUserModuleContext
+    Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type OwnerResolver<
     R = Maybe<User>,
     Parent = Chat,
-    Context = IUserModuleContext
+    Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type IsGroupResolver<
     R = boolean,
     Parent = Chat,
-    Context = IUserModuleContext
+    Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type MessagesResolver<
     R = (Maybe<Message>)[],
     Parent = Chat,
-    Context = IUserModuleContext
+    Context = ModuleContext
   > = Resolver<R, Parent, Context, MessagesArgs>;
   export interface MessagesArgs {
     amount?: Maybe<number>;
@@ -429,20 +230,17 @@ export namespace ChatResolvers {
   export type UpdatedAtResolver<
     R = Maybe<string>,
     Parent = Chat,
-    Context = IUserModuleContext
+    Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type UnreadMessagesResolver<
     R = number,
     Parent = Chat,
-    Context = IUserModuleContext
+    Context = ModuleContext
   > = Resolver<R, Parent, Context>;
 }
 
 export namespace MessageResolvers {
-  export interface Resolvers<
-    Context = IUserModuleContext,
-    TypeParent = Message
-  > {
+  export interface Resolvers<Context = ModuleContext, TypeParent = Message> {
     id?: IdResolver<string, TypeParent, Context>;
 
     sender?: SenderResolver<User, TypeParent, Context>;
@@ -465,55 +263,52 @@ export namespace MessageResolvers {
   export type IdResolver<
     R = string,
     Parent = Message,
-    Context = IUserModuleContext
+    Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type SenderResolver<
     R = User,
     Parent = Message,
-    Context = IUserModuleContext
+    Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type ChatResolver<
     R = Chat,
     Parent = Message,
-    Context = IUserModuleContext
+    Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type ContentResolver<
     R = string,
     Parent = Message,
-    Context = IUserModuleContext
+    Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type CreatedAtResolver<
     R = string,
     Parent = Message,
-    Context = IUserModuleContext
+    Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type TypeResolver<
     R = number,
     Parent = Message,
-    Context = IUserModuleContext
+    Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type HoldersResolver<
     R = User[],
     Parent = Message,
-    Context = IUserModuleContext
+    Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type OwnershipResolver<
     R = boolean,
     Parent = Message,
-    Context = IUserModuleContext
+    Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type RecipientsResolver<
     R = Recipient[],
     Parent = Message,
-    Context = IUserModuleContext
+    Context = ModuleContext
   > = Resolver<R, Parent, Context>;
 }
 
 export namespace RecipientResolvers {
-  export interface Resolvers<
-    Context = IUserModuleContext,
-    TypeParent = Recipient
-  > {
+  export interface Resolvers<Context = ModuleContext, TypeParent = Recipient> {
     user?: UserResolver<User, TypeParent, Context>;
 
     message?: MessageResolver<Message, TypeParent, Context>;
@@ -528,32 +323,32 @@ export namespace RecipientResolvers {
   export type UserResolver<
     R = User,
     Parent = Recipient,
-    Context = IUserModuleContext
+    Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type MessageResolver<
     R = Message,
     Parent = Recipient,
-    Context = IUserModuleContext
+    Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type ChatResolver<
     R = Chat,
     Parent = Recipient,
-    Context = IUserModuleContext
+    Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type ReceivedAtResolver<
     R = Maybe<string>,
     Parent = Recipient,
-    Context = IUserModuleContext
+    Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type ReadAtResolver<
     R = Maybe<string>,
     Parent = Recipient,
-    Context = IUserModuleContext
+    Context = ModuleContext
   > = Resolver<R, Parent, Context>;
 }
 
 export namespace MutationResolvers {
-  export interface Resolvers<Context = IUserModuleContext, TypeParent = {}> {
+  export interface Resolvers<Context = ModuleContext, TypeParent = {}> {
     updateUser?: UpdateUserResolver<User, TypeParent, Context>;
 
     addChat?: AddChatResolver<Maybe<Chat>, TypeParent, Context>;
@@ -596,7 +391,7 @@ export namespace MutationResolvers {
   export type UpdateUserResolver<
     R = User,
     Parent = {},
-    Context = IUserModuleContext
+    Context = ModuleContext
   > = Resolver<R, Parent, Context, UpdateUserArgs>;
   export interface UpdateUserArgs {
     name?: Maybe<string>;
@@ -607,7 +402,7 @@ export namespace MutationResolvers {
   export type AddChatResolver<
     R = Maybe<Chat>,
     Parent = {},
-    Context = IUserModuleContext
+    Context = ModuleContext
   > = Resolver<R, Parent, Context, AddChatArgs>;
   export interface AddChatArgs {
     userId: string;
@@ -616,7 +411,7 @@ export namespace MutationResolvers {
   export type AddGroupResolver<
     R = Maybe<Chat>,
     Parent = {},
-    Context = IUserModuleContext
+    Context = ModuleContext
   > = Resolver<R, Parent, Context, AddGroupArgs>;
   export interface AddGroupArgs {
     userIds: string[];
@@ -629,7 +424,7 @@ export namespace MutationResolvers {
   export type UpdateChatResolver<
     R = Maybe<Chat>,
     Parent = {},
-    Context = IUserModuleContext
+    Context = ModuleContext
   > = Resolver<R, Parent, Context, UpdateChatArgs>;
   export interface UpdateChatArgs {
     chatId: string;
@@ -642,7 +437,7 @@ export namespace MutationResolvers {
   export type RemoveChatResolver<
     R = Maybe<string>,
     Parent = {},
-    Context = IUserModuleContext
+    Context = ModuleContext
   > = Resolver<R, Parent, Context, RemoveChatArgs>;
   export interface RemoveChatArgs {
     chatId: string;
@@ -651,7 +446,7 @@ export namespace MutationResolvers {
   export type AddAdminsResolver<
     R = (Maybe<string>)[],
     Parent = {},
-    Context = IUserModuleContext
+    Context = ModuleContext
   > = Resolver<R, Parent, Context, AddAdminsArgs>;
   export interface AddAdminsArgs {
     groupId: string;
@@ -662,7 +457,7 @@ export namespace MutationResolvers {
   export type RemoveAdminsResolver<
     R = (Maybe<string>)[],
     Parent = {},
-    Context = IUserModuleContext
+    Context = ModuleContext
   > = Resolver<R, Parent, Context, RemoveAdminsArgs>;
   export interface RemoveAdminsArgs {
     groupId: string;
@@ -673,7 +468,7 @@ export namespace MutationResolvers {
   export type AddMembersResolver<
     R = (Maybe<string>)[],
     Parent = {},
-    Context = IUserModuleContext
+    Context = ModuleContext
   > = Resolver<R, Parent, Context, AddMembersArgs>;
   export interface AddMembersArgs {
     groupId: string;
@@ -684,7 +479,7 @@ export namespace MutationResolvers {
   export type RemoveMembersResolver<
     R = (Maybe<string>)[],
     Parent = {},
-    Context = IUserModuleContext
+    Context = ModuleContext
   > = Resolver<R, Parent, Context, RemoveMembersArgs>;
   export interface RemoveMembersArgs {
     groupId: string;
@@ -695,7 +490,7 @@ export namespace MutationResolvers {
   export type AddMessageResolver<
     R = Maybe<Message>,
     Parent = {},
-    Context = IUserModuleContext
+    Context = ModuleContext
   > = Resolver<R, Parent, Context, AddMessageArgs>;
   export interface AddMessageArgs {
     chatId: string;
@@ -706,7 +501,7 @@ export namespace MutationResolvers {
   export type RemoveMessagesResolver<
     R = (Maybe<string>)[],
     Parent = {},
-    Context = IUserModuleContext
+    Context = ModuleContext
   > = Resolver<R, Parent, Context, RemoveMessagesArgs>;
   export interface RemoveMessagesArgs {
     chatId: string;
@@ -719,7 +514,7 @@ export namespace MutationResolvers {
   export type MarkAsReceivedResolver<
     R = Maybe<boolean>,
     Parent = {},
-    Context = IUserModuleContext
+    Context = ModuleContext
   > = Resolver<R, Parent, Context, MarkAsReceivedArgs>;
   export interface MarkAsReceivedArgs {
     chatId: string;
@@ -728,7 +523,7 @@ export namespace MutationResolvers {
   export type MarkAsReadResolver<
     R = Maybe<boolean>,
     Parent = {},
-    Context = IUserModuleContext
+    Context = ModuleContext
   > = Resolver<R, Parent, Context, MarkAsReadArgs>;
   export interface MarkAsReadArgs {
     chatId: string;
@@ -736,7 +531,7 @@ export namespace MutationResolvers {
 }
 
 export namespace SubscriptionResolvers {
-  export interface Resolvers<Context = IUserModuleContext, TypeParent = {}> {
+  export interface Resolvers<Context = ModuleContext, TypeParent = {}> {
     userAdded?: UserAddedResolver<Maybe<User>, TypeParent, Context>;
 
     userUpdated?: UserUpdatedResolver<Maybe<User>, TypeParent, Context>;
@@ -751,27 +546,27 @@ export namespace SubscriptionResolvers {
   export type UserAddedResolver<
     R = Maybe<User>,
     Parent = {},
-    Context = IUserModuleContext
+    Context = ModuleContext
   > = SubscriptionResolver<R, Parent, Context>;
   export type UserUpdatedResolver<
     R = Maybe<User>,
     Parent = {},
-    Context = IUserModuleContext
+    Context = ModuleContext
   > = SubscriptionResolver<R, Parent, Context>;
   export type ChatAddedResolver<
     R = Maybe<Chat>,
     Parent = {},
-    Context = IUserModuleContext
+    Context = ModuleContext
   > = SubscriptionResolver<R, Parent, Context>;
   export type ChatUpdatedResolver<
     R = Maybe<Chat>,
     Parent = {},
-    Context = IUserModuleContext
+    Context = ModuleContext
   > = SubscriptionResolver<R, Parent, Context>;
   export type MessageAddedResolver<
     R = Maybe<Message>,
     Parent = {},
-    Context = IUserModuleContext
+    Context = ModuleContext
   > = SubscriptionResolver<R, Parent, Context>;
 }
 
@@ -779,7 +574,7 @@ export namespace SubscriptionResolvers {
 export type SkipDirectiveResolver<Result> = DirectiveResolverFn<
   Result,
   SkipDirectiveArgs,
-  IUserModuleContext
+  ModuleContext
 >;
 export interface SkipDirectiveArgs {
   /** Skipped when true. */
@@ -790,7 +585,7 @@ export interface SkipDirectiveArgs {
 export type IncludeDirectiveResolver<Result> = DirectiveResolverFn<
   Result,
   IncludeDirectiveArgs,
-  IUserModuleContext
+  ModuleContext
 >;
 export interface IncludeDirectiveArgs {
   /** Included when true. */
@@ -801,14 +596,14 @@ export interface IncludeDirectiveArgs {
 export type DeprecatedDirectiveResolver<Result> = DirectiveResolverFn<
   Result,
   DeprecatedDirectiveArgs,
-  IUserModuleContext
+  ModuleContext
 >;
 export interface DeprecatedDirectiveArgs {
   /** Explains why this element was deprecated, usually also including a suggestion for how to access supported similar data. Formatted using the Markdown syntax (as specified by [CommonMark](https://commonmark.org/). */
   reason?: string;
 }
 
-export interface IResolvers<Context = IUserModuleContext> {
+export interface IResolvers<Context = ModuleContext> {
   Query?: QueryResolvers.Resolvers<Context>;
   User?: UserResolvers.Resolvers<Context>;
   Chat?: ChatResolvers.Resolvers<Context>;

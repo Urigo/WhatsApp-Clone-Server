@@ -1,7 +1,7 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToMany, OneToMany } from "typeorm";
-import { Chat } from "./Chat";
-import { Message } from "./Message";
-import { Recipient } from "./Recipient";
+import { Entity, Column, PrimaryGeneratedColumn, ManyToMany, OneToMany } from 'typeorm';
+import { Chat } from './Chat';
+import { Message } from './Message';
+import { Recipient } from './Recipient';
 
 interface UserConstructor {
   username?: string;
