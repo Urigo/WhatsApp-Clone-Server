@@ -4,7 +4,7 @@ import { Recipient } from './entity/Recipient';
 import moment from 'moment';
 import { Message } from './entity/Message';
 import { User } from './entity/User';
-import { Connection } from 'typeorm';
+import { getConnection } from 'typeorm';
 
 export enum MessageType {
   PICTURE,
@@ -12,7 +12,8 @@ export enum MessageType {
   LOCATION,
 }
 
-export async function addSampleData(connection: Connection) {
+export async function addSampleData() {
+  const connection = getConnection();
   const user1 = new User({
     username: 'ethan',
     password: '$2a$08$NO9tkFLCoSqX1c5wk3s7z.JfxaVMKA.m7zUDdDwEquo4rvzimQeJm', // 111
