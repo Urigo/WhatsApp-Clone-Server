@@ -3,6 +3,7 @@ import { withFilter } from 'apollo-server-express';
 import { UserProvider } from '../providers/user.provider';
 import { User } from '../../../entity/User';
 import { IResolvers } from '../../../types';
+import { ModuleContext } from '@graphql-modules/core';
 
 export default {
   Query: {
@@ -18,14 +19,14 @@ export default {
   Subscription: {
     userAdded: {
       subscribe: withFilter(
-        (root, args, { injector }) => injector.get(PubSub).asyncIterator('userAdded'),
-        ({userAdded}: { userAdded: User }, variables, { injector }) => injector.get(UserProvider).filterUserAddedOrUpdated(userAdded),
+        (root, args, { injector }: ModuleContext) => injector.get(PubSub).asyncIterator('userAdded'),
+        ({userAdded}: { userAdded: User }, variables, { injector }: ModuleContext) => injector.get(UserProvider).filterUserAddedOrUpdated(userAdded),
       ),
     },
     userUpdated: {
       subscribe: withFilter(
-        (root, args, { injector }) => injector.get(PubSub).asyncIterator('userAdded'),
-        ({userUpdated}: { userUpdated: User }, variables, { injector }) => injector.get(UserProvider).filterUserAddedOrUpdated(userUpdated)
+        (root, args, { injector }: ModuleContext) => injector.get(PubSub).asyncIterator('userAdded'),
+        ({userUpdated}: { userUpdated: User }, variables, { injector }: ModuleContext) => injector.get(UserProvider).filterUserAddedOrUpdated(userUpdated)
       ),
     },
   },

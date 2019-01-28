@@ -14,4 +14,6 @@ generates:
         Message: ./entity/Message#Message
         Recipient: ./entity/Recipient#Recipient
         User: ./entity/User#User
-    
+      scalars:
+        Date: Date
+

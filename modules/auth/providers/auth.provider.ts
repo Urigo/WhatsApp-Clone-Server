@@ -14,7 +14,7 @@ export class AuthProvider implements OnRequest, OnConnect {
   constructor(
     private connection: Connection,
     private pubsub: PubSub,
-  ) { }
+  ) {}
 
   onRequest({ session }: ModuleSessionInfo) {
     if ('req' in session) {

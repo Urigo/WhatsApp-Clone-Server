@@ -6,7 +6,6 @@ export enum MessageType {
   Picture = "PICTURE"
 }
 
-export type Date = any;
 import {
   GraphQLResolveInfo,
   GraphQLScalarType,

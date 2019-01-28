@@ -2,6 +2,7 @@ import { PubSub, withFilter } from 'apollo-server-express';
 import { Chat } from '../../../entity/Chat';
 import { IResolvers } from '../../../types';
 import { ChatProvider } from '../providers/chat.provider';
+import { ModuleContext } from '@graphql-modules/core';
 
 export default {
   Query: {
@@ -27,14 +28,14 @@ export default {
   },
   Subscription: {
     chatAdded: {
-      subscribe: withFilter((root, args, { injector }) => injector.get(PubSub).asyncIterator('chatAdded'),
-        ({ chatAdded, creatorId }: { chatAdded: Chat, creatorId: number }, variables, { injector }) =>
+      subscribe: withFilter((root, args, { injector }: ModuleContext) => injector.get(PubSub).asyncIterator('chatAdded'),
+        ({ chatAdded, creatorId }: { chatAdded: Chat, creatorId: number }, variables, { injector }: ModuleContext) =>
           injector.get(ChatProvider).filterChatAddedOrUpdated(chatAdded, creatorId)
       ),
     },
     chatUpdated: {
-      subscribe: withFilter((root, args, { injector }) => injector.get(PubSub).asyncIterator('chatUpdated'),
-        ({ chatUpdated, updaterId }: { chatUpdated: Chat, updaterId: number }, variables, { injector }) =>
+      subscribe: withFilter((root, args, { injector }: ModuleContext) => injector.get(PubSub).asyncIterator('chatUpdated'),
+        ({ chatUpdated, updaterId }: { chatUpdated: Chat, updaterId: number }, variables, { injector }: ModuleContext) =>
           injector.get(ChatProvider).filterChatAddedOrUpdated(chatUpdated, updaterId)
       ),
     },

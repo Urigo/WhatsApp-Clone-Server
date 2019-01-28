@@ -3,6 +3,7 @@ import { withFilter } from 'apollo-server-express';
 import { Message } from '../../../entity/Message';
 import { IResolvers } from '../../../types';
 import { MessageProvider } from '../providers/message.provider';
+import { ModuleContext } from '@graphql-modules/core';
 
 export default {
   Query: {
@@ -22,9 +23,8 @@ export default {
   },
   Subscription: {
     messageAdded: {
-      subscribe: withFilter((root, args, { injector }) => injector.get(PubSub).asyncIterator('messageAdded'),
-        ({ messageAdded }: { messageAdded: Message }, variables, { injector }) =>
-          injector.get(MessageProvider).filterMessageAdded(messageAdded)
+      subscribe: withFilter((root, args, { injector }: ModuleContext) => injector.get(PubSub).asyncIterator('messageAdded'),
+        (data: { messageAdded: Message }, variables, { injector }: ModuleContext) => injector.get(MessageProvider).filterMessageAdded(data.messageAdded)
       ),
     },
   },
