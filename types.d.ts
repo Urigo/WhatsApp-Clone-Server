@@ -5,7 +5,13 @@ export enum MessageType {
   Text = "TEXT",
   Picture = "PICTURE"
 }
-import { GraphQLResolveInfo } from "graphql";
+
+export type Date = any;
+import {
+  GraphQLResolveInfo,
+  GraphQLScalarType,
+  GraphQLScalarTypeConfig
+} from "graphql";
 
 import { Chat } from "./entity/Chat";
 
@@ -139,7 +145,7 @@ export namespace ChatResolvers {
   export interface Resolvers<Context = ModuleContext, TypeParent = Chat> {
     id?: IdResolver<string, TypeParent, Context>;
 
-    createdAt?: CreatedAtResolver<string, TypeParent, Context>;
+    createdAt?: CreatedAtResolver<Date, TypeParent, Context>;
 
     name?: NameResolver<Maybe<string>, TypeParent, Context>;
 
@@ -165,7 +171,7 @@ export namespace ChatResolvers {
 
     lastMessage?: LastMessageResolver<Maybe<Message>, TypeParent, Context>;
 
-    updatedAt?: UpdatedAtResolver<Maybe<string>, TypeParent, Context>;
+    updatedAt?: UpdatedAtResolver<Date, TypeParent, Context>;
 
     unreadMessages?: UnreadMessagesResolver<number, TypeParent, Context>;
   }
@@ -176,7 +182,7 @@ export namespace ChatResolvers {
     Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type CreatedAtResolver<
-    R = string,
+    R = Date,
     Parent = Chat,
     Context = ModuleContext
   > = Resolver<R, Parent, Context>;
@@ -235,7 +241,7 @@ export namespace ChatResolvers {
     Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type UpdatedAtResolver<
-    R = Maybe<string>,
+    R = Date,
     Parent = Chat,
     Context = ModuleContext
   > = Resolver<R, Parent, Context>;
@@ -256,7 +262,7 @@ export namespace MessageResolvers {
 
     content?: ContentResolver<string, TypeParent, Context>;
 
-    createdAt?: CreatedAtResolver<string, TypeParent, Context>;
+    createdAt?: CreatedAtResolver<Date, TypeParent, Context>;
 
     type?: TypeResolver<number, TypeParent, Context>;
 
@@ -288,7 +294,7 @@ export namespace MessageResolvers {
     Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type CreatedAtResolver<
-    R = string,
+    R = Date,
     Parent = Message,
     Context = ModuleContext
   > = Resolver<R, Parent, Context>;
@@ -322,9 +328,9 @@ export namespace RecipientResolvers {
 
     chat?: ChatResolver<Chat, TypeParent, Context>;
 
-    receivedAt?: ReceivedAtResolver<Maybe<string>, TypeParent, Context>;
+    receivedAt?: ReceivedAtResolver<Maybe<Date>, TypeParent, Context>;
 
-    readAt?: ReadAtResolver<Maybe<string>, TypeParent, Context>;
+    readAt?: ReadAtResolver<Maybe<Date>, TypeParent, Context>;
   }
 
   export type UserResolver<
@@ -343,12 +349,12 @@ export namespace RecipientResolvers {
     Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type ReceivedAtResolver<
-    R = Maybe<string>,
+    R = Maybe<Date>,
     Parent = Recipient,
     Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type ReadAtResolver<
-    R = Maybe<string>,
+    R = Maybe<Date>,
     Parent = Recipient,
     Context = ModuleContext
   > = Resolver<R, Parent, Context>;
@@ -610,6 +616,10 @@ export interface DeprecatedDirectiveArgs {
   reason?: string;
 }
 
+export interface DateScalarConfig extends GraphQLScalarTypeConfig<Date, any> {
+  name: "Date";
+}
+
 export interface IResolvers<Context = ModuleContext> {
   Query?: QueryResolvers.Resolvers<Context>;
   User?: UserResolvers.Resolvers<Context>;
@@ -618,6 +628,7 @@ export interface IResolvers<Context = ModuleContext> {
   Recipient?: RecipientResolvers.Resolvers<Context>;
   Mutation?: MutationResolvers.Resolvers<Context>;
   Subscription?: SubscriptionResolvers.Resolvers<Context>;
+  Date?: GraphQLScalarType;
 }
 
 export interface IDirectiveResolvers<Result> {

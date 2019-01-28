@@ -12,8 +12,8 @@ type Recipient {
   user: User!
   message: Message!
   chat: Chat!
-  receivedAt: String
-  readAt: String
+  receivedAt: Date
+  readAt: Date
 }
 
 type Mutation {

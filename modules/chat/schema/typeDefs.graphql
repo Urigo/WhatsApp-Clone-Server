@@ -11,7 +11,7 @@ type Subscription {
 type Chat {
   #May be a chat or a group
   id: ID!
-  createdAt: String!
+  createdAt: Date!
   #Computed for chats
   name: String
   #Computed for chats

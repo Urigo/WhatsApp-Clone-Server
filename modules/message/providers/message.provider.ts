@@ -334,7 +334,7 @@ export class MessageProvider {
 
   async getChatUpdatedAt(chat: Chat) {
     if (chat.messages) {
-      return chat.messages.length ? chat.messages[0].createdAt.toDateString() : null;
+      return chat.messages.length ? chat.messages[0].createdAt : null;
     }
 
     const latestMessage = await this.createQueryBuilder()
@@ -345,7 +345,7 @@ export class MessageProvider {
       .orderBy({ 'message.createdAt': 'DESC' })
       .getOne();
 
-    return latestMessage ? latestMessage.createdAt as any as string : null;
+    return latestMessage ? latestMessage.createdAt : null;
   }
 
   async filterMessageAdded(messageAdded: Message) {

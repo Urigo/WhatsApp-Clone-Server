@@ -11,7 +11,7 @@ enum MessageType {
 extend type Chat {
   messages(amount: Int): [Message]!
   lastMessage: Message
-  updatedAt: String
+  updatedAt: Date!
 }
 
 type Message {
@@ -19,7 +19,7 @@ type Message {
   sender: User!
   chat: Chat!
   content: String!
-  createdAt: String!
+  createdAt: Date!
   #FIXME: should return MessageType
   type: Int!
   #Whoever still holds a copy of the message. Cannot be null because the message gets deleted otherwise
