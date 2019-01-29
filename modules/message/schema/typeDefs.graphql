@@ -1,0 +1,35 @@
+type Subscription {
+  messageAdded: Message
+}
+
+enum MessageType {
+  LOCATION
+  TEXT
+  PICTURE
+}
+
+extend type Chat {
+  messages(amount: Int): [Message]!
+  lastMessage: Message
+  updatedAt: Date!
+}
+
+type Message {
+  id: ID!
+  sender: User!
+  chat: Chat!
+  content: String!
+  createdAt: Date!
+  #FIXME: should return MessageType
+  type: Int!
+  #Whoever still holds a copy of the message. Cannot be null because the message gets deleted otherwise
+  holders: [User!]!
+  #Computed property
+  ownership: Boolean!
+}
+
+type Mutation {
+  addMessage(chatId: ID!, content: String!): Message
+  removeMessages(chatId: ID!, messageIds: [ID!], all: Boolean): [ID]!
+}
+

@@ -1,11 +1,10 @@
-// For TypeORM
-import "reflect-metadata";
-import { Chat } from "./entity/Chat";
-import { Recipient } from "./entity/Recipient";
+import 'reflect-metadata';
+import { Chat } from './entity/Chat';
+import { Recipient } from './entity/Recipient';
 import moment from 'moment';
-import { Message } from "./entity/Message";
-import { User } from "./entity/User";
-import { Connection } from "typeorm";
+import { Message } from './entity/Message';
+import { User } from './entity/User';
+import { Connection } from 'typeorm';
 
 export enum MessageType {
   PICTURE,
