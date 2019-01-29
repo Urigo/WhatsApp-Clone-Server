@@ -25,7 +25,7 @@ export class AuthProvider implements OnRequest, OnConnect {
   async onConnect(connectionParams: { authToken?: string }) {
     if (connectionParams.authToken) {
       // Create a buffer and tell it the data coming in is base64
-      const buf = new Buffer(connectionParams.authToken.split(' ')[1], 'base64');
+      const buf = Buffer.from(connectionParams.authToken.split(' ')[1], 'base64');
       // Read it back out as a string
       const [username, password]: string[] = buf.toString().split(':');
       const user = await this.signIn(username, password);
