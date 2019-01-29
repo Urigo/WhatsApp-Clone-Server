@@ -1,10 +1,10 @@
 import {
   Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToOne, ManyToMany, JoinTable, CreateDateColumn
-} from "typeorm";
-import { Chat } from "./Chat";
-import { User } from "./User";
-import { Recipient } from "./Recipient";
-import { MessageType } from "../db";
+} from 'typeorm';
+import { Chat } from './Chat';
+import { User } from './User';
+import { Recipient } from './Recipient';
+import { MessageType } from '../db';
 
 interface MessageConstructor {
   sender?: User;

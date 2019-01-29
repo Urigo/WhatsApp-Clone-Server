@@ -3,8 +3,8 @@
    "host": "localhost",
    "port": 5432,
    "username": "test",
-   "password": "",
-   "database": "test",
+   "password": "test",
+   "database": "whatsapp",
    "synchronize": true,
    "logging": false,
    "entities": [
