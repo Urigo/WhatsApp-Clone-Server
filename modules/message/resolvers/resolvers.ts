@@ -24,7 +24,7 @@ export default {
   Subscription: {
     messageAdded: {
       subscribe: withFilter((root, args, { injector }: ModuleContext) => injector.get(PubSub).asyncIterator('messageAdded'),
-        (data: { messageAdded: Message }, variables, { injector }: ModuleContext) => injector.get(MessageProvider).filterMessageAdded(data.messageAdded)
+        (data: { messageAdded: Message }, variables, { injector }: ModuleContext) => data && injector.get(MessageProvider).filterMessageAdded(data.messageAdded)
       ),
     },
   },

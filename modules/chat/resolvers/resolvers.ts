@@ -29,14 +29,14 @@ export default {
   Subscription: {
     chatAdded: {
       subscribe: withFilter((root, args, { injector }: ModuleContext) => injector.get(PubSub).asyncIterator('chatAdded'),
-        ({ chatAdded, creatorId }: { chatAdded: Chat, creatorId: number }, variables, { injector }: ModuleContext) =>
-          injector.get(ChatProvider).filterChatAddedOrUpdated(chatAdded, creatorId)
+        (data: { chatAdded: Chat, creatorId: number }, variables, { injector }: ModuleContext) =>
+          data && injector.get(ChatProvider).filterChatAddedOrUpdated(data.chatAdded, data.creatorId)
       ),
     },
     chatUpdated: {
       subscribe: withFilter((root, args, { injector }: ModuleContext) => injector.get(PubSub).asyncIterator('chatUpdated'),
-        ({ chatUpdated, updaterId }: { chatUpdated: Chat, updaterId: number }, variables, { injector }: ModuleContext) =>
-          injector.get(ChatProvider).filterChatAddedOrUpdated(chatUpdated, updaterId)
+        (data: { chatUpdated: Chat, updaterId: number }, variables, { injector }: ModuleContext) =>
+          data && injector.get(ChatProvider).filterChatAddedOrUpdated(data.chatUpdated, data.updaterId)
       ),
     },
   },
