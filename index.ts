@@ -9,7 +9,9 @@ import { addSampleData } from './db';
 import { AppModule } from './modules/app.module';
 
 createConnection().then(async connection => {
-  //await addSampleData(connection);
+  if (process.argv.includes('--add-sample-data')) {
+    addSampleData(connection);
+  }
 
   const PORT = 4000;
 
