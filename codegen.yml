@@ -1,0 +1,8 @@
+overwrite: true
+schema: ./schema/typeDefs.ts
+require: ts-node/register/transpile-only
+generates:
+  ./types.d.ts:
+    plugins:
+      - typescript-common
+      - typescript-resolvers
