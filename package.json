@@ -4,5 +4,13 @@
   "repository": {
     "type": "git",
     "url": "https://Urigo@github.com/Urigo/WhatsApp-Clone-Server.git"
+  },
+  "scripts": {
+    "start": "ts-node index.ts"
+  },
+  "devDependencies": {
+    "@types/node": "10.12.18",
+    "ts-node": "8.0.1",
+    "typescript": "3.2.4"
   }
 }
