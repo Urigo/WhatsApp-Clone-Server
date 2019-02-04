@@ -6,3 +6,9 @@ generates:
     plugins:
       - typescript-common
       - typescript-resolvers
+    config:
+      optionalType: undefined | null
+      mappers:
+        Chat: ./entity/chat#Chat
+        Message: ./entity/message#Message
+        User: ./entity/user#User
