@@ -8,6 +8,7 @@ generates:
       - typescript-resolvers
     config:
       optionalType: undefined | null
+      contextType: ./context#Context
       mappers:
         Chat: ./entity/chat#Chat
         Message: ./entity/message#Message
