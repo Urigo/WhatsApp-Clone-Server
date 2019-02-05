@@ -1,8 +1,4 @@
-import { makeExecutableSchema } from 'apollo-server-express'
-import resolvers from './resolvers'
-import typeDefs from './typeDefs'
+import 'reflect-metadata'
+import { AppModule } from '../modules/app.module'
 
-export default makeExecutableSchema({
-  typeDefs,
-  resolvers,
-})
+export default AppModule.forRoot({} as any).schema

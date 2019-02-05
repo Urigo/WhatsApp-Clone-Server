@@ -7,7 +7,7 @@ import gql from 'graphql-tag'
 import { createServer } from 'http'
 import { createConnection } from 'typeorm'
 import { addSampleData } from './db'
-import schema from './schema'
+import { AppModule } from './modules/app.module'
 
 const PORT = 4000
 
@@ -21,12 +21,11 @@ createConnection().then((connection) => {
   app.use(cors())
   app.use(bodyParser.json())
 
+  const { schema, context } = AppModule.forRoot({ connection })
+
   const apollo = new ApolloServer({
     schema,
-    context: () => ({
-      connection,
-      currentUser: { id: '1' },
-    }),
+    context,
   })
 
   apollo.applyMiddleware({
