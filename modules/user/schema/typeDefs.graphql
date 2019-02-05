@@ -26,4 +26,6 @@ extend type User {
 
 extend input CreateUserInput {
   name: String
+  picture: String
+  phone: String
 }
