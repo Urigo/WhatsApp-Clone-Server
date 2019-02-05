@@ -37,7 +37,7 @@
     "@accounts/graphql-api": "^0.9.3",
     "@accounts/server": "^0.9.3",
     "@accounts/typeorm": "^0.9.3",
-    "@graphql-modules/core": "0.5.0-alpha.3496f53a",
+    "@graphql-modules/core": "0.5.0-alpha.33ac56ab",
     "graphql-toolkit": "0.0.5",
     "apollo-server-express": "^2.3.1",
     "bcrypt-nodejs": "^0.0.3",

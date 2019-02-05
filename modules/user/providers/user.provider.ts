@@ -1,31 +1,36 @@
-/// <reference path="../../../cloudinary.d.ts" />
 import { Injectable } from '@graphql-modules/di'
 import { PubSub } from 'apollo-server-express'
 import { Connection } from 'typeorm'
 import { User } from '../../../entity/User';
-import { AuthProvider } from '../../auth/providers/auth.provider';
-import cloudinary from 'cloudinary';
+import AccountsServer from '@accounts/server';
 import { UploadedFile } from '../../../types';
-
-export const CLOUDINARY_URL = process.env.CLOUDINARY_URL || '';
-const match = CLOUDINARY_URL.match(/cloudinary:\/\/(\d+):(\w+)@(\.+)/);
-
-if (match) {
-  const [api_key, api_secret, cloud_name] = match.slice(1);
-  cloudinary.config({ api_key, api_secret, cloud_name });
-}
+import { ModuleSessionInfo, OnRequest, OnConnect } from '@graphql-modules/core';
+import { AccountsModuleContext } from '@accounts/graphql-api';
+import cloudinary from 'cloudinary';
 
 @Injectable()
-export class UserProvider {
+export class UserProvider implements OnRequest, OnConnect {
 
   constructor(
     private pubsub: PubSub,
     private connection: Connection,
-    private authProvider: AuthProvider,
+    private accountsServer: AccountsServer,
   ) { }
 
   public repository = this.connection.getRepository(User);
-  private currentUser = this.authProvider.currentUser;
+  currentUser: User;
+
+  onRequest({ context }: ModuleSessionInfo<any, any, AccountsModuleContext>) {
+    if (context.user) {
+      this.currentUser = context.user as User;
+    }
+  }
+
+  async onConnect(connectionParams: { 'accounts-access-token'?: string }) {
+    if (connectionParams['accounts-access-token']) {
+      this.currentUser = await this.accountsServer.resumeSession(connectionParams['accounts-access-token']) as User;
+    }
+  }
 
   createQueryBuilder() {
     return this.connection.createQueryBuilder(User, 'user');
@@ -45,7 +50,7 @@ export class UserProvider {
     if (name === this.currentUser.name && picture === this.currentUser.picture) {
       return this.currentUser;
     }
-
+    
     this.currentUser.name = name || this.currentUser.name;
     this.currentUser.picture = picture || this.currentUser.picture;
 

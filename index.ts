@@ -21,9 +21,9 @@ createConnection({
   type: "postgres",
   host: "localhost",
   port: 5432,
-  username: "postgres",
-  password: "deneme12",
-  database: "whatsapp2",
+  username: "test",
+  password: "test",
+  database: "whatsapp",
   synchronize: true,
   logging: false,
   entities: [

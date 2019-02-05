@@ -4,12 +4,12 @@ import { UserModule } from '../user';
 import { MessageModule } from '../message';
 import { ChatModule } from '../chat';
 import { RecipientProvider } from './providers/recipient.provider';
-import { AuthModule } from '../auth';
+import { CommonModule } from '../common';
 
 export const RecipientModule = new GraphQLModule({
   name: "Recipient",
   imports: [
-    AuthModule,
+    CommonModule,
     UserModule,
     ChatModule,
     MessageModule,

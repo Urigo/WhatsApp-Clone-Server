@@ -1,7 +1,7 @@
 import { GraphQLModule } from '@graphql-modules/core';
 import { Connection } from 'typeorm';
 import { Express } from 'express';
-import { AuthModule } from './auth';
+import { CommonModule } from './common';
 import { UserModule } from './user';
 import { ChatModule } from './chat';
 import { MessageModule } from './message';
@@ -17,11 +17,11 @@ export interface IAppModuleConfig {
 export const AppModule = new GraphQLModule<IAppModuleConfig>({
   name: 'App',
   imports: ({config: {connection, accountsServer}}) => [
+    CommonModule.forRoot({
+      connection,
+    }),
     AccountsModule.forRoot({
       accountsServer
-    }),
-    AuthModule.forRoot({
-      connection,
     }),
     UserModule,
     ChatModule,
