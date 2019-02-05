@@ -1,7 +1,8 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToMany, OneToMany } from 'typeorm';
+import { Entity, Column, ManyToMany, OneToMany } from 'typeorm';
 import { Chat } from './Chat';
 import { Message } from './Message';
 import { Recipient } from './Recipient';
+import { User as AccountsUser, UserService } from '@accounts/typeorm';
 
 interface UserConstructor {
   username?: string;
@@ -11,18 +12,10 @@ interface UserConstructor {
   phone?: string;
 }
 
-@Entity('app_user')
-export class User {
-  @PrimaryGeneratedColumn()
-  id: number;
+@Entity()
+export class User extends AccountsUser{
 
-  @Column()
-  username: string;
-
-  @Column()
-  password: string;
-
-  @Column()
+  @Column({nullable: true})
   name: string;
 
   @Column({nullable: true})
@@ -56,11 +49,15 @@ export class User {
   recipients: Recipient[];
 
   constructor({username, password, name, picture, phone}: UserConstructor = {}) {
+    super();
     if (username) {
       this.username = username;
     }
     if (password) {
-      this.password = password;
+      const userService = new UserService();
+      userService.name = 'password';
+      userService.options = { bcrypt: password };
+      this.allServices = [userService];
     }
     if (name) {
       this.name = name;

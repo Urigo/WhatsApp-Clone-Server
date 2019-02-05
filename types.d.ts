@@ -1,4 +1,58 @@
+import { Chat as ChatEntity } from "./entities/Chat";
+import { Message as MessageEntity } from "./entities/Message";
+import { Recipient as RecipientEntity } from "./entities/Recipient";
+import { User as UserEntity } from "./entities/User";
 export type Maybe<T> = T | undefined | null;
+
+export interface CreateUserInput {
+  username?: Maybe<string>;
+
+  email?: Maybe<string>;
+
+  password?: Maybe<string>;
+
+  name?: Maybe<string>;
+}
+
+export interface TwoFactorSecretKeyInput {
+  ascii?: Maybe<string>;
+
+  base32?: Maybe<string>;
+
+  hex?: Maybe<string>;
+
+  qr_code_ascii?: Maybe<string>;
+
+  qr_code_hex?: Maybe<string>;
+
+  qr_code_base32?: Maybe<string>;
+
+  google_auth_qr?: Maybe<string>;
+
+  otpauth_url?: Maybe<string>;
+}
+
+export interface AuthenticateParamsInput {
+  access_token?: Maybe<string>;
+
+  access_token_secret?: Maybe<string>;
+
+  provider?: Maybe<string>;
+
+  password?: Maybe<string>;
+
+  user?: Maybe<UserInput>;
+
+  code?: Maybe<string>;
+}
+
+export interface UserInput {
+  id?: Maybe<string>;
+
+  email?: Maybe<string>;
+
+  username?: Maybe<string>;
+}
 
 export enum MessageType {
   Location = "LOCATION",
@@ -6,19 +60,345 @@ export enum MessageType {
   Picture = "PICTURE"
 }
 
+export type Upload = any;
+
+// ====================================================
+// Scalars
+// ====================================================
+
+// ====================================================
+// Types
+// ====================================================
+
+export interface Query {
+  twoFactorSecret?: Maybe<TwoFactorSecretKey>;
+
+  getUser?: Maybe<User>;
+
+  users?: Maybe<User[]>;
+
+  chats: Chat[];
+
+  chat?: Maybe<Chat>;
+}
+
+export interface TwoFactorSecretKey {
+  ascii?: Maybe<string>;
+
+  base32?: Maybe<string>;
+
+  hex?: Maybe<string>;
+
+  qr_code_ascii?: Maybe<string>;
+
+  qr_code_hex?: Maybe<string>;
+
+  qr_code_base32?: Maybe<string>;
+
+  google_auth_qr?: Maybe<string>;
+
+  otpauth_url?: Maybe<string>;
+}
+
+export interface User {
+  id: string;
+
+  emails?: Maybe<EmailRecord[]>;
+
+  username?: Maybe<string>;
+
+  name?: Maybe<string>;
+
+  picture?: Maybe<string>;
+
+  phone?: Maybe<string>;
+}
+
+export interface EmailRecord {
+  address?: Maybe<string>;
+
+  verified?: Maybe<boolean>;
+}
+
+export interface Chat {
+  id: string;
+
+  createdAt: Date;
+
+  name?: Maybe<string>;
+
+  picture?: Maybe<string>;
+
+  allTimeMembers: User[];
+
+  listingMembers: User[];
+
+  actualGroupMembers?: Maybe<User[]>;
+
+  admins?: Maybe<User[]>;
+
+  owner?: Maybe<User>;
+
+  isGroup: boolean;
+
+  messages: (Maybe<Message>)[];
+
+  lastMessage?: Maybe<Message>;
+
+  updatedAt: Date;
+
+  unreadMessages: number;
+}
+
+export interface Message {
+  id: string;
+
+  sender: User;
+
+  chat: Chat;
+
+  content: string;
+
+  createdAt: Date;
+
+  type: number;
+
+  holders: User[];
+
+  ownership: boolean;
+
+  recipients: Recipient[];
+}
+
+export interface Recipient {
+  user: User;
+
+  message: Message;
+
+  chat: Chat;
+
+  receivedAt?: Maybe<Date>;
+
+  readAt?: Maybe<Date>;
+}
+
+export interface Mutation {
+  createUser?: Maybe<string>;
+
+  verifyEmail?: Maybe<boolean>;
+
+  resetPassword?: Maybe<LoginResult>;
+
+  sendVerificationEmail?: Maybe<boolean>;
+
+  sendResetPasswordEmail?: Maybe<boolean>;
+
+  changePassword?: Maybe<boolean>;
+
+  twoFactorSet?: Maybe<boolean>;
+
+  twoFactorUnset?: Maybe<boolean>;
+
+  impersonate?: Maybe<ImpersonateReturn>;
+
+  refreshTokens?: Maybe<LoginResult>;
+
+  logout?: Maybe<boolean>;
+
+  authenticate?: Maybe<LoginResult>;
+
+  updateUser: User;
+
+  uploadPicture: UploadedFile;
+
+  addChat?: Maybe<Chat>;
+
+  addGroup?: Maybe<Chat>;
+
+  updateChat?: Maybe<Chat>;
+
+  removeChat?: Maybe<string>;
+
+  addAdmins: (Maybe<string>)[];
+
+  removeAdmins: (Maybe<string>)[];
+
+  addMembers: (Maybe<string>)[];
+
+  removeMembers: (Maybe<string>)[];
+
+  addMessage?: Maybe<Message>;
+
+  removeMessages: (Maybe<string>)[];
+
+  markAsReceived?: Maybe<boolean>;
+
+  markAsRead?: Maybe<boolean>;
+}
+
+export interface LoginResult {
+  sessionId?: Maybe<string>;
+
+  tokens?: Maybe<Tokens>;
+}
+
+export interface Tokens {
+  refreshToken?: Maybe<string>;
+
+  accessToken?: Maybe<string>;
+}
+
+export interface ImpersonateReturn {
+  authorized?: Maybe<boolean>;
+
+  tokens?: Maybe<Tokens>;
+
+  user?: Maybe<User>;
+}
+
+export interface UploadedFile {
+  url: string;
+}
+
+export interface Subscription {
+  userAdded?: Maybe<User>;
+
+  userUpdated?: Maybe<User>;
+
+  chatAdded?: Maybe<Chat>;
+
+  chatUpdated?: Maybe<Chat>;
+
+  messageAdded?: Maybe<Message>;
+}
+
+// ====================================================
+// Arguments
+// ====================================================
+
+export interface ChatQueryArgs {
+  chatId: string;
+}
+export interface MessagesChatArgs {
+  amount?: Maybe<number>;
+}
+export interface CreateUserMutationArgs {
+  user: CreateUserInput;
+}
+export interface VerifyEmailMutationArgs {
+  token: string;
+}
+export interface ResetPasswordMutationArgs {
+  token: string;
+
+  newPassword: string;
+}
+export interface SendVerificationEmailMutationArgs {
+  email: string;
+}
+export interface SendResetPasswordEmailMutationArgs {
+  email: string;
+}
+export interface ChangePasswordMutationArgs {
+  oldPassword: string;
+
+  newPassword: string;
+}
+export interface TwoFactorSetMutationArgs {
+  secret: TwoFactorSecretKeyInput;
+
+  code: string;
+}
+export interface TwoFactorUnsetMutationArgs {
+  code: string;
+}
+export interface ImpersonateMutationArgs {
+  accessToken: string;
+
+  username: string;
+}
+export interface RefreshTokensMutationArgs {
+  accessToken: string;
+
+  refreshToken: string;
+}
+export interface AuthenticateMutationArgs {
+  serviceName: string;
+
+  params: AuthenticateParamsInput;
+}
+export interface UpdateUserMutationArgs {
+  name?: Maybe<string>;
+
+  picture?: Maybe<string>;
+}
+export interface UploadPictureMutationArgs {
+  file: Upload;
+}
+export interface AddChatMutationArgs {
+  userId: string;
+}
+export interface AddGroupMutationArgs {
+  userIds: string[];
+
+  groupName: string;
+
+  groupPicture?: Maybe<string>;
+}
+export interface UpdateChatMutationArgs {
+  chatId: string;
+
+  name?: Maybe<string>;
+
+  picture?: Maybe<string>;
+}
+export interface RemoveChatMutationArgs {
+  chatId: string;
+}
+export interface AddAdminsMutationArgs {
+  groupId: string;
+
+  userIds: string[];
+}
+export interface RemoveAdminsMutationArgs {
+  groupId: string;
+
+  userIds: string[];
+}
+export interface AddMembersMutationArgs {
+  groupId: string;
+
+  userIds: string[];
+}
+export interface RemoveMembersMutationArgs {
+  groupId: string;
+
+  userIds: string[];
+}
+export interface AddMessageMutationArgs {
+  chatId: string;
+
+  content: string;
+}
+export interface RemoveMessagesMutationArgs {
+  chatId: string;
+
+  messageIds?: Maybe<string[]>;
+
+  all?: Maybe<boolean>;
+}
+export interface MarkAsReceivedMutationArgs {
+  chatId: string;
+}
+export interface MarkAsReadMutationArgs {
+  chatId: string;
+}
+
 import {
   GraphQLResolveInfo,
   GraphQLScalarType,
   GraphQLScalarTypeConfig
 } from "graphql";
-
-import { Chat } from "./entity/Chat";
-
-import { Message } from "./entity/Message";
-
-import { Recipient } from "./entity/Recipient";
-
-import { User } from "./entity/User";
 
 import { ModuleContext } from "@graphql-modules/core";
 
@@ -73,32 +453,43 @@ export type DirectiveResolverFn<TResult, TArgs = {}, TContext = {}> = (
 
 export namespace QueryResolvers {
   export interface Resolvers<Context = ModuleContext, TypeParent = {}> {
-    me?: MeResolver<Maybe<User>, TypeParent, Context>;
+    twoFactorSecret?: TwoFactorSecretResolver<
+      Maybe<TwoFactorSecretKey>,
+      TypeParent,
+      Context
+    >;
 
-    users?: UsersResolver<Maybe<User[]>, TypeParent, Context>;
+    getUser?: GetUserResolver<Maybe<UserEntity>, TypeParent, Context>;
 
-    chats?: ChatsResolver<Chat[], TypeParent, Context>;
+    users?: UsersResolver<Maybe<UserEntity[]>, TypeParent, Context>;
 
-    chat?: ChatResolver<Maybe<Chat>, TypeParent, Context>;
+    chats?: ChatsResolver<ChatEntity[], TypeParent, Context>;
+
+    chat?: ChatResolver<Maybe<ChatEntity>, TypeParent, Context>;
   }
 
-  export type MeResolver<
-    R = Maybe<User>,
+  export type TwoFactorSecretResolver<
+    R = Maybe<TwoFactorSecretKey>,
+    Parent = {},
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context>;
+  export type GetUserResolver<
+    R = Maybe<UserEntity>,
     Parent = {},
     Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type UsersResolver<
-    R = Maybe<User[]>,
+    R = Maybe<UserEntity[]>,
     Parent = {},
     Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type ChatsResolver<
-    R = Chat[],
+    R = ChatEntity[],
     Parent = {},
     Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type ChatResolver<
-    R = Maybe<Chat>,
+    R = Maybe<ChatEntity>,
     Parent = {},
     Context = ModuleContext
   > = Resolver<R, Parent, Context, ChatArgs>;
@@ -107,9 +498,77 @@ export namespace QueryResolvers {
   }
 }
 
+export namespace TwoFactorSecretKeyResolvers {
+  export interface Resolvers<
+    Context = ModuleContext,
+    TypeParent = TwoFactorSecretKey
+  > {
+    ascii?: AsciiResolver<Maybe<string>, TypeParent, Context>;
+
+    base32?: Base32Resolver<Maybe<string>, TypeParent, Context>;
+
+    hex?: HexResolver<Maybe<string>, TypeParent, Context>;
+
+    qr_code_ascii?: QrCodeAsciiResolver<Maybe<string>, TypeParent, Context>;
+
+    qr_code_hex?: QrCodeHexResolver<Maybe<string>, TypeParent, Context>;
+
+    qr_code_base32?: QrCodeBase32Resolver<Maybe<string>, TypeParent, Context>;
+
+    google_auth_qr?: GoogleAuthQrResolver<Maybe<string>, TypeParent, Context>;
+
+    otpauth_url?: OtpauthUrlResolver<Maybe<string>, TypeParent, Context>;
+  }
+
+  export type AsciiResolver<
+    R = Maybe<string>,
+    Parent = TwoFactorSecretKey,
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context>;
+  export type Base32Resolver<
+    R = Maybe<string>,
+    Parent = TwoFactorSecretKey,
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context>;
+  export type HexResolver<
+    R = Maybe<string>,
+    Parent = TwoFactorSecretKey,
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context>;
+  export type QrCodeAsciiResolver<
+    R = Maybe<string>,
+    Parent = TwoFactorSecretKey,
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context>;
+  export type QrCodeHexResolver<
+    R = Maybe<string>,
+    Parent = TwoFactorSecretKey,
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context>;
+  export type QrCodeBase32Resolver<
+    R = Maybe<string>,
+    Parent = TwoFactorSecretKey,
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context>;
+  export type GoogleAuthQrResolver<
+    R = Maybe<string>,
+    Parent = TwoFactorSecretKey,
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context>;
+  export type OtpauthUrlResolver<
+    R = Maybe<string>,
+    Parent = TwoFactorSecretKey,
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context>;
+}
+
 export namespace UserResolvers {
-  export interface Resolvers<Context = ModuleContext, TypeParent = User> {
+  export interface Resolvers<Context = ModuleContext, TypeParent = UserEntity> {
     id?: IdResolver<string, TypeParent, Context>;
+
+    emails?: EmailsResolver<Maybe<EmailRecord[]>, TypeParent, Context>;
+
+    username?: UsernameResolver<Maybe<string>, TypeParent, Context>;
 
     name?: NameResolver<Maybe<string>, TypeParent, Context>;
 
@@ -120,28 +579,60 @@ export namespace UserResolvers {
 
   export type IdResolver<
     R = string,
-    Parent = User,
+    Parent = UserEntity,
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context>;
+  export type EmailsResolver<
+    R = Maybe<EmailRecord[]>,
+    Parent = UserEntity,
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context>;
+  export type UsernameResolver<
+    R = Maybe<string>,
+    Parent = UserEntity,
     Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type NameResolver<
     R = Maybe<string>,
-    Parent = User,
+    Parent = UserEntity,
     Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type PictureResolver<
     R = Maybe<string>,
-    Parent = User,
+    Parent = UserEntity,
     Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type PhoneResolver<
     R = Maybe<string>,
-    Parent = User,
+    Parent = UserEntity,
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace EmailRecordResolvers {
+  export interface Resolvers<
+    Context = ModuleContext,
+    TypeParent = EmailRecord
+  > {
+    address?: AddressResolver<Maybe<string>, TypeParent, Context>;
+
+    verified?: VerifiedResolver<Maybe<boolean>, TypeParent, Context>;
+  }
+
+  export type AddressResolver<
+    R = Maybe<string>,
+    Parent = EmailRecord,
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context>;
+  export type VerifiedResolver<
+    R = Maybe<boolean>,
+    Parent = EmailRecord,
     Context = ModuleContext
   > = Resolver<R, Parent, Context>;
 }
 
 export namespace ChatResolvers {
-  export interface Resolvers<Context = ModuleContext, TypeParent = Chat> {
+  export interface Resolvers<Context = ModuleContext, TypeParent = ChatEntity> {
     id?: IdResolver<string, TypeParent, Context>;
 
     createdAt?: CreatedAtResolver<Date, TypeParent, Context>;
@@ -150,25 +641,29 @@ export namespace ChatResolvers {
 
     picture?: PictureResolver<Maybe<string>, TypeParent, Context>;
 
-    allTimeMembers?: AllTimeMembersResolver<User[], TypeParent, Context>;
+    allTimeMembers?: AllTimeMembersResolver<UserEntity[], TypeParent, Context>;
 
-    listingMembers?: ListingMembersResolver<User[], TypeParent, Context>;
+    listingMembers?: ListingMembersResolver<UserEntity[], TypeParent, Context>;
 
     actualGroupMembers?: ActualGroupMembersResolver<
-      Maybe<User[]>,
+      Maybe<UserEntity[]>,
       TypeParent,
       Context
     >;
 
-    admins?: AdminsResolver<Maybe<User[]>, TypeParent, Context>;
+    admins?: AdminsResolver<Maybe<UserEntity[]>, TypeParent, Context>;
 
-    owner?: OwnerResolver<Maybe<User>, TypeParent, Context>;
+    owner?: OwnerResolver<Maybe<UserEntity>, TypeParent, Context>;
 
     isGroup?: IsGroupResolver<boolean, TypeParent, Context>;
 
-    messages?: MessagesResolver<(Maybe<Message>)[], TypeParent, Context>;
+    messages?: MessagesResolver<(Maybe<MessageEntity>)[], TypeParent, Context>;
 
-    lastMessage?: LastMessageResolver<Maybe<Message>, TypeParent, Context>;
+    lastMessage?: LastMessageResolver<
+      Maybe<MessageEntity>,
+      TypeParent,
+      Context
+    >;
 
     updatedAt?: UpdatedAtResolver<Date, TypeParent, Context>;
 
@@ -177,57 +672,57 @@ export namespace ChatResolvers {
 
   export type IdResolver<
     R = string,
-    Parent = Chat,
+    Parent = ChatEntity,
     Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type CreatedAtResolver<
     R = Date,
-    Parent = Chat,
+    Parent = ChatEntity,
     Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type NameResolver<
     R = Maybe<string>,
-    Parent = Chat,
+    Parent = ChatEntity,
     Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type PictureResolver<
     R = Maybe<string>,
-    Parent = Chat,
+    Parent = ChatEntity,
     Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type AllTimeMembersResolver<
-    R = User[],
-    Parent = Chat,
+    R = UserEntity[],
+    Parent = ChatEntity,
     Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type ListingMembersResolver<
-    R = User[],
-    Parent = Chat,
+    R = UserEntity[],
+    Parent = ChatEntity,
     Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type ActualGroupMembersResolver<
-    R = Maybe<User[]>,
-    Parent = Chat,
+    R = Maybe<UserEntity[]>,
+    Parent = ChatEntity,
     Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type AdminsResolver<
-    R = Maybe<User[]>,
-    Parent = Chat,
+    R = Maybe<UserEntity[]>,
+    Parent = ChatEntity,
     Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type OwnerResolver<
-    R = Maybe<User>,
-    Parent = Chat,
+    R = Maybe<UserEntity>,
+    Parent = ChatEntity,
     Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type IsGroupResolver<
     R = boolean,
-    Parent = Chat,
+    Parent = ChatEntity,
     Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type MessagesResolver<
-    R = (Maybe<Message>)[],
-    Parent = Chat,
+    R = (Maybe<MessageEntity>)[],
+    Parent = ChatEntity,
     Context = ModuleContext
   > = Resolver<R, Parent, Context, MessagesArgs>;
   export interface MessagesArgs {
@@ -235,29 +730,32 @@ export namespace ChatResolvers {
   }
 
   export type LastMessageResolver<
-    R = Maybe<Message>,
-    Parent = Chat,
+    R = Maybe<MessageEntity>,
+    Parent = ChatEntity,
     Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type UpdatedAtResolver<
     R = Date,
-    Parent = Chat,
+    Parent = ChatEntity,
     Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type UnreadMessagesResolver<
     R = number,
-    Parent = Chat,
+    Parent = ChatEntity,
     Context = ModuleContext
   > = Resolver<R, Parent, Context>;
 }
 
 export namespace MessageResolvers {
-  export interface Resolvers<Context = ModuleContext, TypeParent = Message> {
+  export interface Resolvers<
+    Context = ModuleContext,
+    TypeParent = MessageEntity
+  > {
     id?: IdResolver<string, TypeParent, Context>;
 
-    sender?: SenderResolver<User, TypeParent, Context>;
+    sender?: SenderResolver<UserEntity, TypeParent, Context>;
 
-    chat?: ChatResolver<Chat, TypeParent, Context>;
+    chat?: ChatResolver<ChatEntity, TypeParent, Context>;
 
     content?: ContentResolver<string, TypeParent, Context>;
 
@@ -265,67 +763,70 @@ export namespace MessageResolvers {
 
     type?: TypeResolver<number, TypeParent, Context>;
 
-    holders?: HoldersResolver<User[], TypeParent, Context>;
+    holders?: HoldersResolver<UserEntity[], TypeParent, Context>;
 
     ownership?: OwnershipResolver<boolean, TypeParent, Context>;
 
-    recipients?: RecipientsResolver<Recipient[], TypeParent, Context>;
+    recipients?: RecipientsResolver<RecipientEntity[], TypeParent, Context>;
   }
 
   export type IdResolver<
     R = string,
-    Parent = Message,
+    Parent = MessageEntity,
     Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type SenderResolver<
-    R = User,
-    Parent = Message,
+    R = UserEntity,
+    Parent = MessageEntity,
     Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type ChatResolver<
-    R = Chat,
-    Parent = Message,
+    R = ChatEntity,
+    Parent = MessageEntity,
     Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type ContentResolver<
     R = string,
-    Parent = Message,
+    Parent = MessageEntity,
     Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type CreatedAtResolver<
     R = Date,
-    Parent = Message,
+    Parent = MessageEntity,
     Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type TypeResolver<
     R = number,
-    Parent = Message,
+    Parent = MessageEntity,
     Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type HoldersResolver<
-    R = User[],
-    Parent = Message,
+    R = UserEntity[],
+    Parent = MessageEntity,
     Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type OwnershipResolver<
     R = boolean,
-    Parent = Message,
+    Parent = MessageEntity,
     Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type RecipientsResolver<
-    R = Recipient[],
-    Parent = Message,
+    R = RecipientEntity[],
+    Parent = MessageEntity,
     Context = ModuleContext
   > = Resolver<R, Parent, Context>;
 }
 
 export namespace RecipientResolvers {
-  export interface Resolvers<Context = ModuleContext, TypeParent = Recipient> {
-    user?: UserResolver<User, TypeParent, Context>;
+  export interface Resolvers<
+    Context = ModuleContext,
+    TypeParent = RecipientEntity
+  > {
+    user?: UserResolver<UserEntity, TypeParent, Context>;
 
-    message?: MessageResolver<Message, TypeParent, Context>;
+    message?: MessageResolver<MessageEntity, TypeParent, Context>;
 
-    chat?: ChatResolver<Chat, TypeParent, Context>;
+    chat?: ChatResolver<ChatEntity, TypeParent, Context>;
 
     receivedAt?: ReceivedAtResolver<Maybe<Date>, TypeParent, Context>;
 
@@ -333,41 +834,99 @@ export namespace RecipientResolvers {
   }
 
   export type UserResolver<
-    R = User,
-    Parent = Recipient,
+    R = UserEntity,
+    Parent = RecipientEntity,
     Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type MessageResolver<
-    R = Message,
-    Parent = Recipient,
+    R = MessageEntity,
+    Parent = RecipientEntity,
     Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type ChatResolver<
-    R = Chat,
-    Parent = Recipient,
+    R = ChatEntity,
+    Parent = RecipientEntity,
     Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type ReceivedAtResolver<
     R = Maybe<Date>,
-    Parent = Recipient,
+    Parent = RecipientEntity,
     Context = ModuleContext
   > = Resolver<R, Parent, Context>;
   export type ReadAtResolver<
     R = Maybe<Date>,
-    Parent = Recipient,
+    Parent = RecipientEntity,
     Context = ModuleContext
   > = Resolver<R, Parent, Context>;
 }
 
 export namespace MutationResolvers {
   export interface Resolvers<Context = ModuleContext, TypeParent = {}> {
-    updateUser?: UpdateUserResolver<User, TypeParent, Context>;
+    createUser?: CreateUserResolver<Maybe<string>, TypeParent, Context>;
 
-    addChat?: AddChatResolver<Maybe<Chat>, TypeParent, Context>;
+    verifyEmail?: VerifyEmailResolver<Maybe<boolean>, TypeParent, Context>;
 
-    addGroup?: AddGroupResolver<Maybe<Chat>, TypeParent, Context>;
+    resetPassword?: ResetPasswordResolver<
+      Maybe<LoginResult>,
+      TypeParent,
+      Context
+    >;
 
-    updateChat?: UpdateChatResolver<Maybe<Chat>, TypeParent, Context>;
+    sendVerificationEmail?: SendVerificationEmailResolver<
+      Maybe<boolean>,
+      TypeParent,
+      Context
+    >;
+
+    sendResetPasswordEmail?: SendResetPasswordEmailResolver<
+      Maybe<boolean>,
+      TypeParent,
+      Context
+    >;
+
+    changePassword?: ChangePasswordResolver<
+      Maybe<boolean>,
+      TypeParent,
+      Context
+    >;
+
+    twoFactorSet?: TwoFactorSetResolver<Maybe<boolean>, TypeParent, Context>;
+
+    twoFactorUnset?: TwoFactorUnsetResolver<
+      Maybe<boolean>,
+      TypeParent,
+      Context
+    >;
+
+    impersonate?: ImpersonateResolver<
+      Maybe<ImpersonateReturn>,
+      TypeParent,
+      Context
+    >;
+
+    refreshTokens?: RefreshTokensResolver<
+      Maybe<LoginResult>,
+      TypeParent,
+      Context
+    >;
+
+    logout?: LogoutResolver<Maybe<boolean>, TypeParent, Context>;
+
+    authenticate?: AuthenticateResolver<
+      Maybe<LoginResult>,
+      TypeParent,
+      Context
+    >;
+
+    updateUser?: UpdateUserResolver<UserEntity, TypeParent, Context>;
+
+    uploadPicture?: UploadPictureResolver<UploadedFile, TypeParent, Context>;
+
+    addChat?: AddChatResolver<Maybe<ChatEntity>, TypeParent, Context>;
+
+    addGroup?: AddGroupResolver<Maybe<ChatEntity>, TypeParent, Context>;
+
+    updateChat?: UpdateChatResolver<Maybe<ChatEntity>, TypeParent, Context>;
 
     removeChat?: RemoveChatResolver<Maybe<string>, TypeParent, Context>;
 
@@ -383,7 +942,7 @@ export namespace MutationResolvers {
       Context
     >;
 
-    addMessage?: AddMessageResolver<Maybe<Message>, TypeParent, Context>;
+    addMessage?: AddMessageResolver<Maybe<MessageEntity>, TypeParent, Context>;
 
     removeMessages?: RemoveMessagesResolver<
       (Maybe<string>)[],
@@ -400,8 +959,124 @@ export namespace MutationResolvers {
     markAsRead?: MarkAsReadResolver<Maybe<boolean>, TypeParent, Context>;
   }
 
+  export type CreateUserResolver<
+    R = Maybe<string>,
+    Parent = {},
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context, CreateUserArgs>;
+  export interface CreateUserArgs {
+    user: CreateUserInput;
+  }
+
+  export type VerifyEmailResolver<
+    R = Maybe<boolean>,
+    Parent = {},
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context, VerifyEmailArgs>;
+  export interface VerifyEmailArgs {
+    token: string;
+  }
+
+  export type ResetPasswordResolver<
+    R = Maybe<LoginResult>,
+    Parent = {},
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context, ResetPasswordArgs>;
+  export interface ResetPasswordArgs {
+    token: string;
+
+    newPassword: string;
+  }
+
+  export type SendVerificationEmailResolver<
+    R = Maybe<boolean>,
+    Parent = {},
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context, SendVerificationEmailArgs>;
+  export interface SendVerificationEmailArgs {
+    email: string;
+  }
+
+  export type SendResetPasswordEmailResolver<
+    R = Maybe<boolean>,
+    Parent = {},
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context, SendResetPasswordEmailArgs>;
+  export interface SendResetPasswordEmailArgs {
+    email: string;
+  }
+
+  export type ChangePasswordResolver<
+    R = Maybe<boolean>,
+    Parent = {},
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context, ChangePasswordArgs>;
+  export interface ChangePasswordArgs {
+    oldPassword: string;
+
+    newPassword: string;
+  }
+
+  export type TwoFactorSetResolver<
+    R = Maybe<boolean>,
+    Parent = {},
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context, TwoFactorSetArgs>;
+  export interface TwoFactorSetArgs {
+    secret: TwoFactorSecretKeyInput;
+
+    code: string;
+  }
+
+  export type TwoFactorUnsetResolver<
+    R = Maybe<boolean>,
+    Parent = {},
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context, TwoFactorUnsetArgs>;
+  export interface TwoFactorUnsetArgs {
+    code: string;
+  }
+
+  export type ImpersonateResolver<
+    R = Maybe<ImpersonateReturn>,
+    Parent = {},
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context, ImpersonateArgs>;
+  export interface ImpersonateArgs {
+    accessToken: string;
+
+    username: string;
+  }
+
+  export type RefreshTokensResolver<
+    R = Maybe<LoginResult>,
+    Parent = {},
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context, RefreshTokensArgs>;
+  export interface RefreshTokensArgs {
+    accessToken: string;
+
+    refreshToken: string;
+  }
+
+  export type LogoutResolver<
+    R = Maybe<boolean>,
+    Parent = {},
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context>;
+  export type AuthenticateResolver<
+    R = Maybe<LoginResult>,
+    Parent = {},
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context, AuthenticateArgs>;
+  export interface AuthenticateArgs {
+    serviceName: string;
+
+    params: AuthenticateParamsInput;
+  }
+
   export type UpdateUserResolver<
-    R = User,
+    R = UserEntity,
     Parent = {},
     Context = ModuleContext
   > = Resolver<R, Parent, Context, UpdateUserArgs>;
@@ -411,8 +1086,17 @@ export namespace MutationResolvers {
     picture?: Maybe<string>;
   }
 
+  export type UploadPictureResolver<
+    R = UploadedFile,
+    Parent = {},
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context, UploadPictureArgs>;
+  export interface UploadPictureArgs {
+    file: Upload;
+  }
+
   export type AddChatResolver<
-    R = Maybe<Chat>,
+    R = Maybe<ChatEntity>,
     Parent = {},
     Context = ModuleContext
   > = Resolver<R, Parent, Context, AddChatArgs>;
@@ -421,7 +1105,7 @@ export namespace MutationResolvers {
   }
 
   export type AddGroupResolver<
-    R = Maybe<Chat>,
+    R = Maybe<ChatEntity>,
     Parent = {},
     Context = ModuleContext
   > = Resolver<R, Parent, Context, AddGroupArgs>;
@@ -434,7 +1118,7 @@ export namespace MutationResolvers {
   }
 
   export type UpdateChatResolver<
-    R = Maybe<Chat>,
+    R = Maybe<ChatEntity>,
     Parent = {},
     Context = ModuleContext
   > = Resolver<R, Parent, Context, UpdateChatArgs>;
@@ -500,7 +1184,7 @@ export namespace MutationResolvers {
   }
 
   export type AddMessageResolver<
-    R = Maybe<Message>,
+    R = Maybe<MessageEntity>,
     Parent = {},
     Context = ModuleContext
   > = Resolver<R, Parent, Context, AddMessageArgs>;
@@ -542,47 +1226,140 @@ export namespace MutationResolvers {
   }
 }
 
+export namespace LoginResultResolvers {
+  export interface Resolvers<
+    Context = ModuleContext,
+    TypeParent = LoginResult
+  > {
+    sessionId?: SessionIdResolver<Maybe<string>, TypeParent, Context>;
+
+    tokens?: TokensResolver<Maybe<Tokens>, TypeParent, Context>;
+  }
+
+  export type SessionIdResolver<
+    R = Maybe<string>,
+    Parent = LoginResult,
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context>;
+  export type TokensResolver<
+    R = Maybe<Tokens>,
+    Parent = LoginResult,
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace TokensResolvers {
+  export interface Resolvers<Context = ModuleContext, TypeParent = Tokens> {
+    refreshToken?: RefreshTokenResolver<Maybe<string>, TypeParent, Context>;
+
+    accessToken?: AccessTokenResolver<Maybe<string>, TypeParent, Context>;
+  }
+
+  export type RefreshTokenResolver<
+    R = Maybe<string>,
+    Parent = Tokens,
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context>;
+  export type AccessTokenResolver<
+    R = Maybe<string>,
+    Parent = Tokens,
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace ImpersonateReturnResolvers {
+  export interface Resolvers<
+    Context = ModuleContext,
+    TypeParent = ImpersonateReturn
+  > {
+    authorized?: AuthorizedResolver<Maybe<boolean>, TypeParent, Context>;
+
+    tokens?: TokensResolver<Maybe<Tokens>, TypeParent, Context>;
+
+    user?: UserResolver<Maybe<UserEntity>, TypeParent, Context>;
+  }
+
+  export type AuthorizedResolver<
+    R = Maybe<boolean>,
+    Parent = ImpersonateReturn,
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context>;
+  export type TokensResolver<
+    R = Maybe<Tokens>,
+    Parent = ImpersonateReturn,
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context>;
+  export type UserResolver<
+    R = Maybe<UserEntity>,
+    Parent = ImpersonateReturn,
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace UploadedFileResolvers {
+  export interface Resolvers<
+    Context = ModuleContext,
+    TypeParent = UploadedFile
+  > {
+    url?: UrlResolver<string, TypeParent, Context>;
+  }
+
+  export type UrlResolver<
+    R = string,
+    Parent = UploadedFile,
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context>;
+}
+
 export namespace SubscriptionResolvers {
   export interface Resolvers<Context = ModuleContext, TypeParent = {}> {
-    userAdded?: UserAddedResolver<Maybe<User>, TypeParent, Context>;
+    userAdded?: UserAddedResolver<Maybe<UserEntity>, TypeParent, Context>;
 
-    userUpdated?: UserUpdatedResolver<Maybe<User>, TypeParent, Context>;
+    userUpdated?: UserUpdatedResolver<Maybe<UserEntity>, TypeParent, Context>;
 
-    chatAdded?: ChatAddedResolver<Maybe<Chat>, TypeParent, Context>;
+    chatAdded?: ChatAddedResolver<Maybe<ChatEntity>, TypeParent, Context>;
 
-    chatUpdated?: ChatUpdatedResolver<Maybe<Chat>, TypeParent, Context>;
+    chatUpdated?: ChatUpdatedResolver<Maybe<ChatEntity>, TypeParent, Context>;
 
-    messageAdded?: MessageAddedResolver<Maybe<Message>, TypeParent, Context>;
+    messageAdded?: MessageAddedResolver<
+      Maybe<MessageEntity>,
+      TypeParent,
+      Context
+    >;
   }
 
   export type UserAddedResolver<
-    R = Maybe<User>,
+    R = Maybe<UserEntity>,
     Parent = {},
     Context = ModuleContext
   > = SubscriptionResolver<R, Parent, Context>;
   export type UserUpdatedResolver<
-    R = Maybe<User>,
+    R = Maybe<UserEntity>,
     Parent = {},
     Context = ModuleContext
   > = SubscriptionResolver<R, Parent, Context>;
   export type ChatAddedResolver<
-    R = Maybe<Chat>,
+    R = Maybe<ChatEntity>,
     Parent = {},
     Context = ModuleContext
   > = SubscriptionResolver<R, Parent, Context>;
   export type ChatUpdatedResolver<
-    R = Maybe<Chat>,
+    R = Maybe<ChatEntity>,
     Parent = {},
     Context = ModuleContext
   > = SubscriptionResolver<R, Parent, Context>;
   export type MessageAddedResolver<
-    R = Maybe<Message>,
+    R = Maybe<MessageEntity>,
     Parent = {},
     Context = ModuleContext
   > = SubscriptionResolver<R, Parent, Context>;
 }
 
-/** Directs the executor to skip this field or fragment when the `if` argument is true. */
+export type AuthDirectiveResolver<Result> = DirectiveResolverFn<
+  Result,
+  {},
+  ModuleContext
+>; /** Directs the executor to skip this field or fragment when the `if` argument is true. */
 export type SkipDirectiveResolver<Result> = DirectiveResolverFn<
   Result,
   SkipDirectiveArgs,
@@ -618,19 +1395,31 @@ export interface DeprecatedDirectiveArgs {
 export interface DateScalarConfig extends GraphQLScalarTypeConfig<Date, any> {
   name: "Date";
 }
+export interface UploadScalarConfig
+  extends GraphQLScalarTypeConfig<Upload, any> {
+  name: "Upload";
+}
 
 export interface IResolvers<Context = ModuleContext> {
   Query?: QueryResolvers.Resolvers<Context>;
+  TwoFactorSecretKey?: TwoFactorSecretKeyResolvers.Resolvers<Context>;
   User?: UserResolvers.Resolvers<Context>;
+  EmailRecord?: EmailRecordResolvers.Resolvers<Context>;
   Chat?: ChatResolvers.Resolvers<Context>;
   Message?: MessageResolvers.Resolvers<Context>;
   Recipient?: RecipientResolvers.Resolvers<Context>;
   Mutation?: MutationResolvers.Resolvers<Context>;
+  LoginResult?: LoginResultResolvers.Resolvers<Context>;
+  Tokens?: TokensResolvers.Resolvers<Context>;
+  ImpersonateReturn?: ImpersonateReturnResolvers.Resolvers<Context>;
+  UploadedFile?: UploadedFileResolvers.Resolvers<Context>;
   Subscription?: SubscriptionResolvers.Resolvers<Context>;
   Date?: GraphQLScalarType;
+  Upload?: GraphQLScalarType;
 }
 
 export interface IDirectiveResolvers<Result> {
+  auth?: AuthDirectiveResolver<Result>;
   skip?: SkipDirectiveResolver<Result>;
   include?: IncludeDirectiveResolver<Result>;
   deprecated?: DeprecatedDirectiveResolver<Result>;

@@ -1,5 +1,5 @@
 import { GraphQLModule } from '@graphql-modules/core';
-import { loadResolversFiles, loadSchemaFiles } from '@graphql-modules/sonar';
+import { loadResolversFiles, loadSchemaFiles } from 'graphql-toolkit';
 import { UserModule } from '../user';
 import { ChatProvider } from './providers/chat.provider';
 import { AuthModule } from '../auth';

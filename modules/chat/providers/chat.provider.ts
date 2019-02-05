@@ -337,7 +337,7 @@ export class ChatProvider {
 
   async filterChatAddedOrUpdated(chatAddedOrUpdated: Chat, creatorOrUpdaterId: number) {
 
-    return Number(creatorOrUpdaterId) !== this.currentUser.id &&
+    return creatorOrUpdaterId.toString() !== this.currentUser.id &&
       chatAddedOrUpdated.listingMembers.some((user: User) => user.id === this.currentUser.id);
   }
 

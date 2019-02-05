@@ -6,18 +6,22 @@ import { UserModule } from './user';
 import { ChatModule } from './chat';
 import { MessageModule } from './message';
 import { RecipientModule } from './recipient';
+import { AccountsModule } from '@accounts/graphql-api';
+import AccountsServer from '@accounts/server';
 
 export interface IAppModuleConfig {
   connection: Connection,
-  app: Express;
+  accountsServer: AccountsServer
 }
 
 export const AppModule = new GraphQLModule<IAppModuleConfig>({
   name: 'App',
-  imports: ({config: {connection, app}}) => [
+  imports: ({config: {connection, accountsServer}}) => [
+    AccountsModule.forRoot({
+      accountsServer
+    }),
     AuthModule.forRoot({
       connection,
-      app,
     }),
     UserModule,
     ChatModule,

@@ -1,9 +1,19 @@
-import { Injectable, ProviderScope } from '@graphql-modules/di'
+/// <reference path="../../../cloudinary.d.ts" />
+import { Injectable } from '@graphql-modules/di'
 import { PubSub } from 'apollo-server-express'
 import { Connection } from 'typeorm'
 import { User } from '../../../entity/User';
 import { AuthProvider } from '../../auth/providers/auth.provider';
 import cloudinary from 'cloudinary';
+import { UploadedFile } from '../../../types';
+
+export const CLOUDINARY_URL = process.env.CLOUDINARY_URL || '';
+const match = CLOUDINARY_URL.match(/cloudinary:\/\/(\d+):(\w+)@(\.+)/);
+
+if (match) {
+  const [api_key, api_secret, cloud_name] = match.slice(1);
+  cloudinary.config({ api_key, api_secret, cloud_name });
+}
 
 @Injectable()
 export class UserProvider {
@@ -19,10 +29,6 @@ export class UserProvider {
 
   createQueryBuilder() {
     return this.connection.createQueryBuilder(User, 'user');
-  }
-
-  getMe() {
-    return this.currentUser;
   }
 
   getUsers() {
@@ -56,15 +62,16 @@ export class UserProvider {
     return userAddedOrUpdated.id !== this.currentUser.id;
   }
 
-  uploadProfilePic(filePath: string) {
-    return new Promise((resolve, reject) => {
-      cloudinary.v2.uploader.upload(filePath, (error, result) => {
+  uploadProfilePic(readableStream: NodeJS.ReadableStream) {
+    return new Promise<UploadedFile>((resolve, reject) => {
+      const writeStream = cloudinary.v2.uploader.upload_stream((error, result) => {
         if (error) {
           reject(error);
         } else {
           resolve(result);
         }
-      })
+      });
+      readableStream.pipe(writeStream);
     });
   }
 }

@@ -1,4 +1,4 @@
-import { PubSub } from 'apollo-server-express';
+import { PubSub, GraphQLUpload } from 'apollo-server-express';
 import { withFilter } from 'apollo-server-express';
 import { UserProvider } from '../providers/user.provider';
 import { User } from '../../../entity/User';
@@ -6,8 +6,8 @@ import { IResolvers } from '../../../types';
 import { ModuleContext } from '@graphql-modules/core';
 
 export default {
+  Upload: GraphQLUpload,
   Query: {
-    me: (_, __, { injector }) => injector.get(UserProvider).getMe(),
     users: (obj, args, { injector }) => injector.get(UserProvider).getUsers(),
   },
   Mutation: {
@@ -15,6 +15,7 @@ export default {
         name: name || '',
         picture: picture || '',
       }),
+    uploadPicture: async (obj, { file }, { injector }) => injector.get(UserProvider).uploadProfilePic((await file).createReadStream()),
   },
   Subscription: {
     userAdded: {

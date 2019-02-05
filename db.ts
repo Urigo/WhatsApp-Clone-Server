@@ -20,6 +20,7 @@ export async function addSampleData(connection: Connection) {
     picture: 'https://randomuser.me/api/portraits/thumb/men/1.jpg',
     phone: '+391234567890',
   });
+  await connection.manager.save(user1.allServices[0]);
   await connection.manager.save(user1);
 
   const user2 = new User({
@@ -29,6 +30,7 @@ export async function addSampleData(connection: Connection) {
     picture: 'https://randomuser.me/api/portraits/thumb/men/2.jpg',
     phone: '+391234567891',
   });
+  await connection.manager.save(user2.allServices[0]);
   await connection.manager.save(user2);
 
   const user3 = new User({
@@ -38,6 +40,7 @@ export async function addSampleData(connection: Connection) {
     picture: 'https://randomuser.me/api/portraits/thumb/women/1.jpg',
     phone: '+391234567892',
   });
+  await connection.manager.save(user3.allServices[0]);
   await connection.manager.save(user3);
 
   const user4 = new User({
@@ -47,6 +50,7 @@ export async function addSampleData(connection: Connection) {
     picture: 'https://randomuser.me/api/portraits/thumb/women/2.jpg',
     phone: '+391234567893',
   });
+  await connection.manager.save(user4.allServices[0]);
   await connection.manager.save(user4);
 
   const user5 = new User({
@@ -56,6 +60,7 @@ export async function addSampleData(connection: Connection) {
     picture: 'https://randomuser.me/api/portraits/thumb/men/3.jpg',
     phone: '+391234567894',
   });
+  await connection.manager.save(user5.allServices[0]);
   await connection.manager.save(user5);
 
   const user6 = new User({
@@ -65,6 +70,7 @@ export async function addSampleData(connection: Connection) {
     picture: 'https://randomuser.me/api/portraits/thumb/men/4.jpg',
     phone: '+391234567895',
   });
+  await connection.manager.save(user6.allServices[0]);
   await connection.manager.save(user6);
 
   const user7 = new User({
@@ -74,6 +80,7 @@ export async function addSampleData(connection: Connection) {
     picture: 'https://randomuser.me/api/portraits/thumb/men/5.jpg',
     phone: '+391234567896',
   });
+  await connection.manager.save(user7.allServices[0]);
   await connection.manager.save(user7);
 
 

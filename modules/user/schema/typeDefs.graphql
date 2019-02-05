@@ -1,10 +1,16 @@
+scalar Upload
+
 type Query {
-  me: User
-  users: [User!]
+  users: [User!] @auth
+}
+
+type UploadedFile {
+  url: String!
 }
 
 type Mutation {
-  updateUser(name: String, picture: String): User!
+  updateUser(name: String, picture: String): User! @auth
+  uploadPicture(file: Upload!): UploadedFile! @auth
 }
 
 type Subscription {
@@ -12,9 +18,12 @@ type Subscription {
   userUpdated: User
 }
 
-type User {
-  id: ID!
+extend type User {
   name: String
   picture: String
   phone: String
+}
+
+extend input CreateUserInput {
+  name: String
 }

@@ -17,6 +17,6 @@ type Recipient {
 }
 
 type Mutation {
-  markAsReceived(chatId: ID!): Boolean
-  markAsRead(chatId: ID!): Boolean
+  markAsReceived(chatId: ID!): Boolean @auth
+  markAsRead(chatId: ID!): Boolean @auth
 }
