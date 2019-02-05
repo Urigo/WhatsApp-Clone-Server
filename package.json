@@ -30,6 +30,9 @@
     "typescript": "3.2.4"
   },
   "dependencies": {
+    "@graphql-modules/core": "0.4.2",
+    "@graphql-modules/di": "0.4.0",
+    "@graphql-modules/sonar": "0.4.0",
     "apollo-server-express": "2.3.1",
     "body-parser": "1.18.3",
     "core-js": "3.0.0-beta.3",
