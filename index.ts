@@ -4,27 +4,33 @@ import cors from 'cors'
 import express from 'express'
 import gql from 'graphql-tag'
 import { createServer } from 'http'
+import { createConnection } from 'typeorm'
 import schema from './schema'
 
 const PORT = 4000
 
-const app = express()
+createConnection().then((connection) => {
+  const app = express()
 
-app.use(cors())
-app.use(bodyParser.json())
+  app.use(cors())
+  app.use(bodyParser.json())
 
-const apollo = new ApolloServer({ schema })
+  const apollo = new ApolloServer({
+    schema,
+    context: () => ({ connection }),
+  })
 
-apollo.applyMiddleware({
-  app,
-  path: '/graphql',
-})
+  apollo.applyMiddleware({
+    app,
+    path: '/graphql',
+  })
 
-// Wrap the Express server
-const ws = createServer(app)
+  // Wrap the Express server
+  const ws = createServer(app)
 
-apollo.installSubscriptionHandlers(ws)
+  apollo.installSubscriptionHandlers(ws)
 
-ws.listen(PORT, () => {
-  console.log(`Apollo Server is now running on http://localhost:${PORT}`)
+  ws.listen(PORT, () => {
+    console.log(`Apollo Server is now running on http://localhost:${PORT}`)
+  })
 })
