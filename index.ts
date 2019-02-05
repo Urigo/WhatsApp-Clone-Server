@@ -9,31 +9,12 @@ import { createServer } from 'http';
 import { createConnection } from 'typeorm';
 import { addSampleData } from './db';
 import { AppModule } from './modules/app.module';
-import { AccountsTypeorm, entities } from '@accounts/typeorm';
+import { AccountsTypeorm } from '@accounts/typeorm';
 import AccountsServer from '@accounts/server';
 import AccountsPassword from '@accounts/password';
-import { Chat } from './entity/Chat';
-import { Message } from './entity/Message';
-import { Recipient } from './entity/Recipient';
 import { User } from './entity/User';
 
-createConnection({
-  type: "postgres",
-  host: "localhost",
-  port: 5432,
-  username: "test",
-  password: "test",
-  database: "whatsapp",
-  synchronize: true,
-  logging: false,
-  entities: [
-    ...entities,
-    Chat,
-    Message,
-    Recipient,
-    User,
-  ]
-}).then(async connection => {
+createConnection().then(async connection => {
 
   const PORT = 4000;
 

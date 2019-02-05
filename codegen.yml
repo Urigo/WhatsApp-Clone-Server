@@ -4,10 +4,11 @@ require: ts-node/register/transpile-only
 generates:
   ./types.d.ts:
     plugins:
-      - add: "import { Chat as ChatEntity } from './entities/Chat';"
-      - add: "import { Message as MessageEntity } from './entities/Message';"
-      - add: "import { Recipient as RecipientEntity } from './entities/Recipient';"
-      - add: "import { User as UserEntity } from './entities/User';"
+      - add: "import { Chat as ChatEntity } from './entity/Chat';"
+      - add: "import { Message as MessageEntity } from './entity/Message';"
+      - add: "import { Recipient as RecipientEntity } from './entity/Recipient';"
+      - add: "import { User as UserEntity } from './entity/User';"
+      - add: "import { Upload } from './upload';"
       - typescript-common
       - typescript-server
       - typescript-resolvers
@@ -21,4 +22,5 @@ generates:
         User: UserEntity
       scalars:
         Date: Date
+        Upload: Upload
 

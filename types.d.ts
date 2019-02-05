@@ -1,7 +1,8 @@
-import { Chat as ChatEntity } from "./entities/Chat";
-import { Message as MessageEntity } from "./entities/Message";
-import { Recipient as RecipientEntity } from "./entities/Recipient";
-import { User as UserEntity } from "./entities/User";
+import { Chat as ChatEntity } from "./entity/Chat";
+import { Message as MessageEntity } from "./entity/Message";
+import { Recipient as RecipientEntity } from "./entity/Recipient";
+import { User as UserEntity } from "./entity/User";
+import { Upload } from "./upload";
 export type Maybe<T> = T | undefined | null;
 
 export interface CreateUserInput {
@@ -12,6 +13,10 @@ export interface CreateUserInput {
   password?: Maybe<string>;
 
   name?: Maybe<string>;
+
+  picture?: Maybe<string>;
+
+  phone?: Maybe<string>;
 }
 
 export interface TwoFactorSecretKeyInput {
@@ -59,8 +64,6 @@ export enum MessageType {
   Text = "TEXT",
   Picture = "PICTURE"
 }
-
-export type Upload = any;
 
 // ====================================================
 // Scalars
