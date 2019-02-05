@@ -13,3 +13,5 @@ generates:
         Chat: ./entity/chat#Chat
         Message: ./entity/message#Message
         User: ./entity/user#User
+      scalars:
+        Date: Date
