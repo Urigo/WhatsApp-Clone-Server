@@ -1,5 +1,5 @@
 overwrite: true
-schema: ./schema/typeDefs.ts
+schema: ./schema.ts
 require: ts-node/register/transpile-only
 generates:
   ./types.d.ts:
