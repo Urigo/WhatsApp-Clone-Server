@@ -7,13 +7,15 @@ import { ChatModule } from './chat'
 import { MessageModule } from './message'
 
 export interface IAppModuleConfig {
-  connection: Connection;
+  connection: Connection
+  app: Express
 }
 
 export const AppModule = new GraphQLModule<IAppModuleConfig>({
   name: 'App',
-  imports: ({ config: { connection } }) => [
+  imports: ({ config: { app, connection } }) => [
     AuthModule.forRoot({
+      app,
       connection,
     }),
     UserModule,
