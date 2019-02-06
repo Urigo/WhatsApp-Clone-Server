@@ -8,4 +8,10 @@ export default {
     me: (obj, args, { injector }) => injector.get(UserProvider).getMe(),
     users: (obj, args, { injector }) => injector.get(UserProvider).getUsers(),
   },
+  Mutation: {
+    updateUser: (obj, { name, picture }, { injector }) => injector.get(UserProvider).updateUser({
+      name: name || '',
+      picture: picture || '',
+    }),
+  },
 } as IResolvers
