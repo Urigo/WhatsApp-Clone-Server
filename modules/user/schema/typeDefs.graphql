@@ -3,6 +3,10 @@ type Query {
   users: [User!]
 }
 
+type Mutation {
+  updateUser(name: String, picture: String): User!
+}
+
 type User {
   id: ID!
   name: String
