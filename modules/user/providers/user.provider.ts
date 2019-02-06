@@ -23,4 +23,23 @@ export class UserProvider {
       .where('user.id != :id', { id: this.currentUser.id })
       .getMany()
   }
+
+  async updateUser({
+    name,
+    picture,
+  }: {
+    name?: string,
+    picture?: string,
+  } = {}) {
+    if (name === this.currentUser.name && picture === this.currentUser.picture) {
+      return this.currentUser;
+    }
+
+    this.currentUser.name = name || this.currentUser.name;
+    this.currentUser.picture = picture || this.currentUser.picture;
+
+    await this.repository.save(this.currentUser);
+
+    return this.currentUser;
+  }
 }
