@@ -14,6 +14,10 @@ export class UserProvider {
     return this.connection.createQueryBuilder(User, 'user')
   }
 
+  getMe() {
+    return this.currentUser
+  }
+
   getUsers() {
     return this.createQueryBuilder()
       .where('user.id != :id', { id: this.currentUser.id })

@@ -14,12 +14,15 @@
     "start": "yarn generate && yarn start:server"
   },
   "devDependencies": {
+    "@types/bcrypt-nodejs": "0.0.30",
     "@types/body-parser": "1.17.0",
     "@types/cors": "2.8.4",
     "@types/express": "4.16.0",
     "@types/graphql": "14.0.4",
     "@types/graphql-iso-date": "3.3.1",
     "@types/node": "10.12.18",
+    "@types/passport": "1.0.0",
+    "@types/passport-http": "0.3.7",
     "@types/pg": "^7.4.11",
     "concurrently": "4.1.0",
     "graphql-code-generator": "0.16.0",
@@ -34,6 +37,7 @@
     "@graphql-modules/di": "0.4.0",
     "@graphql-modules/sonar": "0.4.0",
     "apollo-server-express": "2.3.1",
+    "bcrypt-nodejs": "0.0.3",
     "body-parser": "1.18.3",
     "core-js": "3.0.0-beta.3",
     "cors": "2.8.5",
@@ -41,6 +45,8 @@
     "graphql": "14.0.2",
     "graphql-iso-date": "3.6.1",
     "moment": "^2.24.0",
+    "passport": "0.4.0",
+    "passport-http": "0.3.0",
     "pg": "7.8.0",
     "reflect-metadata": "0.1.12",
     "typeorm": "0.2.11"
