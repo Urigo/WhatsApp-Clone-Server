@@ -26,9 +26,10 @@ export class UserProvider implements OnRequest, OnConnect {
     }
   }
 
-  async onConnect(connectionParams: { 'accounts-access-token'?: string }) {
-    if (connectionParams['accounts-access-token']) {
-      this.currentUser = await this.accountsServer.resumeSession(connectionParams['accounts-access-token']) as User;
+  async onConnect(connectionParams: { Authorization ?: string }) {
+    if (connectionParams.Authorization) {
+      const authToken = connectionParams.Authorization.replace('Bearer ', '');
+      this.currentUser = await this.accountsServer.resumeSession(authToken) as User;
     }
   }
 

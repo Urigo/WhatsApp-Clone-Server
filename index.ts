@@ -23,16 +23,14 @@ createConnection().then(async connection => {
   app.use(cors());
   app.use(bodyParser.json());
 
+  const accountsPassword = new AccountsPassword({
+    validateNewUser: ({ username, password, name, picture, phone }) => ({ username, password, name, picture, phone })
+  });
+
   const accountsTypeorm = new AccountsTypeorm({
     connection,
     userEntity: User,
   });
-
-  if (process.argv.includes('--add-sample-data')) {
-    addSampleData(connection);
-  }
-
-  const accountsPassword = new AccountsPassword();
 
   const accountsServer = new AccountsServer({
     db: accountsTypeorm,
@@ -40,6 +38,10 @@ createConnection().then(async connection => {
   }, {
     password: accountsPassword
   });
+
+  if (process.argv.includes('--add-sample-data')) {
+    await addSampleData(connection, accountsPassword);
+  }
 
   const { schema, context, subscriptions } = AppModule.forRoot({ connection, accountsServer });
 

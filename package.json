@@ -34,13 +34,13 @@
     "typescript": "^3.2.2"
   },
   "dependencies": {
-    "@accounts/graphql-api": "^0.9.3",
-    "@accounts/server": "^0.9.3",
-    "@accounts/typeorm": "^0.9.3",
-    "@graphql-modules/core": "0.4.1",
+    "@accounts/graphql-api": "^0.11.1",
+    "@accounts/password": "^0.11.1",
+    "@accounts/server": "^0.11.1",
+    "@accounts/typeorm": "^0.11.1",
+    "@graphql-modules/core": "0.4.2",
     "graphql-toolkit": "0.0.5",
     "apollo-server-express": "^2.3.1",
-    "bcrypt-nodejs": "^0.0.3",
     "body-parser": "^1.18.3",
     "cloudinary": "^1.13.2",
     "cors": "^2.8.5",
@@ -49,12 +49,8 @@
     "graphql": "^14.0.2",
     "graphql-iso-date": "^3.6.1",
     "moment": "^2.23.0",
-    "multer": "^1.4.1",
-    "passport": "^0.4.0",
-    "passport-http": "^0.3.0",
     "pg": "^7.8.0",
     "reflect-metadata": "^0.1.12",
-    "tmp": "^0.0.33",
     "typeorm": "^0.2.11"
   }
 }
