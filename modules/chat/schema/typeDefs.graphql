@@ -21,3 +21,8 @@ type Chat {
   #If null the group is read-only. Null for chats.
   owner: User
 }
+
+type Mutation {
+  addChat(userId: ID!): Chat
+  removeChat(chatId: ID!): ID
+}
