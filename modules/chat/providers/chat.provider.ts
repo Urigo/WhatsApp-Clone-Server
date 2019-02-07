@@ -1,4 +1,5 @@
 import { Injectable } from '@graphql-modules/di'
+import { PubSub } from 'apollo-server-express'
 import { Connection } from 'typeorm'
 import { Chat } from '../../../entity/chat'
 import { User } from '../../../entity/user'
@@ -8,6 +9,7 @@ import { UserProvider } from '../../user/providers/user.provider'
 @Injectable()
 export class ChatProvider {
   constructor(
+    private pubsub: PubSub,
     private connection: Connection,
     private userProvider: UserProvider,
     private authProvider: AuthProvider
@@ -107,5 +109,54 @@ export class ChatProvider {
       .getOne()
 
     return owner || null
+  }
+
+  async filterChatAddedOrUpdated(chatAddedOrUpdated: Chat, creatorOrUpdaterId: string) {
+    return (
+      creatorOrUpdaterId !== this.currentUser.id &&
+      chatAddedOrUpdated.listingMembers.some((user: User) => user.id === this.currentUser.id)
+    )
+  }
+
+  async updateUser({
+    name,
+    picture,
+  }: {
+    name?: string
+    picture?: string
+  } = {}) {
+    await this.userProvider.updateUser({ name, picture })
+
+    const data = await this.connection
+      .createQueryBuilder(User, 'user')
+      .where('user.id = :id', { id: this.currentUser.id })
+      // Get a list of the chats who have/had currentUser involved
+      .innerJoinAndSelect(
+        'user.allTimeMemberChats',
+        'allTimeMemberChats',
+        // Groups are unaffected
+        'allTimeMemberChats.name IS NULL'
+      )
+      // We need to notify only those who get the chat listed (except currentUser of course)
+      .innerJoin(
+        'allTimeMemberChats.listingMembers',
+        'listingMembers',
+        'listingMembers.id != :currentUserId',
+        {
+          currentUserId: this.currentUser.id,
+        }
+      )
+      .getOne()
+
+    const chatsAffected = (data && data.allTimeMemberChats) || []
+
+    chatsAffected.forEach(chat => {
+      this.pubsub.publish('chatUpdated', {
+        updaterId: this.currentUser.id,
+        chatUpdated: chat,
+      })
+    })
+
+    return this.currentUser
   }
 }
