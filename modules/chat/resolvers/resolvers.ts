@@ -18,6 +18,12 @@ export default {
     removeChat: (obj, { chatId }, { injector }) => injector.get(ChatProvider).removeChat(chatId),
   },
   Subscription: {
+    chatAdded: {
+      subscribe: withFilter((root, args, { injector }: ModuleContext) => injector.get(PubSub).asyncIterator('chatAdded'),
+        (data: { chatAdded: Chat, creatorId: string }, variables, { injector }: ModuleContext) =>
+          data && injector.get(ChatProvider).filterChatAddedOrUpdated(data.chatAdded, data.creatorId)
+      ),
+    },
     chatUpdated: {
       subscribe: withFilter((root, args, { injector }: ModuleContext) => injector.get(PubSub).asyncIterator('chatUpdated'),
         (data: { chatUpdated: Chat, updaterId: string }, variables, { injector }: ModuleContext) =>

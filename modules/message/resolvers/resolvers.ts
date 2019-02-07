@@ -1,4 +1,5 @@
 import { ModuleContext } from '@graphql-modules/core'
+import { PubSub, withFilter } from 'apollo-server-express'
 import { Message } from '../../../entity/message'
 import { IResolvers } from '../../../types'
 import { MessageProvider } from '../providers/message.provider'
@@ -18,6 +19,13 @@ export default {
       }),
     // We may need to also remove the messages
     removeChat: async (obj, { chatId }, { injector }) => injector.get(MessageProvider).removeChat(chatId),
+  },
+  Subscription: {
+    messageAdded: {
+      subscribe: withFilter((root, args, { injector }: ModuleContext) => injector.get(PubSub).asyncIterator('messageAdded'),
+        (data: { messageAdded: Message }, variables, { injector }: ModuleContext) => data && injector.get(MessageProvider).filterMessageAdded(data.messageAdded)
+      ),
+    },
   },
   Chat: {
     messages: async (chat, { amount }, { injector }) =>
