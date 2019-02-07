@@ -9,6 +9,7 @@ import {
   CreateDateColumn,
 } from 'typeorm'
 import Chat from './chat'
+import Recipient from './recipient'
 import User from './user'
 import { MessageType } from '../db'
 
@@ -17,6 +18,7 @@ interface MessageConstructor {
   content?: string
   createdAt?: Date
   type?: MessageType
+  recipients?: Recipient[]
   holders?: User[]
   chat?: Chat
 }
@@ -38,6 +40,9 @@ export class Message {
   @Column()
   type: number
 
+  @OneToMany(type => Recipient, recipient => recipient.message, { cascade: ['insert', 'update'], eager: true })
+  recipients: Recipient[]
+
   @ManyToMany(type => User, user => user.holderMessages, {
     cascade: ['insert', 'update'],
     eager: true,
@@ -53,6 +58,7 @@ export class Message {
     content,
     createdAt,
     type,
+    recipients,
     holders,
     chat,
   }: MessageConstructor = {}) {
@@ -67,6 +73,10 @@ export class Message {
     }
     if (type) {
       this.type = type
+    }
+    if (recipients) {
+      recipients.forEach(recipient => recipient.message = this)
+      this.recipients = recipients
     }
     if (holders) {
       this.holders = holders
