@@ -14,6 +14,8 @@ export default {
       name: name || '',
       picture: picture || '',
     }),
+    addChat: (obj, { userId }, { injector }) => injector.get(ChatProvider).addChat(userId),
+    removeChat: (obj, { chatId }, { injector }) => injector.get(ChatProvider).removeChat(chatId),
   },
   Subscription: {
     chatUpdated: {
