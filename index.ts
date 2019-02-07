@@ -21,11 +21,12 @@ createConnection().then((connection) => {
   app.use(cors())
   app.use(bodyParser.json())
 
-  const { schema, context } = AppModule.forRoot({ app, connection })
+  const { schema, context, subscriptions } = AppModule.forRoot({ app, connection })
 
   const apollo = new ApolloServer({
     schema,
     context,
+    subscriptions,
   })
 
   apollo.applyMiddleware({
