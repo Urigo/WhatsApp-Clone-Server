@@ -3,6 +3,10 @@ type Query {
   chat(chatId: ID!): Chat
 }
 
+type Subscription {
+  chatUpdated: Chat
+}
+
 type Chat {
   #May be a chat or a group
   id: ID!
