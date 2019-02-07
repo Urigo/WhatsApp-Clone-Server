@@ -2,31 +2,31 @@
 # yarn lockfile v1
 
 
-"@accounts/graphql-api@^0.11.1":
-  version "0.11.1"
-  resolved "https://registry.yarnpkg.com/@accounts/graphql-api/-/graphql-api-0.11.1.tgz#14be726bf8dae0a271e87cdcce53b526d28fd889"
-  integrity sha512-a5G//z/aNZTggCb4asgP4sM056olJShueoxCAOdaCqU4I+dfSEn5dGSe9ghv/jJ2it5EnBpxV8ub4sxEhNFKLQ==
+"@accounts/graphql-api@^0.11.2":
+  version "0.11.2"
+  resolved "https://registry.yarnpkg.com/@accounts/graphql-api/-/graphql-api-0.11.2.tgz#6b6916610f4fbe2382f78d914c1e7309fd0eabbb"
+  integrity sha512-3img2ahT+iVpJPKxZ9g+5AXqzG3v0B3kIeSW2DM9V+Uu/E1VfIodum2TcdzbhWiMfW05novKuvRDfrf8VA2hNQ==
   dependencies:
     graphql-toolkit "^0.0.5"
     request-ip "2.1.3"
     tslib "1.9.3"
 
-"@accounts/password@^0.11.1":
-  version "0.11.1"
-  resolved "https://registry.yarnpkg.com/@accounts/password/-/password-0.11.1.tgz#3bc8807a65ae6f8e962961eeac0485813b9568e4"
-  integrity sha512-O/20DY5t1TIfMeRFz3IbxQTKFzQ4f8o0K4su2kE6VdgGX1bkGdy2pxcFGn1KEe+7GVK6aMf+ca9pafvy8kdnRg==
+"@accounts/password@^0.11.2":
+  version "0.11.2"
+  resolved "https://registry.yarnpkg.com/@accounts/password/-/password-0.11.2.tgz#9117cf5ae9c3afe546a525051a836af8584aa3a5"
+  integrity sha512-zq8RGIwqUPZJxAoZmnx8fgHi8De+3spLkHDWT7rDwEILdvXmK6z9t5DqARLsE10WEEltIhMhLLVQHMtqTo8Whg==
   dependencies:
-    "@accounts/two-factor" "^0.11.1"
+    "@accounts/two-factor" "^0.11.2"
     bcryptjs "^2.4.3"
     lodash "^4.17.11"
     tslib "1.9.3"
 
-"@accounts/server@^0.11.1":
-  version "0.11.1"
-  resolved "https://registry.yarnpkg.com/@accounts/server/-/server-0.11.1.tgz#521d54f25d332fdf4d4e7e9a3c4a9582bda4edb4"
-  integrity sha512-BeCfG0Inzug/YK1o66KIzNs7lG+UOUJ1WQbWV2Xs6CZSF9z95frMnpi0YfF0ZcFLkUxFGeoI2hFMo7CvZpWkVg==
+"@accounts/server@^0.11.2":
+  version "0.11.2"
+  resolved "https://registry.yarnpkg.com/@accounts/server/-/server-0.11.2.tgz#0e27e6d15049e2b0fbcdea1899978fbdb37afb2d"
+  integrity sha512-OXl6UITtoNbnwY54a7fo09I5kEIFdynUoLb0erbH2iMSZiXvLz4ZKUs8OBuQX/BmaTk1K/OOXRja8mMY5793tQ==
   dependencies:
-    "@accounts/types" "^0.11.1"
+    "@accounts/types" "^0.11.2"
     "@types/jsonwebtoken" "8.3.0"
     emittery "0.4.1"
     jsonwebtoken "8.4.0"
@@ -34,34 +34,34 @@
     lodash "4.17.11"
     tslib "1.9.3"
 
-"@accounts/two-factor@^0.11.1":
-  version "0.11.1"
-  resolved "https://registry.yarnpkg.com/@accounts/two-factor/-/two-factor-0.11.1.tgz#02a84e4e9910b4b97f4dcd4372ce5a8344740f2b"
-  integrity sha512-K3MxPV/Jom1uYdPDvzumTD/FNn64awIJNG3rT2fvzCI2+5o2tCvyhHOZAOtsuJtC8gtO+VKERQtP2Yd7Nbn4mg==
+"@accounts/two-factor@^0.11.2":
+  version "0.11.2"
+  resolved "https://registry.yarnpkg.com/@accounts/two-factor/-/two-factor-0.11.2.tgz#b68c98f219181bb8c5a261db5a5a742bfc698852"
+  integrity sha512-NyNvYb0FzFniBH+z+7o1cj1DVR5QuOQcnOUjhkbwBicX5p74vvOZur5wPeQ7gTWzSdlRtYn/EuSeKdnZD1Adig==
   dependencies:
-    "@accounts/types" "^0.11.1"
+    "@accounts/types" "^0.11.2"
     "@types/lodash" "^4.14.119"
     "@types/speakeasy" "2.0.2"
     lodash "^4.17.11"
     speakeasy "^2.0.0"
     tslib "1.9.3"
 
-"@accounts/typeorm@^0.11.1":
-  version "0.11.1"
-  resolved "https://registry.yarnpkg.com/@accounts/typeorm/-/typeorm-0.11.1.tgz#da87a4b8aef4fecd113df0f4d9cc87d2bf8eb775"
-  integrity sha512-2SDiVxTe55cd+AuusPR2GicrmUJHCPaJDx9zWtDzohyMvlpKuaRcFFdJE6CwM9vaw9CmucJS9QmYrnfGZt/2cA==
+"@accounts/typeorm@^0.11.2":
+  version "0.11.2"
+  resolved "https://registry.yarnpkg.com/@accounts/typeorm/-/typeorm-0.11.2.tgz#d7cfe06691e36cadc4b1d705ecc9c7831f3fcc15"
+  integrity sha512-JEnNLhZ0pRE6wUPtyD3UtgU/6QstJuvMzZXLMhoqrL0ifaWmuKUmQpKIHP22fHCmsplTiqh7lrGHxm2xc/gPDQ==
   dependencies:
-    "@accounts/types" "^0.11.1"
+    "@accounts/types" "^0.11.2"
     lodash "^4.17.11"
     pg "^7.8.0"
     reflect-metadata "^0.1.13"
     tslib "1.9.3"
     typeorm "^0.2.11"
 
-"@accounts/types@^0.11.1":
-  version "0.11.1"
-  resolved "https://registry.yarnpkg.com/@accounts/types/-/types-0.11.1.tgz#cf6706103e23aca71b06a59a6a74940edd26b1a7"
-  integrity sha512-jUllZ2tNjkjf3fSJh7LLCwdDKLBq4wacDqBU2DKQ94WBv5oy9fwnP/FYiVQbH+IGpgwyjOi8bHYMAxOFQK2KfQ==
+"@accounts/types@^0.11.2":
+  version "0.11.2"
+  resolved "https://registry.yarnpkg.com/@accounts/types/-/types-0.11.2.tgz#5f7ac85af1af8009803a94bdb61d5e231d588761"
+  integrity sha512-ZpMYSWFy2AkjfNnoc/g2VTRAErRbSE97DZlnI3DKcdGh891yUdAmovdeeoZAUp9UW7lMRrMII9MgZRHMlLe5sA==
   dependencies:
     tslib "1.9.3"
 
@@ -4660,7 +4660,7 @@ type-is@^1.6.16, type-is@~1.6.16:
     media-typer "0.3.0"
     mime-types "~2.1.18"
 
-typeorm@^0.2.11:
+typeorm@^0.2.11, typeorm@^0.2.12:
   version "0.2.12"
   resolved "https://registry.yarnpkg.com/typeorm/-/typeorm-0.2.12.tgz#faa1bef1af185b682ad28d09aebeef3a7bbcf756"
   integrity sha512-y9RWUfzE1rZ4WZM8B2Bj0l/V+EhA1yAyEVzHGD2zCM7YjVpqVg/L7HdSRO16VRaPvlz4rHH4Xt0yWfE+NXZLww==
