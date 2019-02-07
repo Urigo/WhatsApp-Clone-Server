@@ -1,4 +1,5 @@
 import { Injectable, ProviderScope } from '@graphql-modules/di'
+import cloudinary from 'cloudinary'
 import { Connection } from 'typeorm'
 import { User } from '../../../entity/user'
 import { AuthProvider } from '../../auth/providers/auth.provider'
@@ -41,5 +42,17 @@ export class UserProvider {
     await this.repository.save(this.currentUser);
 
     return this.currentUser;
+  }
+
+  uploadProfilePic(filePath: string) {
+    return new Promise((resolve, reject) => {
+      cloudinary.v2.uploader.upload(filePath, (error, result) => {
+        if (error) {
+          reject(error)
+        } else {
+          resolve(result)
+        }
+      })
+    })
   }
 }
