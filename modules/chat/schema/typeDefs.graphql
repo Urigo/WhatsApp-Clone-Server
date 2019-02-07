@@ -4,6 +4,7 @@ type Query {
 }
 
 type Subscription {
+  chatAdded: Chat
   chatUpdated: Chat
 }
 
