@@ -38,6 +38,63 @@ export class ChatProvider {
     return chat || null
   }
 
+  async addChat(userId: string) {
+    const user = await this.userProvider
+      .createQueryBuilder()
+      .whereInIds(userId)
+      .getOne();
+
+    if (!user) {
+      throw new Error(`User ${userId} doesn't exist.`);
+    }
+
+    let chat = await this
+      .createQueryBuilder()
+      .where('chat.name IS NULL')
+      .innerJoin('chat.allTimeMembers', 'allTimeMembers1', 'allTimeMembers1.id = :currentUserId', {
+        currentUserId: this.currentUser.id,
+      })
+      .innerJoin('chat.allTimeMembers', 'allTimeMembers2', 'allTimeMembers2.id = :userId', {
+        userId: userId,
+      })
+      .innerJoinAndSelect('chat.listingMembers', 'listingMembers')
+      .getOne();
+
+    if (chat) {
+      // Chat already exists. Both users are already in the userIds array
+      const listingMembers = await this.userProvider
+        .createQueryBuilder()
+        .innerJoin(
+          'user.listingMemberChats',
+          'listingMemberChats',
+          'listingMemberChats.id = :chatId',
+          { chatId: chat.id },
+        )
+        .getMany();
+
+      if (!listingMembers.find(user => user.id === this.currentUser.id)) {
+        // The chat isn't listed for the current user. Add him to the memberIds
+        chat.listingMembers.push(this.currentUser);
+        chat = await this.repository.save(chat);
+
+        return chat || null;
+      } else {
+        return chat;
+      }
+    } else {
+      // Create the chat
+      chat = await this.repository.save(
+        new Chat({
+          allTimeMembers: [this.currentUser, user],
+          // Chat will not be listed to the other user until the first message gets written
+          listingMembers: [this.currentUser],
+        }),
+      );
+
+      return chat || null;
+    }
+  }
+
   async getChatName(chat: Chat) {
     if (chat.name) {
       return chat.name
@@ -158,5 +215,56 @@ export class ChatProvider {
     })
 
     return this.currentUser
+  }
+
+  async removeChat(chatId: string) {
+    const chat = await this.createQueryBuilder()
+      .whereInIds(Number(chatId))
+      .innerJoinAndSelect('chat.listingMembers', 'listingMembers')
+      .leftJoinAndSelect('chat.owner', 'owner')
+      .getOne();
+
+    if (!chat) {
+      throw new Error(`The chat ${chatId} doesn't exist.`)
+    }
+
+    if (!chat.name) {
+      // Chat
+      if (!chat.listingMembers.find(user => user.id === this.currentUser.id)) {
+        throw new Error(`The user is not a listing member of the chat ${chatId}.`)
+      }
+
+      // Remove the current user from who gets the chat listed. The chat will no longer appear in his list
+      chat.listingMembers = chat.listingMembers.filter(user => user.id !== this.currentUser.id);
+
+      // Check how many members are left
+      if (chat.listingMembers.length === 0) {
+        // Delete the chat
+        await this.repository.remove(chat);
+      } else {
+        // Update the chat
+        await this.repository.save(chat);
+      }
+
+      return chatId;
+    } else {
+      // Group
+
+      // Remove the current user from who gets the group listed. The group will no longer appear in his list
+      chat.listingMembers = chat.listingMembers.filter(user => user.id !== this.currentUser.id);
+
+      // Check how many members (including previous ones who can still access old messages) are left
+      if (chat.listingMembers.length === 0) {
+        // Remove the group
+        await this.repository.remove(chat);
+      } else {
+        // TODO: Implement for group
+        chat.owner = chat.listingMembers[0]
+
+        await this.repository.save(chat);
+      }
+
+      return chatId;
+    }
   }
 }
