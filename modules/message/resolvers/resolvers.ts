@@ -8,6 +8,17 @@ export default {
     // The ordering depends on the messages
     chats: (obj, args, { injector }) => injector.get(MessageProvider).getChats(),
   },
+  Mutation: {
+    addMessage: async (obj, { chatId, content }, { injector }) =>
+      injector.get(MessageProvider).addMessage(chatId, content),
+    removeMessages: async (obj, { chatId, messageIds, all }, { injector }) =>
+      injector.get(MessageProvider).removeMessages(chatId, {
+        messageIds: messageIds || undefined,
+        all: all || false,
+      }),
+    // We may need to also remove the messages
+    removeChat: async (obj, { chatId }, { injector }) => injector.get(MessageProvider).removeChat(chatId),
+  },
   Chat: {
     messages: async (chat, { amount }, { injector }) =>
       injector.get(MessageProvider).getChatMessages(chat, amount || 0),
