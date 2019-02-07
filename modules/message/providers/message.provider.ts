@@ -62,6 +62,11 @@ export class MessageProvider {
         chat.listingMembers.push(user);
 
         await this.chatProvider.repository.save(chat);
+
+        this.pubsub.publish('chatAdded', {
+          creatorId: this.currentUser.id,
+          chatAdded: chat,
+        });
       }
 
       holders = chat.listingMembers;
@@ -316,5 +321,19 @@ export class MessageProvider {
       .getOne()
 
     return latestMessage ? latestMessage.createdAt : null
+  }
+
+  async filterMessageAdded(messageAdded: Message) {
+    const relevantUsers = (await this.userProvider
+      .createQueryBuilder()
+      .innerJoin(
+        'user.listingMemberChats',
+        'listingMemberChats',
+        'listingMemberChats.id = :chatId',
+        { chatId: messageAdded.chat.id }
+      )
+      .getMany()).filter(user => user.id != messageAdded.sender.id)
+
+    return relevantUsers.some(user => user.id === this.currentUser.id)
   }
 }
