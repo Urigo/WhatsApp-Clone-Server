@@ -5,7 +5,7 @@
     "username": "postgres",
     "password": "deneme12",
     "database": "wazaap",
-    "synchronize": true,
+    "synchronize": false,
     "logging": false,
     "entities": [
         "entity/**/*.ts"

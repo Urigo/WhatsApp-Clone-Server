@@ -28,7 +28,7 @@
     // "noImplicitAny": true,                 /* Raise error on expressions and declarations with an implied 'any' type. */
     // "strictNullChecks": true,              /* Enable strict null checks. */
     // See https://github.com/DefinitelyTyped/DefinitelyTyped/issues/21359
-    "strictFunctionTypes": false,             /* Enable strict checking of function types. */
+    // "strictFunctionTypes": false,             /* Enable strict checking of function types. */
     // "strictBindCallApply": true,           /* Enable strict 'bind', 'call', and 'apply' methods on functions. */
     "strictPropertyInitialization": false,    /* Enable strict checking of property initialization in classes. */
     // "noImplicitThis": true,                /* Raise error on 'this' expressions with an implied 'any' type. */

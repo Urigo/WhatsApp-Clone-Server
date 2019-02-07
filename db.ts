@@ -16,6 +16,8 @@ export enum MessageType {
 
 export async function addSampleData(connection: Connection, accountsPassword: AccountsPassword) {
 
+  await connection.synchronize();
+
   const userId1 = await accountsPassword.createUser({
     username: 'ethan',
     password: hashPassword('111', 'sha256'),

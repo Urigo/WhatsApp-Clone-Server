@@ -2,7 +2,7 @@ import { Entity, Column, ManyToMany, OneToMany } from 'typeorm';
 import { Chat } from './Chat';
 import { Message } from './Message';
 import { Recipient } from './Recipient';
-import { User as AccountsUser, UserService } from '@accounts/typeorm';
+import { User as AccountsUser } from '@accounts/typeorm';
 
 @Entity()
 export class User extends AccountsUser{
