@@ -12,6 +12,7 @@ generates:
       mappers:
         Chat: ./entity/chat#Chat
         Message: ./entity/message#Message
+        Recipient: ./entity/recipient#Recipient
         User: ./entity/user#User
       scalars:
         Date: Date
