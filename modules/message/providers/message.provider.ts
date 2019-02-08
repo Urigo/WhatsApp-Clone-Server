@@ -36,6 +36,7 @@ export class MessageProvider {
       .whereInIds(chatId)
       .innerJoinAndSelect('chat.allTimeMembers', 'allTimeMembers')
       .innerJoinAndSelect('chat.listingMembers', 'listingMembers')
+      .leftJoinAndSelect('chat.actualGroupMembers', 'actualGroupMembers')
       .getOne();
 
     if (!chat) {
@@ -71,8 +72,12 @@ export class MessageProvider {
 
       holders = chat.listingMembers;
     } else {
-      // TODO: Implement for groups
-      holders = chat.listingMembers
+      // Group
+      if (!chat.actualGroupMembers || !chat.actualGroupMembers.find(user => user.id === this.currentUser.id)) {
+        throw new Error(`The user is not a member of the group ${chatId}. Cannot add message.`);
+      }
+
+      holders = chat.actualGroupMembers;
     }
 
     const message = await this.repository.save(new Message({
@@ -324,15 +329,31 @@ export class MessageProvider {
   }
 
   async filterMessageAdded(messageAdded: Message) {
-    const relevantUsers = (await this.userProvider
-      .createQueryBuilder()
-      .innerJoin(
-        'user.listingMemberChats',
-        'listingMemberChats',
-        'listingMemberChats.id = :chatId',
-        { chatId: messageAdded.chat.id }
-      )
-      .getMany()).filter(user => user.id != messageAdded.sender.id)
+    let relevantUsers: User[]
+
+    if (!messageAdded.chat.name) {
+      // Chat
+      relevantUsers = (await this.userProvider
+        .createQueryBuilder()
+        .innerJoin(
+          'user.listingMemberChats',
+          'listingMemberChats',
+          'listingMemberChats.id = :chatId',
+          { chatId: messageAdded.chat.id }
+        )
+        .getMany()).filter(user => user.id != messageAdded.sender.id)
+    } else {
+      // Group
+      relevantUsers = (await this.userProvider
+        .createQueryBuilder()
+        .innerJoin(
+          'user.actualGroupMemberChats',
+          'actualGroupMemberChats',
+          'actualGroupMemberChats.id = :chatId',
+          { chatId: messageAdded.chat.id }
+        )
+        .getMany()).filter(user => user.id != messageAdded.sender.id)
+    }
 
     return relevantUsers.some(user => user.id === this.currentUser.id)
   }
