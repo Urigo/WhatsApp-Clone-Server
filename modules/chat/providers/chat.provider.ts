@@ -305,4 +305,80 @@ export class ChatProvider {
       return chatId;
     }
   }
+
+  async addGroup(
+    userIds: string[],
+    {
+      groupName,
+      groupPicture,
+    }: {
+      groupName?: string
+      groupPicture?: string
+    } = {},
+  ) {
+    let users: User[] = [];
+    for (let userId of userIds) {
+      const user = await this.userProvider
+        .createQueryBuilder()
+        .whereInIds(userId)
+        .getOne();
+
+      if (!user) {
+        throw new Error(`User ${userId} doesn't exist.`);
+      }
+
+      users.push(user);
+    }
+
+    const chat = await this.repository.save(
+      new Chat({
+        name: groupName,
+        admins: [this.currentUser],
+        picture: groupPicture || undefined,
+        owner: this.currentUser,
+        allTimeMembers: [...users, this.currentUser],
+        listingMembers: [...users, this.currentUser],
+        actualGroupMembers: [...users, this.currentUser],
+      }),
+    );
+
+    this.pubsub.publish('chatAdded', {
+      creatorId: this.currentUser.id,
+      chatAdded: chat,
+    });
+
+    return chat || null;
+  }
+
+  async updateChat(
+    chatId: string,
+    {
+      name,
+      picture,
+    }: {
+      name?: string
+      picture?: string
+    } = {},
+  ) {
+    const chat = await this.createQueryBuilder()
+      .whereInIds(chatId)
+      .getOne();
+
+    if (!chat) return null;
+    if (!chat.name) return chat;
+
+    name = name || chat.name;
+    picture = picture || chat.picture;
+    Object.assign(chat, { name, picture });
+
+    // Update the chat
+    await this.repository.save(chat);
+
+    this.pubsub.publish('chatUpdated', {
+      updaterId: this.currentUser.id,
+      chatUpdated: chat,
+    });
+
+    return chat || null;
+  }
 }
