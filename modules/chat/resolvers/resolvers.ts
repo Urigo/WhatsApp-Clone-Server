@@ -16,6 +16,15 @@ export default {
     }),
     addChat: (obj, { userId }, { injector }) => injector.get(ChatProvider).addChat(userId),
     removeChat: (obj, { chatId }, { injector }) => injector.get(ChatProvider).removeChat(chatId),
+    addGroup: (obj, { userIds, groupName, groupPicture }, { injector }) =>
+      injector.get(ChatProvider).addGroup(userIds, {
+        groupName: groupName || '',
+        groupPicture: groupPicture || '',
+      }),
+    updateGroup: (obj, { chatId, groupName, groupPicture }, { injector }) => injector.get(ChatProvider).updateGroup(chatId, {
+      groupName: groupName || '',
+      groupPicture: groupPicture || '',
+    }),
   },
   Subscription: {
     chatAdded: {
