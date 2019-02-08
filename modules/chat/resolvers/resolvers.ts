@@ -38,6 +38,9 @@ export default {
       injector.get(ChatProvider).getChatAllTimeMembers(chat),
     listingMembers: (chat, args, { injector }) =>
       injector.get(ChatProvider).getChatListingMembers(chat),
+    actualGroupMembers: (chat, args, { injector }) => injector.get(ChatProvider).getChatActualGroupMembers(chat),
+    admins: (chat, args, { injector }) => injector.get(ChatProvider).getChatAdmins(chat),
     owner: (chat, args, { injector }) => injector.get(ChatProvider).getChatOwner(chat),
+    isGroup: (chat, args, { injector }) => injector.get(ChatProvider).isChatGroup(chat),
   },
 } as IResolvers
