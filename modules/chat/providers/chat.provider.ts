@@ -157,6 +157,27 @@ export class ChatProvider {
       .getMany()
   }
 
+  getChatActualGroupMembers(chat: Chat) {
+    return this.userProvider
+      .createQueryBuilder()
+      .innerJoin(
+        'user.actualGroupMemberChats',
+        'actualGroupMemberChats',
+        'actualGroupMemberChats.id = :chatId',
+        { chatId: chat.id },
+      )
+      .getMany();
+  }
+
+  getChatAdmins(chat: Chat) {
+    return this.userProvider
+      .createQueryBuilder()
+      .innerJoin('user.adminChats', 'adminChats', 'adminChats.id = :chatId', {
+        chatId: chat.id,
+      })
+      .getMany();
+  }
+
   async getChatOwner(chat: Chat) {
     const owner = await this.userProvider
       .createQueryBuilder()
@@ -166,6 +187,10 @@ export class ChatProvider {
       .getOne()
 
     return owner || null
+  }
+
+  async isChatGroup(chat: Chat) {
+    return !!chat.name;
   }
 
   async filterChatAddedOrUpdated(chatAddedOrUpdated: Chat, creatorOrUpdaterId: string) {
@@ -221,6 +246,8 @@ export class ChatProvider {
     const chat = await this.createQueryBuilder()
       .whereInIds(Number(chatId))
       .innerJoinAndSelect('chat.listingMembers', 'listingMembers')
+      .leftJoinAndSelect('chat.actualGroupMembers', 'actualGroupMembers')
+      .leftJoinAndSelect('chat.admins', 'admins')
       .leftJoinAndSelect('chat.owner', 'owner')
       .getOne();
 
@@ -242,7 +269,18 @@ export class ChatProvider {
         // Delete the chat
         await this.repository.remove(chat);
       } else {
-        // Update the chat
+        // Update the group
+
+        // Remove the current user from the chat members. He is no longer a member of the group
+        chat.actualGroupMembers = chat.actualGroupMembers && chat.actualGroupMembers.filter(user =>
+          user.id !== this.currentUser.id
+        );
+        // Remove the current user from the chat admins
+        chat.admins = chat.admins && chat.admins.filter(user => user.id !== this.currentUser.id);
+        // If there are no more admins left the group goes read only
+        // A null owner means the group is read-only
+        chat.owner = chat.admins && chat.admins[0] || null;
+
         await this.repository.save(chat);
       }
 

@@ -16,6 +16,8 @@ interface ChatConstructor {
   picture?: string
   allTimeMembers?: User[]
   listingMembers?: User[]
+  actualGroupMembers?: User[]
+  admins?: User[]
   owner?: User
   messages?: Message[]
 }
@@ -48,6 +50,14 @@ export class Chat {
   @JoinTable()
   listingMembers: User[]
 
+  @ManyToMany(type => User, user => user.actualGroupMemberChats, { cascade: ["insert", "update"], eager: false })
+  @JoinTable()
+  actualGroupMembers?: User[]
+
+  @ManyToMany(type => User, user => user.adminChats, { cascade: ["insert", "update"], eager: false })
+  @JoinTable()
+  admins?: User[]
+
   @ManyToOne(type => User, user => user.ownerChats, { cascade: ['insert', 'update'], eager: false })
   owner?: User | null
 
@@ -62,6 +72,8 @@ export class Chat {
     picture,
     allTimeMembers,
     listingMembers,
+    actualGroupMembers,
+    admins,
     owner,
     messages,
   }: ChatConstructor = {}) {
@@ -73,6 +85,12 @@ export class Chat {
     }
     if (allTimeMembers) {
       this.allTimeMembers = allTimeMembers
+    }
+    if (actualGroupMembers) {
+      this.actualGroupMembers = actualGroupMembers
+    }
+    if (admins) {
+      this.admins = admins
     }
     if (listingMembers) {
       this.listingMembers = listingMembers
