@@ -24,7 +24,7 @@
     "@types/pg": "7.4.11",
     "@types/tmp": "0.0.33",
     "concurrently": "4.1.0",
-    "graphql-code-generator": "0.16.0",
+    "graphql-code-generator": "0.16.1",
     "graphql-codegen-typescript-common": "0.16.0",
     "graphql-codegen-typescript-resolvers": "0.16.0",
     "nodemon": "1.18.9",
