@@ -32,7 +32,7 @@
     "typescript": "3.2.4"
   },
   "dependencies": {
-    "@graphql-modules/core": "0.4.0",
+    "@graphql-modules/core": "0.4.2",
     "@graphql-modules/sonar": "0.4.0",
     "apollo-server-express": "2.3.3",
     "bcrypt-nodejs": "0.0.3",
