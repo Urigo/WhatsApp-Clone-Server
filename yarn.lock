@@ -345,10 +345,10 @@
   dependencies:
     moment ">=2.14.0"
 
-"@types/pg@7.4.11":
-  version "7.4.11"
-  resolved "https://registry.yarnpkg.com/@types/pg/-/pg-7.4.11.tgz#dcc560e89c17d859c83c91ad3faf60bfeacaad6c"
-  integrity sha512-Eksj2yOBNHnNqLuU1AqwF1qXgdaYDcWVH1ZQlxS7k1i34+JZd/ZNd15ugIpTVQxmBBMqjliJstmrnusjXy08Tg==
+"@types/pg@7.4.13":
+  version "7.4.13"
+  resolved "https://registry.yarnpkg.com/@types/pg/-/pg-7.4.13.tgz#4630494096bceee5ee562339502e3448c09703a8"
+  integrity sha512-jk/hFADnywyjnWXZ6IeNsAk2lZtKDInZWGs1ASxmLb3QBpwLDGcSvH5s6IIRlPqsXjwzu8btnNbQ5Cx+AX/CjA==
   dependencies:
     "@types/node" "*"
     "@types/pg-types" "*"
