@@ -23,7 +23,7 @@
     "@types/passport": "1.0.0",
     "@types/passport-http": "0.3.7",
     "@types/pg": "7.4.11",
-    "@types/tmp": "0.0.33",
+    "@types/tmp": "0.0.34",
     "concurrently": "4.1.0",
     "graphql-code-generator": "0.16.0",
     "graphql-codegen-typescript-common": "0.16.0",
