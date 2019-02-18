@@ -8,7 +8,8 @@
     "start:server": "ts-node index.ts",
     "start:server:watch": "nodemon --exec yarn start:server -e ts",
     "dev": "concurrently \"yarn generate:watch\" \"yarn start:server:watch\"",
-    "start": "yarn generate && yarn start:server"
+    "start": "yarn generate && yarn start:server",
+    "test": "tsc"
   },
   "devDependencies": {
     "@types/bcrypt-nodejs": "0.0.30",
