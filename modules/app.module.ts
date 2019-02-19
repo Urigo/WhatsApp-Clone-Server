@@ -3,6 +3,7 @@ import { Connection } from 'typeorm';
 import { Express } from 'express';
 import { AuthModule } from './auth';
 import { UserModule } from './user';
+import { ChatModule } from './chat';
 
 export interface IAppModuleConfig {
   connection: Connection,
@@ -17,6 +18,7 @@ export const AppModule = new GraphQLModule<IAppModuleConfig>({
       app,
     }),
     UserModule,
+    ChatModule,
   ],
   configRequired: true,
 });
