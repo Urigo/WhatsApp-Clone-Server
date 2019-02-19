@@ -6,6 +6,8 @@ import {
   GraphQLScalarTypeConfig
 } from "graphql";
 
+import { User } from "./entity/User";
+
 import { ModuleContext } from "@graphql-modules/core";
 
 export type Resolver<Result, Parent = {}, Context = {}, Args = {}> = (
@@ -57,6 +59,94 @@ export type DirectiveResolverFn<TResult, TArgs = {}, TContext = {}> = (
   info: GraphQLResolveInfo
 ) => TResult | Promise<TResult>;
 
+export namespace QueryResolvers {
+  export interface Resolvers<Context = ModuleContext, TypeParent = {}> {
+    me?: MeResolver<Maybe<User>, TypeParent, Context>;
+
+    users?: UsersResolver<Maybe<User[]>, TypeParent, Context>;
+  }
+
+  export type MeResolver<
+    R = Maybe<User>,
+    Parent = {},
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context>;
+  export type UsersResolver<
+    R = Maybe<User[]>,
+    Parent = {},
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace UserResolvers {
+  export interface Resolvers<Context = ModuleContext, TypeParent = User> {
+    id?: IdResolver<string, TypeParent, Context>;
+
+    name?: NameResolver<Maybe<string>, TypeParent, Context>;
+
+    picture?: PictureResolver<Maybe<string>, TypeParent, Context>;
+
+    phone?: PhoneResolver<Maybe<string>, TypeParent, Context>;
+  }
+
+  export type IdResolver<
+    R = string,
+    Parent = User,
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context>;
+  export type NameResolver<
+    R = Maybe<string>,
+    Parent = User,
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context>;
+  export type PictureResolver<
+    R = Maybe<string>,
+    Parent = User,
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context>;
+  export type PhoneResolver<
+    R = Maybe<string>,
+    Parent = User,
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace MutationResolvers {
+  export interface Resolvers<Context = ModuleContext, TypeParent = {}> {
+    updateUser?: UpdateUserResolver<User, TypeParent, Context>;
+  }
+
+  export type UpdateUserResolver<
+    R = User,
+    Parent = {},
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context, UpdateUserArgs>;
+  export interface UpdateUserArgs {
+    name?: Maybe<string>;
+
+    picture?: Maybe<string>;
+  }
+}
+
+export namespace SubscriptionResolvers {
+  export interface Resolvers<Context = ModuleContext, TypeParent = {}> {
+    userAdded?: UserAddedResolver<Maybe<User>, TypeParent, Context>;
+
+    userUpdated?: UserUpdatedResolver<Maybe<User>, TypeParent, Context>;
+  }
+
+  export type UserAddedResolver<
+    R = Maybe<User>,
+    Parent = {},
+    Context = ModuleContext
+  > = SubscriptionResolver<R, Parent, Context>;
+  export type UserUpdatedResolver<
+    R = Maybe<User>,
+    Parent = {},
+    Context = ModuleContext
+  > = SubscriptionResolver<R, Parent, Context>;
+}
+
 /** Directs the executor to skip this field or fragment when the `if` argument is true. */
 export type SkipDirectiveResolver<Result> = DirectiveResolverFn<
   Result,
@@ -95,6 +185,10 @@ export interface DateScalarConfig extends GraphQLScalarTypeConfig<Date, any> {
 }
 
 export interface IResolvers<Context = ModuleContext> {
+  Query?: QueryResolvers.Resolvers<Context>;
+  User?: UserResolvers.Resolvers<Context>;
+  Mutation?: MutationResolvers.Resolvers<Context>;
+  Subscription?: SubscriptionResolvers.Resolvers<Context>;
   Date?: GraphQLScalarType;
 }
 
