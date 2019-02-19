@@ -16,6 +16,8 @@ import { Chat } from "./entity/Chat";
 
 import { Message } from "./entity/Message";
 
+import { Recipient } from "./entity/Recipient";
+
 import { User } from "./entity/User";
 
 import { ModuleContext } from "@graphql-modules/core";
@@ -169,6 +171,8 @@ export namespace ChatResolvers {
     lastMessage?: LastMessageResolver<Maybe<Message>, TypeParent, Context>;
 
     updatedAt?: UpdatedAtResolver<Date, TypeParent, Context>;
+
+    unreadMessages?: UnreadMessagesResolver<number, TypeParent, Context>;
   }
 
   export type IdResolver<
@@ -240,6 +244,11 @@ export namespace ChatResolvers {
     Parent = Chat,
     Context = ModuleContext
   > = Resolver<R, Parent, Context>;
+  export type UnreadMessagesResolver<
+    R = number,
+    Parent = Chat,
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context>;
 }
 
 export namespace MessageResolvers {
@@ -259,6 +268,8 @@ export namespace MessageResolvers {
     holders?: HoldersResolver<User[], TypeParent, Context>;
 
     ownership?: OwnershipResolver<boolean, TypeParent, Context>;
+
+    recipients?: RecipientsResolver<Recipient[], TypeParent, Context>;
   }
 
   export type IdResolver<
@@ -301,6 +312,51 @@ export namespace MessageResolvers {
     Parent = Message,
     Context = ModuleContext
   > = Resolver<R, Parent, Context>;
+  export type RecipientsResolver<
+    R = Recipient[],
+    Parent = Message,
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace RecipientResolvers {
+  export interface Resolvers<Context = ModuleContext, TypeParent = Recipient> {
+    user?: UserResolver<User, TypeParent, Context>;
+
+    message?: MessageResolver<Message, TypeParent, Context>;
+
+    chat?: ChatResolver<Chat, TypeParent, Context>;
+
+    receivedAt?: ReceivedAtResolver<Maybe<Date>, TypeParent, Context>;
+
+    readAt?: ReadAtResolver<Maybe<Date>, TypeParent, Context>;
+  }
+
+  export type UserResolver<
+    R = User,
+    Parent = Recipient,
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context>;
+  export type MessageResolver<
+    R = Message,
+    Parent = Recipient,
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context>;
+  export type ChatResolver<
+    R = Chat,
+    Parent = Recipient,
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context>;
+  export type ReceivedAtResolver<
+    R = Maybe<Date>,
+    Parent = Recipient,
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context>;
+  export type ReadAtResolver<
+    R = Maybe<Date>,
+    Parent = Recipient,
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context>;
 }
 
 export namespace MutationResolvers {
@@ -334,6 +390,14 @@ export namespace MutationResolvers {
       TypeParent,
       Context
     >;
+
+    markAsReceived?: MarkAsReceivedResolver<
+      Maybe<boolean>,
+      TypeParent,
+      Context
+    >;
+
+    markAsRead?: MarkAsReadResolver<Maybe<boolean>, TypeParent, Context>;
   }
 
   export type UpdateUserResolver<
@@ -458,6 +522,24 @@ export namespace MutationResolvers {
 
     all?: Maybe<boolean>;
   }
+
+  export type MarkAsReceivedResolver<
+    R = Maybe<boolean>,
+    Parent = {},
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context, MarkAsReceivedArgs>;
+  export interface MarkAsReceivedArgs {
+    chatId: string;
+  }
+
+  export type MarkAsReadResolver<
+    R = Maybe<boolean>,
+    Parent = {},
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context, MarkAsReadArgs>;
+  export interface MarkAsReadArgs {
+    chatId: string;
+  }
 }
 
 export namespace SubscriptionResolvers {
@@ -542,6 +624,7 @@ export interface IResolvers<Context = ModuleContext> {
   User?: UserResolvers.Resolvers<Context>;
   Chat?: ChatResolvers.Resolvers<Context>;
   Message?: MessageResolvers.Resolvers<Context>;
+  Recipient?: RecipientResolvers.Resolvers<Context>;
   Mutation?: MutationResolvers.Resolvers<Context>;
   Subscription?: SubscriptionResolvers.Resolvers<Context>;
   Date?: GraphQLScalarType;

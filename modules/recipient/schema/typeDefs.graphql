@@ -1,0 +1,22 @@
+extend type Chat {
+  #Computed property
+  unreadMessages: Int!
+}
+
+extend type Message {
+  #Whoever received the message
+  recipients: [Recipient!]!
+}
+
+type Recipient {
+  user: User!
+  message: Message!
+  chat: Chat!
+  receivedAt: Date
+  readAt: Date
+}
+
+type Mutation {
+  markAsReceived(chatId: ID!): Boolean
+  markAsRead(chatId: ID!): Boolean
+}
