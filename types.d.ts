@@ -6,6 +6,8 @@ import {
   GraphQLScalarTypeConfig
 } from "graphql";
 
+import { Chat } from "./entity/Chat";
+
 import { User } from "./entity/User";
 
 import { ModuleContext } from "@graphql-modules/core";
@@ -64,6 +66,10 @@ export namespace QueryResolvers {
     me?: MeResolver<Maybe<User>, TypeParent, Context>;
 
     users?: UsersResolver<Maybe<User[]>, TypeParent, Context>;
+
+    chats?: ChatsResolver<Chat[], TypeParent, Context>;
+
+    chat?: ChatResolver<Maybe<Chat>, TypeParent, Context>;
   }
 
   export type MeResolver<
@@ -76,6 +82,19 @@ export namespace QueryResolvers {
     Parent = {},
     Context = ModuleContext
   > = Resolver<R, Parent, Context>;
+  export type ChatsResolver<
+    R = Chat[],
+    Parent = {},
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context>;
+  export type ChatResolver<
+    R = Maybe<Chat>,
+    Parent = {},
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context, ChatArgs>;
+  export interface ChatArgs {
+    chatId: string;
+  }
 }
 
 export namespace UserResolvers {
@@ -111,9 +130,108 @@ export namespace UserResolvers {
   > = Resolver<R, Parent, Context>;
 }
 
+export namespace ChatResolvers {
+  export interface Resolvers<Context = ModuleContext, TypeParent = Chat> {
+    id?: IdResolver<string, TypeParent, Context>;
+
+    createdAt?: CreatedAtResolver<Date, TypeParent, Context>;
+
+    name?: NameResolver<Maybe<string>, TypeParent, Context>;
+
+    picture?: PictureResolver<Maybe<string>, TypeParent, Context>;
+
+    allTimeMembers?: AllTimeMembersResolver<User[], TypeParent, Context>;
+
+    listingMembers?: ListingMembersResolver<User[], TypeParent, Context>;
+
+    actualGroupMembers?: ActualGroupMembersResolver<
+      Maybe<User[]>,
+      TypeParent,
+      Context
+    >;
+
+    admins?: AdminsResolver<Maybe<User[]>, TypeParent, Context>;
+
+    owner?: OwnerResolver<Maybe<User>, TypeParent, Context>;
+
+    isGroup?: IsGroupResolver<boolean, TypeParent, Context>;
+  }
+
+  export type IdResolver<
+    R = string,
+    Parent = Chat,
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context>;
+  export type CreatedAtResolver<
+    R = Date,
+    Parent = Chat,
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context>;
+  export type NameResolver<
+    R = Maybe<string>,
+    Parent = Chat,
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context>;
+  export type PictureResolver<
+    R = Maybe<string>,
+    Parent = Chat,
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context>;
+  export type AllTimeMembersResolver<
+    R = User[],
+    Parent = Chat,
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context>;
+  export type ListingMembersResolver<
+    R = User[],
+    Parent = Chat,
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context>;
+  export type ActualGroupMembersResolver<
+    R = Maybe<User[]>,
+    Parent = Chat,
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context>;
+  export type AdminsResolver<
+    R = Maybe<User[]>,
+    Parent = Chat,
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context>;
+  export type OwnerResolver<
+    R = Maybe<User>,
+    Parent = Chat,
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context>;
+  export type IsGroupResolver<
+    R = boolean,
+    Parent = Chat,
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context>;
+}
+
 export namespace MutationResolvers {
   export interface Resolvers<Context = ModuleContext, TypeParent = {}> {
     updateUser?: UpdateUserResolver<User, TypeParent, Context>;
+
+    addChat?: AddChatResolver<Maybe<Chat>, TypeParent, Context>;
+
+    addGroup?: AddGroupResolver<Maybe<Chat>, TypeParent, Context>;
+
+    updateGroup?: UpdateGroupResolver<Maybe<Chat>, TypeParent, Context>;
+
+    removeChat?: RemoveChatResolver<Maybe<string>, TypeParent, Context>;
+
+    addAdmins?: AddAdminsResolver<(Maybe<string>)[], TypeParent, Context>;
+
+    removeAdmins?: RemoveAdminsResolver<(Maybe<string>)[], TypeParent, Context>;
+
+    addMembers?: AddMembersResolver<(Maybe<string>)[], TypeParent, Context>;
+
+    removeMembers?: RemoveMembersResolver<
+      (Maybe<string>)[],
+      TypeParent,
+      Context
+    >;
   }
 
   export type UpdateUserResolver<
@@ -126,6 +244,94 @@ export namespace MutationResolvers {
 
     picture?: Maybe<string>;
   }
+
+  export type AddChatResolver<
+    R = Maybe<Chat>,
+    Parent = {},
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context, AddChatArgs>;
+  export interface AddChatArgs {
+    userId: string;
+  }
+
+  export type AddGroupResolver<
+    R = Maybe<Chat>,
+    Parent = {},
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context, AddGroupArgs>;
+  export interface AddGroupArgs {
+    userIds: string[];
+
+    groupName: string;
+
+    groupPicture?: Maybe<string>;
+  }
+
+  export type UpdateGroupResolver<
+    R = Maybe<Chat>,
+    Parent = {},
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context, UpdateGroupArgs>;
+  export interface UpdateGroupArgs {
+    chatId: string;
+
+    groupName?: Maybe<string>;
+
+    groupPicture?: Maybe<string>;
+  }
+
+  export type RemoveChatResolver<
+    R = Maybe<string>,
+    Parent = {},
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context, RemoveChatArgs>;
+  export interface RemoveChatArgs {
+    chatId: string;
+  }
+
+  export type AddAdminsResolver<
+    R = (Maybe<string>)[],
+    Parent = {},
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context, AddAdminsArgs>;
+  export interface AddAdminsArgs {
+    groupId: string;
+
+    userIds: string[];
+  }
+
+  export type RemoveAdminsResolver<
+    R = (Maybe<string>)[],
+    Parent = {},
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context, RemoveAdminsArgs>;
+  export interface RemoveAdminsArgs {
+    groupId: string;
+
+    userIds: string[];
+  }
+
+  export type AddMembersResolver<
+    R = (Maybe<string>)[],
+    Parent = {},
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context, AddMembersArgs>;
+  export interface AddMembersArgs {
+    groupId: string;
+
+    userIds: string[];
+  }
+
+  export type RemoveMembersResolver<
+    R = (Maybe<string>)[],
+    Parent = {},
+    Context = ModuleContext
+  > = Resolver<R, Parent, Context, RemoveMembersArgs>;
+  export interface RemoveMembersArgs {
+    groupId: string;
+
+    userIds: string[];
+  }
 }
 
 export namespace SubscriptionResolvers {
@@ -133,6 +339,10 @@ export namespace SubscriptionResolvers {
     userAdded?: UserAddedResolver<Maybe<User>, TypeParent, Context>;
 
     userUpdated?: UserUpdatedResolver<Maybe<User>, TypeParent, Context>;
+
+    chatAdded?: ChatAddedResolver<Maybe<Chat>, TypeParent, Context>;
+
+    chatUpdated?: ChatUpdatedResolver<Maybe<Chat>, TypeParent, Context>;
   }
 
   export type UserAddedResolver<
@@ -142,6 +352,16 @@ export namespace SubscriptionResolvers {
   > = SubscriptionResolver<R, Parent, Context>;
   export type UserUpdatedResolver<
     R = Maybe<User>,
+    Parent = {},
+    Context = ModuleContext
+  > = SubscriptionResolver<R, Parent, Context>;
+  export type ChatAddedResolver<
+    R = Maybe<Chat>,
+    Parent = {},
+    Context = ModuleContext
+  > = SubscriptionResolver<R, Parent, Context>;
+  export type ChatUpdatedResolver<
+    R = Maybe<Chat>,
     Parent = {},
     Context = ModuleContext
   > = SubscriptionResolver<R, Parent, Context>;
@@ -187,6 +407,7 @@ export interface DateScalarConfig extends GraphQLScalarTypeConfig<Date, any> {
 export interface IResolvers<Context = ModuleContext> {
   Query?: QueryResolvers.Resolvers<Context>;
   User?: UserResolvers.Resolvers<Context>;
+  Chat?: ChatResolvers.Resolvers<Context>;
   Mutation?: MutationResolvers.Resolvers<Context>;
   Subscription?: SubscriptionResolvers.Resolvers<Context>;
   Date?: GraphQLScalarType;
