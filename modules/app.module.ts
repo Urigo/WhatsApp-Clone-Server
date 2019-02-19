@@ -2,6 +2,7 @@ import { GraphQLModule } from '@graphql-modules/core';
 import { Connection } from 'typeorm';
 import { Express } from 'express';
 import { AuthModule } from './auth';
+import { UserModule } from './user';
 
 export interface IAppModuleConfig {
   connection: Connection,
@@ -15,6 +16,7 @@ export const AppModule = new GraphQLModule<IAppModuleConfig>({
       connection,
       app,
     }),
+    UserModule,
   ],
   configRequired: true,
 });
