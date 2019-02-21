@@ -4,7 +4,6 @@ import { Connection } from 'typeorm'
 import { User } from '../../../entity/User';
 import { Chat } from '../../../entity/Chat';
 import { UserProvider } from '../../user/providers/user.provider';
-import { AuthProvider } from '../../auth/providers/auth.provider';
 
 @Injectable()
 export class ChatProvider {
@@ -12,12 +11,11 @@ export class ChatProvider {
     private pubsub: PubSub,
     private connection: Connection,
     private userProvider: UserProvider,
-    private authProvider: AuthProvider,
   ) {
   }
 
   repository = this.connection.getRepository(Chat);
-  currentUser = this.authProvider.currentUser;
+  currentUser = this.userProvider.currentUser;
 
   createQueryBuilder() {
     return this.connection.createQueryBuilder(Chat, 'chat');
@@ -341,9 +339,10 @@ export class ChatProvider {
 
   async filterChatAddedOrUpdated(chatAddedOrUpdated: Chat, creatorOrUpdaterId: number) {
 
-    return Number(creatorOrUpdaterId) !== this.currentUser.id &&
+    return creatorOrUpdaterId.toString() !== this.currentUser.id &&
       chatAddedOrUpdated.listingMembers.some((user: User) => user.id === this.currentUser.id);
   }
+
 
   async updateUser({
     name,

@@ -1,15 +1,15 @@
 import { GraphQLModule } from '@graphql-modules/core';
-import { loadResolversFiles, loadSchemaFiles } from '@graphql-modules/sonar';
+import { loadResolversFiles, loadSchemaFiles } from 'graphql-toolkit';
 import { UserModule } from '../user';
 import { ChatModule } from '../chat';
 import { MessageProvider } from './providers/message.provider';
-import { AuthModule } from '../auth';
+import { CommonModule } from '../common';
 import { ProviderScope } from '@graphql-modules/di';
 
 export const MessageModule = new GraphQLModule({
   name: "Message",
   imports: [
-    AuthModule,
+    CommonModule,
     UserModule,
     ChatModule,
   ],

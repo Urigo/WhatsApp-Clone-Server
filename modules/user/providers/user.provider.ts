@@ -2,27 +2,39 @@ import { Injectable } from '@graphql-modules/di'
 import { PubSub } from 'apollo-server-express'
 import { Connection } from 'typeorm'
 import { User } from '../../../entity/User';
-import { AuthProvider } from '../../auth/providers/auth.provider';
+import AccountsServer from '@accounts/server';
+import { UploadedFile } from '../../../types';
+import { ModuleSessionInfo, OnRequest, OnConnect } from '@graphql-modules/core';
+import { AccountsModuleContext } from '@accounts/graphql-api';
 import cloudinary from 'cloudinary';
 
 @Injectable()
-export class UserProvider {
+export class UserProvider implements OnRequest, OnConnect {
 
   constructor(
     private pubsub: PubSub,
     private connection: Connection,
-    private authProvider: AuthProvider,
+    private accountsServer: AccountsServer,
   ) { }
 
   public repository = this.connection.getRepository(User);
-  private currentUser = this.authProvider.currentUser;
+  currentUser: User;
+
+  onRequest({ context }: ModuleSessionInfo<any, any, AccountsModuleContext>) {
+    if (context.user) {
+      this.currentUser = context.user as User;
+    }
+  }
+
+  async onConnect(connectionParams: { Authorization ?: string }) {
+    if (connectionParams.Authorization) {
+      const authToken = connectionParams.Authorization.replace('Bearer ', '');
+      this.currentUser = await this.accountsServer.resumeSession(authToken) as User;
+    }
+  }
 
   createQueryBuilder() {
     return this.connection.createQueryBuilder(User, 'user');
-  }
-
-  getMe() {
-    return this.currentUser;
   }
 
   getUsers() {
@@ -39,7 +51,7 @@ export class UserProvider {
     if (name === this.currentUser.name && picture === this.currentUser.picture) {
       return this.currentUser;
     }
-
+    
     this.currentUser.name = name || this.currentUser.name;
     this.currentUser.picture = picture || this.currentUser.picture;
 
@@ -56,15 +68,16 @@ export class UserProvider {
     return userAddedOrUpdated.id !== this.currentUser.id;
   }
 
-  uploadProfilePic(filePath: string) {
-    return new Promise((resolve, reject) => {
-      cloudinary.v2.uploader.upload(filePath, (error, result) => {
+  uploadProfilePic(readableStream: NodeJS.ReadableStream) {
+    return new Promise<UploadedFile>((resolve, reject) => {
+      const writeStream = cloudinary.v2.uploader.upload_stream((error, result) => {
         if (error) {
           reject(error);
         } else {
           resolve(result);
         }
-      })
+      });
+      readableStream.pipe(writeStream);
     });
   }
 }

@@ -1,28 +1,13 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToMany, OneToMany } from "typeorm";
-import { Chat } from "./Chat";
-import { Message } from "./Message";
-import { Recipient } from "./Recipient";
-
-interface UserConstructor {
-  username?: string;
-  password?: string;
-  name?: string;
-  picture?: string;
-  phone?: string;
-}
+import { Entity, Column, ManyToMany, OneToMany } from 'typeorm';
+import { Chat } from './Chat';
+import { Message } from './Message';
+import { Recipient } from './Recipient';
+import { User as AccountsUser } from '@accounts/typeorm';
 
 @Entity()
-export class User {
-  @PrimaryGeneratedColumn()
-  id: number;
+export class User extends AccountsUser{
 
-  @Column()
-  username: string;
-
-  @Column()
-  password: string;
-
-  @Column()
+  @Column({nullable: true})
   name: string;
 
   @Column({nullable: true})
@@ -54,22 +39,4 @@ export class User {
 
   @OneToMany(type => Recipient, recipient => recipient.user)
   recipients: Recipient[];
-
-  constructor({username, password, name, picture, phone}: UserConstructor = {}) {
-    if (username) {
-      this.username = username;
-    }
-    if (password) {
-      this.password = password;
-    }
-    if (name) {
-      this.name = name;
-    }
-    if (picture) {
-      this.picture = picture;
-    }
-    if (phone) {
-      this.phone = phone;
-    }
-  }
 }

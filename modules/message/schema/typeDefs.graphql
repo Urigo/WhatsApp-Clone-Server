@@ -29,7 +29,7 @@ type Message {
 }
 
 type Mutation {
-  addMessage(chatId: ID!, content: String!): Message
-  removeMessages(chatId: ID!, messageIds: [ID!], all: Boolean): [ID]!
+  addMessage(chatId: ID!, content: String!): Message @auth
+  removeMessages(chatId: ID!, messageIds: [ID!], all: Boolean): [ID]! @auth
 }
 

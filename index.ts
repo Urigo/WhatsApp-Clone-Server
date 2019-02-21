@@ -8,10 +8,31 @@ import { createServer } from "http";
 import { createConnection } from "typeorm";
 import { addSampleData } from "./db";
 import { AppModule } from "./modules/app.module";
+import { AccountsTypeorm } from '@accounts/typeorm';
+import AccountsServer from '@accounts/server';
+import AccountsPassword from '@accounts/password';
+import { User } from './entity/User';
 
 createConnection().then(async connection => {
+
+  const accountsPassword = new AccountsPassword({
+    validateNewUser: ({ username, password, name, picture, phone }) => ({ username, password, name, picture, phone })
+  });
+
+  const accountsTypeorm = new AccountsTypeorm({
+    connection,
+    userEntity: User,
+  });
+
+  const accountsServer = new AccountsServer({
+    db: accountsTypeorm,
+    tokenSecret: 'WHATSAPP',
+  }, {
+    password: accountsPassword
+  });
+
   if (process.argv.includes('--add-sample-data')) {
-    addSampleData(connection);
+    await addSampleData(connection, accountsPassword);
   }
 
   const PORT = 4000;
@@ -21,7 +42,7 @@ createConnection().then(async connection => {
   app.use(cors());
   app.use(bodyParser.json());
 
-  const { schema, context, subscriptions } = AppModule.forRoot({ connection, app, });
+  const { schema, context, subscriptions } = AppModule.forRoot({ connection, accountsServer });
 
   const apollo = new ApolloServer({ schema, context, subscriptions });
 

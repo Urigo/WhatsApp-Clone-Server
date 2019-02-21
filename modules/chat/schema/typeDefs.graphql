@@ -1,6 +1,6 @@
 type Query {
-  chats: [Chat!]!
-  chat(chatId: ID!): Chat
+  chats: [Chat!]! @auth
+  chat(chatId: ID!): Chat @auth
 }
 
 type Subscription {
@@ -31,12 +31,12 @@ type Chat {
 }
 
 type Mutation {
-  addChat(userId: ID!): Chat
-  addGroup(userIds: [ID!]!, groupName: String!, groupPicture: String): Chat
-  updateGroup(chatId: ID!, groupName: String, groupPicture: String): Chat
-  removeChat(chatId: ID!): ID
-  addAdmins(groupId: ID!, userIds: [ID!]!): [ID]!
-  removeAdmins(groupId: ID!, userIds: [ID!]!): [ID]!
-  addMembers(groupId: ID!, userIds: [ID!]!): [ID]!
-  removeMembers(groupId: ID!, userIds: [ID!]!): [ID]!
+  addChat(userId: ID!): Chat @auth
+  addGroup(userIds: [ID!]!, groupName: String!, groupPicture: String): Chat @auth
+  updateGroup(chatId: ID!, groupName: String, groupPicture: String): Chat @auth
+  removeChat(chatId: ID!): ID @auth
+  addAdmins(groupId: ID!, userIds: [ID!]!): [ID]! @auth
+  removeAdmins(groupId: ID!, userIds: [ID!]!): [ID]! @auth
+  addMembers(groupId: ID!, userIds: [ID!]!): [ID]! @auth
+  removeMembers(groupId: ID!, userIds: [ID!]!): [ID]! @auth
 }

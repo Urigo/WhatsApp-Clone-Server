@@ -1,11 +1,12 @@
-// For TypeORM
-import "reflect-metadata";
-import { Chat } from "./entity/Chat";
-import { Recipient } from "./entity/Recipient";
+import 'reflect-metadata';
+import { Chat } from './entity/Chat';
+import { Recipient } from './entity/Recipient';
 import moment from 'moment';
-import { Message } from "./entity/Message";
-import { User } from "./entity/User";
-import { Connection } from "typeorm";
+import { Message } from './entity/Message';
+import { User } from './entity/User';
+import { Connection } from 'typeorm';
+import AccountsPassword from '@accounts/password';
+import { hashPassword } from '@accounts/password/lib/utils';
 
 export enum MessageType {
   PICTURE,
@@ -13,72 +14,73 @@ export enum MessageType {
   LOCATION,
 }
 
-export async function addSampleData(connection: Connection) {
-  const user1 = new User({
+export async function addSampleData(connection: Connection, accountsPassword: AccountsPassword) {
+
+  await connection.synchronize();
+
+  const userId1 = await accountsPassword.createUser({
     username: 'ethan',
-    password: '$2a$08$NO9tkFLCoSqX1c5wk3s7z.JfxaVMKA.m7zUDdDwEquo4rvzimQeJm', // 111
+    password: hashPassword('111', 'sha256'),
     name: 'Ethan Gonzalez',
     picture: 'https://randomuser.me/api/portraits/thumb/men/1.jpg',
     phone: '+391234567890',
   });
-  await connection.manager.save(user1);
 
-  const user2 = new User({
+  const userId2 = await accountsPassword.createUser({
     username: 'bryan',
-    password: '$2a$08$xE4FuCi/ifxjL2S8CzKAmuKLwv18ktksSN.F3XYEnpmcKtpbpeZgO', // 222
+    password: hashPassword('222', 'sha256'),
     name: 'Bryan Wallace',
     picture: 'https://randomuser.me/api/portraits/thumb/men/2.jpg',
     phone: '+391234567891',
   });
-  await connection.manager.save(user2);
 
-  const user3 = new User({
+  const userId3 = await accountsPassword.createUser({
     username: 'avery',
-    password: '$2a$08$UHgH7J8G6z1mGQn2qx2kdeWv0jvgHItyAsL9hpEUI3KJmhVW5Q1d.', // 333
+    password: hashPassword('333', 'sha256'),
     name: 'Avery Stewart',
     picture: 'https://randomuser.me/api/portraits/thumb/women/1.jpg',
     phone: '+391234567892',
   });
-  await connection.manager.save(user3);
 
-  const user4 = new User({
+  const userId4 = await accountsPassword.createUser({
     username: 'katie',
-    password: '$2a$08$wR1k5Q3T9FC7fUgB7Gdb9Os/GV7dGBBf4PLlWT7HERMFhmFDt47xi', // 444
+    password: hashPassword('444', 'sha256'),
     name: 'Katie Peterson',
     picture: 'https://randomuser.me/api/portraits/thumb/women/2.jpg',
     phone: '+391234567893',
   });
-  await connection.manager.save(user4);
 
-  const user5 = new User({
+  const userId5 = await accountsPassword.createUser({
     username: 'ray',
-    password: '$2a$08$6.mbXqsDX82ZZ7q5d8Osb..JrGSsNp4R3IKj7mxgF6YGT0OmMw242', // 555
+    password: hashPassword('555', 'sha256'),
     name: 'Ray Edwards',
     picture: 'https://randomuser.me/api/portraits/thumb/men/3.jpg',
     phone: '+391234567894',
   });
-  await connection.manager.save(user5);
 
-  const user6 = new User({
+  const userId6 = await accountsPassword.createUser({
     username: 'niko',
-    password: '$2a$08$fL5lZR.Rwf9FWWe8XwwlceiPBBim8n9aFtaem.INQhiKT4.Ux3Uq.', // 666
+    password: hashPassword('666', 'sha256'),
     name: 'Niccolò Belli',
     picture: 'https://randomuser.me/api/portraits/thumb/men/4.jpg',
     phone: '+391234567895',
   });
-  await connection.manager.save(user6);
 
-  const user7 = new User({
+  const userId7 = await accountsPassword.createUser({
     username: 'mario',
-    password: '$2a$08$nDHDmWcVxDnH5DDT3HMMC.psqcnu6wBiOgkmJUy9IH..qxa3R6YrO', // 777
+    password: hashPassword('777', 'sha256'),
     name: 'Mario Rossi',
     picture: 'https://randomuser.me/api/portraits/thumb/men/5.jpg',
     phone: '+391234567896',
   });
-  await connection.manager.save(user7);
-
-
-
+  
+  const user1 = await connection.getRepository(User).findOne(userId1) as User;
+  const user2 = await connection.getRepository(User).findOne(userId2) as User;
+  const user3 = await connection.getRepository(User).findOne(userId3) as User;
+  const user4 = await connection.getRepository(User).findOne(userId4) as User;
+  const user5 = await connection.getRepository(User).findOne(userId5) as User;
+  const user6 = await connection.getRepository(User).findOne(userId6) as User;
+  const user7 = await connection.getRepository(User).findOne(userId7) as User;
 
   await connection.manager.save(new Chat({
     createdAt: moment().subtract(10, 'weeks').toDate(),

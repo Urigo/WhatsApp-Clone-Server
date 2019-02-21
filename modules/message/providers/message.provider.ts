@@ -6,7 +6,6 @@ import { Chat } from '../../../entity/Chat';
 import { ChatProvider } from '../../chat/providers/chat.provider';
 import { Message } from '../../../entity/Message';
 import { MessageType } from '../../../db';
-import { AuthProvider } from '../../auth/providers/auth.provider';
 import { UserProvider } from '../../user/providers/user.provider';
 
 @Injectable()
@@ -15,12 +14,11 @@ export class MessageProvider {
     private pubsub: PubSub,
     private connection: Connection,
     private chatProvider: ChatProvider,
-    private authProvider: AuthProvider,
     private userProvider: UserProvider,
   ) { }
 
   repository = this.connection.getRepository(Message);
-  currentUser = this.authProvider.currentUser;
+  currentUser = this.userProvider.currentUser;
 
   createQueryBuilder() {
     return this.connection.createQueryBuilder(Message, 'message');
@@ -263,7 +261,6 @@ export class MessageProvider {
   }
 
   async getChats() {
-    // TODO: make a proper query instead of this mess (see https://github.com/typeorm/typeorm/issues/2132)
     const chats = await this.chatProvider
       .createQueryBuilder()
       .leftJoin('chat.listingMembers', 'listingMembers')

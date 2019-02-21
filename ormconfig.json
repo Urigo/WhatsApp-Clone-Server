@@ -5,7 +5,7 @@
    "username": "test",
    "password": "test",
    "database": "whatsapp",
-   "synchronize": true,
+   "synchronize": false,
    "logging": false,
    "entities": [
       "entity/**/*.ts"

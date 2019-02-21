@@ -4,15 +4,22 @@ require: ts-node/register/transpile-only
 generates:
   ./types.d.ts:
     plugins:
+      - add: "import { Chat as ChatEntity } from './entity/Chat';"
+      - add: "import { Message as MessageEntity } from './entity/Message';"
+      - add: "import { Recipient as RecipientEntity } from './entity/Recipient';"
+      - add: "import { User as UserEntity } from './entity/User';"
+      - add: "import { Upload } from './upload';"
       - typescript-common
+      - typescript-server
       - typescript-resolvers
     config:
       optionalType: undefined | null
       contextType: "@graphql-modules/core#ModuleContext"
       mappers:
-        Chat: ./entity/Chat#Chat
-        Message: ./entity/Message#Message
-        Recipient: ./entity/Recipient#Recipient
-        User: ./entity/User#User
+        Chat: ChatEntity
+        Message: MessageEntity
+        Recipient: RecipientEntity
+        User: UserEntity
       scalars:
         Date: Date
+        Upload: Upload
