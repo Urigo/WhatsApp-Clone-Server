@@ -1,11 +1,10 @@
+import { PubSub, withFilter, IResolvers } from 'apollo-server-express';
 import { MessageType } from "../db";
-import { IResolvers } from "graphql-tools/dist/Interfaces";
 import {
   AddChatMutationArgs, AddGroupMutationArgs, AddMessageMutationArgs, ChatQueryArgs, MessageAddedSubscriptionArgs,
   MessageFeedChatArgs, MessagesChatArgs, RemoveChatMutationArgs, RemoveMessagesMutationArgs
 } from "../types";
 import * as moment from "moment";
-import { PubSub, withFilter } from "graphql-subscriptions";
 import { User } from "../entity/User";
 import { Chat } from "../entity/Chat";
 import { Message } from "../entity/Message";

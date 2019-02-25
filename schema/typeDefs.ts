@@ -1,6 +1,4 @@
-import { ITypeDefinitions } from "graphql-tools/dist/Interfaces";
-
-export const typeDefs: ITypeDefinitions = `
+export const typeDefs = `
   scalar Date
 
   type Query {

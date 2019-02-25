@@ -4,13 +4,11 @@ import { schema } from "./schema";
 import * as bodyParser from "body-parser";
 import * as cors from 'cors';
 import * as express from 'express';
-import { graphiqlExpress, graphqlExpress } from "apollo-server-express";
+import { ApolloServer } from "apollo-server-express";
 import * as passport from "passport";
 import * as basicStrategy from 'passport-http';
 import * as bcrypt from 'bcrypt-nodejs';
 import { createServer } from "http";
-import { SubscriptionServer } from "subscriptions-transport-ws";
-import { execute, subscribe } from "graphql";
 import { createConnection } from "typeorm";
 import { User } from "./entity/User";
 import { addSampleData } from "./db";
@@ -27,7 +25,7 @@ createConnection().then(async connection => {
   //await addSampleData(connection);
 
   passport.use('basic-signin', new basicStrategy.BasicStrategy(
-    async function (username, password, done) {
+    async function (username: string, password: string, done: any) {
       const user = await connection.getRepository(User).findOne({where: { username }});
       if (user && validPassword(password, user.password)) {
         return done(null, user);
@@ -37,7 +35,7 @@ createConnection().then(async connection => {
   ));
 
   passport.use('basic-signup', new basicStrategy.BasicStrategy({passReqToCallback: true},
-    async function (req: any, username: any, password: any, done: any) {
+    async function (req: any, username: string, password: string, done: any) {
       const userExists = !!(await connection.getRepository(User).findOne({where: { username }}));
       if (!userExists && password && req.body.name) {
         const user = await connection.manager.save(new User({
@@ -61,7 +59,7 @@ createConnection().then(async connection => {
 
   app.post('/signup',
     passport.authenticate('basic-signup', {session: false}),
-    function (req, res) {
+    function (req: any, res) {
       if (req.user && req.user.id) {
         // We want to return id as string
         req.user.id = String(req.user.id);
@@ -79,24 +77,23 @@ createConnection().then(async connection => {
     res.json(req.user);
   });
 
-  app.use('/graphql', graphqlExpress(req => ({
-    schema: schema,
-    context: {
-      user: req!['user'],
-      connection,
+  const apollo = new ApolloServer({
+    schema,
+      context({ req, connection }: any) {
+      // Subscription
+      if (connection) {
+        return {
+          user: connection.context.user,
+          connection,
+        };
+      }
+
+      return {
+        user: req!['user'],
+        connection,
+      }
     },
-  })));
-
-  app.use('/graphiql', graphiqlExpress({
-    endpointURL: '/graphql',
-  }));
-
-// Wrap the Express server
-  const ws = createServer(app);
-  ws.listen(PORT, () => {
-    console.log(`Apollo Server is now running on http://localhost:${PORT}`);
-    // Set up the WebSocket for handling GraphQL subscriptions
-    new SubscriptionServer({
+    subscriptions: {
       onConnect: async (connectionParams: any, webSocket: any) => {
         if (connectionParams.authToken) {
           // Create a buffer and tell it the data coming in is base64
@@ -115,13 +112,21 @@ createConnection().then(async connection => {
           }
         }
         throw new Error('Missing auth token!');
-      },
-      execute,
-      subscribe,
-      schema
-    }, {
-      server: ws,
-      path: '/subscriptions',
-    });
+      }
+    }
+  });
+
+  apollo.applyMiddleware({
+    app,
+    path: '/graphql'
+  });
+
+  // Wrap the Express server
+  const ws = createServer(app);
+
+  apollo.installSubscriptionHandlers(ws);
+
+  ws.listen(PORT, () => {
+    console.log(`Apollo Server is now running on http://localhost:${PORT}`);
   });
 });
