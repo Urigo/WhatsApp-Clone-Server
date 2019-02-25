@@ -1,15 +1,10 @@
-import { PubSub, withFilter, IResolvers } from 'apollo-server-express';
+import { PubSub, withFilter } from 'apollo-server-express';
 import { MessageType } from "../db";
-import {
-  AddChatMutationArgs, AddGroupMutationArgs, AddMessageMutationArgs, ChatQueryArgs, MessageAddedSubscriptionArgs,
-  MessageFeedChatArgs, MessagesChatArgs, RemoveChatMutationArgs, RemoveMessagesMutationArgs
-} from "../types";
-import * as moment from "moment";
+import { IResolvers, MessageAddedSubscriptionArgs } from "../types";
 import { User } from "../entity/User";
 import { Chat } from "../entity/Chat";
 import { Message } from "../entity/Message";
 import { Recipient } from "../entity/Recipient";
-import { Connection } from "typeorm";
 import { GraphQLDateTime } from "graphql-iso-date";
 
 export const pubsub = new PubSub();
@@ -18,20 +13,20 @@ export const resolvers: IResolvers = {
   Date: GraphQLDateTime,
   Query: {
     // Show all users for the moment.
-    users: async (obj: any, args: any, {user: currentUser, connection}: { user: User, connection: Connection }): Promise<User[]> => {
+    users: async (obj, args, {user: currentUser, connection}) => {
       return await connection
         .createQueryBuilder(User, "user")
         .where('user.id != :id', {id: currentUser.id})
         .getMany();
     },
-    chats: async (obj: any, args: any, {user: currentUser, connection}: { user: User, connection: Connection }): Promise<any[]> => {
+    chats: async (obj, args, {user: currentUser, connection}) => {
       return await connection
         .createQueryBuilder(Chat, "chat")
         .leftJoin('chat.listingMembers', 'listingMembers')
         .where('listingMembers.id = :id', {id: currentUser.id})
         .getMany();
     },
-    chat: async (obj: any, {chatId}: ChatQueryArgs, {connection}: { user: User, connection: Connection }): Promise<any> => {
+    chat: async (obj, {chatId}, {connection}) => {
       return await connection
         .createQueryBuilder(Chat, "chat")
         .whereInIds(chatId)
@@ -39,7 +34,7 @@ export const resolvers: IResolvers = {
     },
   },
   Mutation: {
-    addChat: async (obj: any, {recipientId}: AddChatMutationArgs, {user: currentUser, connection}: { user: User, connection: Connection }): Promise<Chat | null> => {
+    addChat: async (obj, {recipientId}, {user: currentUser, connection}) => {
       const recipient = await connection
         .createQueryBuilder(User, "user")
         .whereInIds(recipientId)
@@ -84,7 +79,7 @@ export const resolvers: IResolvers = {
         return chat || null;
       }
     },
-    addGroup: async (obj: any, {recipientIds, groupName}: AddGroupMutationArgs, {user: currentUser, connection}: { user: User, connection: Connection }): Promise<Chat | null> => {
+    addGroup: async (obj, {recipientIds, groupName}, {user: currentUser, connection}) => {
       let recipients: User[] = [];
       for (let recipientId of recipientIds) {
         const recipient = await connection
@@ -113,7 +108,7 @@ export const resolvers: IResolvers = {
 
       return chat || null;
     },
-    removeChat: async (obj: any, {chatId}: RemoveChatMutationArgs, {user: currentUser, connection}: { user: User, connection: Connection }) => {
+    removeChat: async (obj, {chatId}, {user: currentUser, connection}) => {
       const chat = await connection
         .createQueryBuilder(Chat, "chat")
         .whereInIds(Number(chatId))
@@ -224,7 +219,7 @@ export const resolvers: IResolvers = {
         return chatId;
       }
     },
-    addMessage: async (obj: any, {chatId, content}: AddMessageMutationArgs, {user: currentUser, connection}: { user: User, connection: Connection }): Promise<Message | null> => {
+    addMessage: async (obj, {chatId, content}, {user: currentUser, connection}) => {
       if (content === null || content === '') {
         throw new Error(`Cannot add empty or null messages.`);
       }
@@ -278,7 +273,7 @@ export const resolvers: IResolvers = {
       }
 
       const message = await connection.getRepository(Message).save(new Message({
-        chat: chat,
+        chat,
         sender: currentUser,
         content,
         type: MessageType.TEXT,
@@ -299,7 +294,7 @@ export const resolvers: IResolvers = {
 
       return message || null;
     },
-    removeMessages: async (obj: any, {chatId, messageIds, all}: RemoveMessagesMutationArgs, {user: currentUser, connection}: { user: User, connection: Connection }) => {
+    removeMessages: async (obj, {chatId, messageIds, all}, {user: currentUser, connection}) => {
       const chat = await connection
         .createQueryBuilder(Chat, "chat")
         .whereInIds(chatId)
@@ -329,7 +324,7 @@ export const resolvers: IResolvers = {
       chat.messages = await chat.messages.reduce<Promise<Message[]>>(async (filtered$, message) => {
         const filtered = await filtered$;
 
-        if (all || messageIds!.includes(String(message.id))) {
+        if (all || messageIds!.includes(message.id)) {
           deletedIds.push(message.id);
           // Remove the current user from the message holders
           message.holders = message.holders.filter(user => user.id !== currentUser.id);
@@ -378,7 +373,7 @@ export const resolvers: IResolvers = {
     }
   },
   Chat: {
-    name: async (chat: Chat, args: any, {user: currentUser, connection}: {user: User, connection: Connection}): Promise<string | null> => {
+    name: async (chat, args, {user: currentUser, connection}) => {
       if (chat.name) {
         return chat.name;
       }
@@ -389,7 +384,7 @@ export const resolvers: IResolvers = {
         .getOne();
       return user && user.name || null;
     },
-    picture: async (chat: Chat, args: any, {user: currentUser, connection}: {user: User, connection: Connection}): Promise<string | null> => {
+    picture: async (chat, args, {user: currentUser, connection}) => {
       if (chat.name) {
         return chat.picture;
       }
@@ -400,37 +395,37 @@ export const resolvers: IResolvers = {
         .getOne();
       return user ? user.picture : null;
     },
-    allTimeMembers: async (chat: Chat, args: any, {user: currentUser, connection}: {user: User, connection: Connection}): Promise<User[]> => {
+    allTimeMembers: async (chat, args, {user: currentUser, connection}) => {
       return await connection
         .createQueryBuilder(User, "user")
         .innerJoin('user.allTimeMemberChats', 'allTimeMemberChats', 'allTimeMemberChats.id = :chatId', {chatId: chat.id})
         .getMany();
     },
-    listingMembers: async (chat: Chat, args: any, {user: currentUser, connection}: {user: User, connection: Connection}): Promise<User[]> => {
+    listingMembers: async (chat, args, {user: currentUser, connection}) => {
       return await connection
         .createQueryBuilder(User, "user")
         .innerJoin('user.listingMemberChats', 'listingMemberChats', 'listingMemberChats.id = :chatId', {chatId: chat.id})
         .getMany();
     },
-    actualGroupMembers: async (chat: Chat, args: any, {user: currentUser, connection}: {user: User, connection: Connection}): Promise<User[]> => {
+    actualGroupMembers: async (chat, args, {user: currentUser, connection}) => {
       return await connection
         .createQueryBuilder(User, "user")
         .innerJoin('user.actualGroupMemberChats', 'actualGroupMemberChats', 'actualGroupMemberChats.id = :chatId', {chatId: chat.id})
         .getMany();
     },
-    admins: async (chat: Chat, args: any, {user: currentUser, connection}: {user: User, connection: Connection}): Promise<User[]> => {
+    admins: async (chat, args, {user: currentUser, connection}) => {
       return await connection
         .createQueryBuilder(User, "user")
         .innerJoin('user.adminChats', 'adminChats', 'adminChats.id = :chatId', {chatId: chat.id})
         .getMany();
     },
-    owner: async (chat: Chat, args: any, {user: currentUser, connection}: {user: User, connection: Connection}): Promise<User | null> => {
+    owner: async (chat, args, {user: currentUser, connection}) => {
       return await connection
         .createQueryBuilder(User, "user")
         .innerJoin('user.ownerChats', 'ownerChats', 'ownerChats.id = :chatId', {chatId: chat.id})
         .getOne() || null;
     },
-    messages: async (chat: Chat, {before, amount}: MessagesChatArgs, {user: currentUser, connection}: {user: User, connection: Connection}): Promise<Message[]> => {
+    messages: async (chat: Chat, {before, amount}, {user: currentUser, connection}) => {
       let query = connection
         .createQueryBuilder(Message, "message")
         .innerJoin('message.chat', 'chat', 'chat.id = :chatId', {chatId: chat.id})
@@ -447,7 +442,7 @@ export const resolvers: IResolvers = {
 
       return (await query.getMany()).reverse();
     },
-    messageFeed: async (chat: Chat, {before, amount}: MessageFeedChatArgs, {user: currentUser, connection}: {user: User, connection: Connection}): Promise<{hasNextPage: boolean, cursor: Date | null, messages: Message[]}> => {
+    messageFeed: async (chat: Chat, {before, amount}, {user: currentUser, connection}) => {
       let query = connection
         .createQueryBuilder(Message, "message")
         .innerJoin('message.chat', 'chat', 'chat.id = :chatId', {chatId: chat.id})
@@ -460,36 +455,37 @@ export const resolvers: IResolvers = {
       }
 
       const [messages, count] = await query.getManyAndCount();
+      const cursor = messages && messages[messages.length - 1].createdAt;
       return {
         hasNextPage: messages.length !== count,
-        cursor: messages && messages.length && messages[messages.length - 1].createdAt || null,
+        cursor: cursor && cursor.toString(),
         messages: messages.reverse(),
       };
     },
-    unreadMessages: async (chat: Chat, args: any, {user: currentUser, connection}: {user: User, connection: Connection}): Promise<number> => {
+    unreadMessages: async (chat, args, {user: currentUser, connection}) => {
       return await connection
         .createQueryBuilder(Message, "message")
         .innerJoin('message.chat', 'chat', 'chat.id = :chatId', {chatId: chat.id})
         .innerJoin('message.recipients', 'recipients', 'recipients.user.id = :userId AND recipients.readAt IS NULL', {userId: currentUser.id})
         .getCount();
     },
-    isGroup: (chat: Chat) => !!chat.name,
+    isGroup: (chat) => !!chat.name,
   },
   Message: {
-    sender: async (message: Message, args: any, {user: currentUser, connection}: {user: User, connection: Connection}): Promise<User | null> => {
+    sender: async (message: Message, args, {user: currentUser, connection}) => {
       return (await connection
         .createQueryBuilder(User, "user")
         .innerJoin('user.senderMessages', 'senderMessages', 'senderMessages.id = :messageId', {messageId: message.id})
-        .getOne()) || null;
+        .getOne())!;
     },
-    ownership: async (message: Message, args: any, {user: currentUser, connection}: {user: User, connection: Connection}): Promise<boolean> => {
+    ownership: async (message: Message, args, {user: currentUser, connection}) => {
       return !!(await connection
         .createQueryBuilder(User, "user")
         .whereInIds(currentUser.id)
         .innerJoin('user.senderMessages', 'senderMessages', 'senderMessages.id = :messageId', {messageId: message.id})
         .getCount());
     },
-    recipients: async (message: Message, args: any, {user: currentUser, connection}: {user: User, connection: Connection}): Promise<Recipient[]> => {
+    recipients: async (message: Message, args, {user: currentUser, connection}) => {
       return await connection
         .createQueryBuilder(Recipient, "recipient")
         .innerJoinAndSelect('recipient.message', 'message', 'message.id = :messageId', {messageId: message.id})
@@ -497,17 +493,17 @@ export const resolvers: IResolvers = {
         .innerJoinAndSelect('recipient.chat', 'chat')
         .getMany();
     },
-    holders: async (message: Message, args: any, {user: currentUser, connection}: {user: User, connection: Connection}): Promise<User[]> => {
+    holders: async (message: Message, args, {user: currentUser, connection}) => {
       return await connection
         .createQueryBuilder(User, "user")
         .innerJoin('user.holderMessages', 'holderMessages', 'holderMessages.id = :messageId', {messageId: message.id})
         .getMany();
     },
-    chat: async (message: Message, args: any, {user: currentUser, connection}: {user: User, connection: Connection}): Promise<Chat | null> => {
+    chat: async (message: Message, args, {user: currentUser, connection})=> {
       return (await connection
         .createQueryBuilder(Chat, "chat")
         .innerJoin('chat.messages', 'messages', 'messages.id = :messageId', {messageId: message.id})
-        .getOne()) || null;
+        .getOne())!;
     },
   },
 };
