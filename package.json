@@ -2,6 +2,10 @@
   "name": "whatsapp-server-express",
   "description": "A newly created Tortilla project",
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://Urigo@github.com/Urigo/WhatsApp-Clone-Server.git"
+  },
   "scripts": {
     "build": "tsc",
     "generate": "gql-gen",
