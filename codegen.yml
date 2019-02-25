@@ -1,19 +1,18 @@
 overwrite: true
-schema: "./schema/typeDefs.ts"
-documents: null
-require:
-  - ts-node/register
+schema: ./schema.ts
+require: ts-node/register/transpile-only
 generates:
   ./types.d.ts:
+    plugins:
+      - typescript-common
+      - typescript-resolvers
     config:
       optionalType: undefined | null
-      contextType: ./schema/types#AppContext
+      contextType: "@graphql-modules/core#ModuleContext"
       mappers:
         Chat: ./entity/Chat#Chat
         Message: ./entity/Message#Message
         Recipient: ./entity/Recipient#Recipient
         User: ./entity/User#User
-    plugins:
-      - "typescript-common"
-      - "typescript-server"
-      - "typescript-resolvers"
+      scalars:
+        Date: Date
