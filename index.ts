@@ -79,17 +79,9 @@ createConnection().then(async connection => {
 
   const apollo = new ApolloServer({
     schema,
-      context({ req, connection }: any) {
-      // Subscription
-      if (connection) {
-        return {
-          user: connection.context.user,
-          connection,
-        };
-      }
-
+    context(received: any) {
       return {
-        user: req!['user'],
+        user: received.connection ? received.connection.context.user : received.req!['user'],
         connection,
       }
     },
@@ -105,7 +97,7 @@ createConnection().then(async connection => {
 
             if (user && validPassword(password, user.password)) {
               // Set context for the WebSocket
-              return {user, connection};
+              return {user};
             } else {
               throw new Error('Wrong credentials!');
             }
