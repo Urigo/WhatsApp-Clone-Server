@@ -1,6 +1,4 @@
 export default `
-  scalar Date
-
   type Query {
     users: [User!]
     chats: [Chat!]
@@ -35,19 +33,11 @@ export default `
     admins: [User!]
     #If null the group is read-only. Null for chats.
     owner: User
-    messages(amount: Int, before: String): [Message]!
-    #Return messages in a a Feed Wrapper with cursor based pagination
-    messageFeed(amount: Int, before: String): MessageFeed
+    messages(amount: Int): [Message]!
     #Computed property
     unreadMessages: Int!
     #Computed property
     isGroup: Boolean!
-  }
-  
-  type MessageFeed {
-    hasNextPage: Boolean!
-    cursor: String
-    messages: [Message]!
   }
 
   type Message {
@@ -55,7 +45,7 @@ export default `
     sender: User!
     chat: Chat!
     content: String!
-    createdAt: Date!
+    createdAt: String!
     #FIXME: should return MessageType
     type: Int!
     #Whoever received the message
@@ -70,8 +60,8 @@ export default `
     user: User!
     message: Message!
     chat: Chat!
-    receivedAt: Date
-    readAt: Date
+    receivedAt: String
+    readAt: String
   }
 
   type User {

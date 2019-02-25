@@ -5,12 +5,10 @@ import { User } from "../entity/User";
 import { Chat } from "../entity/Chat";
 import { Message } from "../entity/Message";
 import { Recipient } from "../entity/Recipient";
-import { GraphQLDateTime } from "graphql-iso-date";
 
 export const pubsub = new PubSub();
 
 export const resolvers: IResolvers = {
-  Date: GraphQLDateTime,
   Query: {
     // Show all users for the moment.
     users: async (obj, args, {user: currentUser, connection}) => {
@@ -319,13 +317,13 @@ export const resolvers: IResolvers = {
         throw new Error(`'all' and 'messageIds' cannot be both null`);
       }
 
-      let deletedIds: number[] = [];
+      let deletedIds: string[] = [];
       // Instead of chaining map and filter we can loop once using reduce
       chat.messages = await chat.messages.reduce<Promise<Message[]>>(async (filtered$, message) => {
         const filtered = await filtered$;
 
-        if (all || messageIds!.includes(message.id)) {
-          deletedIds.push(message.id);
+        if (all || messageIds!.map(Number).includes(message.id)) {
+          deletedIds.push(String(message.id));
           // Remove the current user from the message holders
           message.holders = message.holders.filter(user => user.id !== currentUser.id);
 
@@ -425,42 +423,13 @@ export const resolvers: IResolvers = {
         .innerJoin('user.ownerChats', 'ownerChats', 'ownerChats.id = :chatId', {chatId: chat.id})
         .getOne() || null;
     },
-    messages: async (chat: Chat, {before, amount}, {user: currentUser, connection}) => {
-      let query = connection
+    messages: async (chat, {amount = 0}: {amount: number}, {user: currentUser, connection}) => {
+      const query = connection
         .createQueryBuilder(Message, "message")
         .innerJoin('message.chat', 'chat', 'chat.id = :chatId', {chatId: chat.id})
         .innerJoin('message.holders', 'holders', 'holders.id = :userId', {userId: currentUser.id})
         .orderBy({"message.createdAt": "DESC"});
-
-      if (amount) {
-        query = query.take(amount);
-      }
-
-      if (before) {
-        query = query.where('message.createdAt < :before', {before: new Date(before)});
-      }
-
-      return (await query.getMany()).reverse();
-    },
-    messageFeed: async (chat: Chat, {before, amount}, {user: currentUser, connection}) => {
-      let query = connection
-        .createQueryBuilder(Message, "message")
-        .innerJoin('message.chat', 'chat', 'chat.id = :chatId', {chatId: chat.id})
-        .innerJoin('message.holders', 'holders', 'holders.id = :userId', {userId: currentUser.id})
-        .orderBy({"message.createdAt": "DESC"})
-        .take(amount || 15);
-
-      if (before) {
-        query = query.where('message.createdAt < :before', {before: new Date(before)});
-      }
-
-      const [messages, count] = await query.getManyAndCount();
-      const cursor = messages && messages[messages.length - 1].createdAt;
-      return {
-        hasNextPage: messages.length !== count,
-        cursor: cursor && cursor.toString(),
-        messages: messages.reverse(),
-      };
+      return (amount ? await query.take(amount).getMany() : await query.getMany()).reverse();
     },
     unreadMessages: async (chat, args, {user: currentUser, connection}) => {
       return await connection

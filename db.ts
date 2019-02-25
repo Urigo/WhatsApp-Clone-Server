@@ -2,7 +2,7 @@
 import "reflect-metadata";
 import { Chat } from "./entity/Chat";
 import { Recipient } from "./entity/Recipient";
-import * as moment from 'moment';
+import moment from 'moment';
 import { Message } from "./entity/Message";
 import { User } from "./entity/User";
 import { Connection } from "typeorm";

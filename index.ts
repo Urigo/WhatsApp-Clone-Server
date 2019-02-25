@@ -1,13 +1,13 @@
 // For TypeORM
 import "reflect-metadata";
 import { schema } from "./schema";
-import * as bodyParser from "body-parser";
-import * as cors from 'cors';
-import * as express from 'express';
+import bodyParser from "body-parser";
+import cors from 'cors';
+import express from 'express';
 import { ApolloServer } from "apollo-server-express";
-import * as passport from "passport";
-import * as basicStrategy from 'passport-http';
-import * as bcrypt from 'bcrypt-nodejs';
+import passport from "passport";
+import basicStrategy from 'passport-http';
+import bcrypt from 'bcrypt-nodejs';
 import { createServer } from "http";
 import { createConnection } from "typeorm";
 import { User } from "./entity/User";
@@ -22,7 +22,7 @@ function validPassword(password: string, localPassword: string) {
 }
 
 createConnection().then(async connection => {
-  //await addSampleData(connection);
+  await addSampleData(connection);
 
   passport.use('basic-signin', new basicStrategy.BasicStrategy(
     async function (username: string, password: string, done: any) {
@@ -60,20 +60,12 @@ createConnection().then(async connection => {
   app.post('/signup',
     passport.authenticate('basic-signup', {session: false}),
     function (req: any, res) {
-      if (req.user && req.user.id) {
-        // We want to return id as string
-        req.user.id = String(req.user.id);
-      }
       res.json(req.user);
     });
 
   app.use(passport.authenticate('basic-signin', {session: false}));
 
   app.post('/signin', function (req, res) {
-    if (req.user && req.user.id) {
-      // We want to return id as string
-      req.user.id = String(req.user.id);
-    }
     res.json(req.user);
   });
 
