@@ -5,7 +5,7 @@
   "scripts": {
     "start": "npm run build:live",
     "build:live": "nodemon --exec ./node_modules/.bin/ts-node -- ./index.ts",
-    "generator": "gql-gen --schema http://localhost:3000/graphql --template ts --out ./types.d.ts"
+    "generator": "gql-gen -r ts-node/register —schema schema/typeDefs.ts --template ts --out ./types.d.ts"
   },
   "devDependencies": {
     "@types/bcrypt-nodejs": "0.0.30",

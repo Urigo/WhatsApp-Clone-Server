@@ -1,4 +1,4 @@
-export const typeDefs = `
+export default `
   scalar Date
 
   type Query {
