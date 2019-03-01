@@ -29,7 +29,7 @@
     "@types/pg": "^7.4.13",
     "@types/tmp": "^0.0.34",
     "concurrently": "^4.1.0",
-    "graphql-codegen-typescript-common": "^0.17.0",
+    "graphql-codegen-typescript-common": "^0.18.0",
     "graphql-codegen-typescript-resolvers": "^0.17.0",
     "graphql-codegen-typescript-server": "^0.17.0",
     "nodemon": "^1.18.10",
