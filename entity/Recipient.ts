@@ -1,6 +1,7 @@
-import { Entity, ManyToOne, Column } from 'typeorm';
-import { Message } from './Message';
-import { User } from './User';
+import { Entity, ManyToOne, Column } from "typeorm";
+import { Message } from "./Message";
+import { User } from "./User";
+import { Chat } from "./Chat";
 
 interface RecipientConstructor {
   user?: User;
@@ -16,6 +17,9 @@ export class Recipient {
 
   @ManyToOne(type => Message, message => message.recipients, { primary: true })
   message: Message;
+
+  @ManyToOne(type => Chat, chat => chat.recipients)
+  chat: Chat;
 
   @Column({nullable: true})
   receivedAt: Date;

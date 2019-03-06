@@ -33,7 +33,7 @@ type Chat {
 type Mutation {
   addChat(userId: ID!): Chat
   addGroup(userIds: [ID!]!, groupName: String!, groupPicture: String): Chat
-  updateChat(chatId: ID!, name: String, picture: String): Chat
+  updateGroup(chatId: ID!, groupName: String, groupPicture: String): Chat
   removeChat(chatId: ID!): ID
   addAdmins(groupId: ID!, userIds: [ID!]!): [ID]!
   removeAdmins(groupId: ID!, userIds: [ID!]!): [ID]!

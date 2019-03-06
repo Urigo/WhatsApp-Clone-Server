@@ -16,4 +16,3 @@ generates:
         User: ./entity/User#User
       scalars:
         Date: Date
-

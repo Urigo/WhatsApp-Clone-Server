@@ -1,4 +1,4 @@
-import { Injectable, ProviderScope } from '@graphql-modules/di'
+import { Injectable } from '@graphql-modules/di'
 import { PubSub } from 'apollo-server-express'
 import { Connection } from 'typeorm'
 import { User } from '../../../entity/User';

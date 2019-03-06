@@ -1,10 +1,11 @@
-import 'reflect-metadata';
-import { Chat } from './entity/Chat';
-import { Recipient } from './entity/Recipient';
+// For TypeORM
+import "reflect-metadata";
+import { Chat } from "./entity/Chat";
+import { Recipient } from "./entity/Recipient";
 import moment from 'moment';
-import { Message } from './entity/Message';
-import { User } from './entity/User';
-import { Connection } from 'typeorm';
+import { Message } from "./entity/Message";
+import { User } from "./entity/User";
+import { Connection } from "typeorm";
 
 export enum MessageType {
   PICTURE,
@@ -80,6 +81,7 @@ export async function addSampleData(connection: Connection) {
 
 
   await connection.manager.save(new Chat({
+    createdAt: moment().subtract(10, 'weeks').toDate(),
     allTimeMembers: [user1, user3],
     listingMembers: [user1, user3],
     messages: [
@@ -111,6 +113,7 @@ export async function addSampleData(connection: Connection) {
   }));
 
   await connection.manager.save(new Chat({
+    createdAt: moment().subtract(9, 'weeks').toDate(),
     allTimeMembers: [user1, user4],
     listingMembers: [user1, user4],
     messages: [
@@ -130,6 +133,7 @@ export async function addSampleData(connection: Connection) {
   }));
 
   await connection.manager.save(new Chat({
+    createdAt: moment().subtract(8, 'weeks').toDate(),
     allTimeMembers: [user1, user5],
     listingMembers: [user1, user5],
     messages: [
@@ -161,6 +165,7 @@ export async function addSampleData(connection: Connection) {
   }));
 
   await connection.manager.save(new Chat({
+    createdAt: moment().subtract(7, 'weeks').toDate(),
     allTimeMembers: [user3, user4],
     listingMembers: [user3, user4],
     messages: [
@@ -180,6 +185,7 @@ export async function addSampleData(connection: Connection) {
   }));
 
   await connection.manager.save(new Chat({
+    createdAt: moment().subtract(6, 'weeks').toDate(),
     allTimeMembers: [user2, user5],
     listingMembers: [user2, user5],
     messages: [
@@ -211,16 +217,19 @@ export async function addSampleData(connection: Connection) {
   }));
 
   await connection.manager.save(new Chat({
+    createdAt: moment().subtract(5, 'weeks').toDate(),
     allTimeMembers: [user1, user6],
     listingMembers: [user1],
   }));
 
   await connection.manager.save(new Chat({
+    createdAt: moment().subtract(4, 'weeks').toDate(),
     allTimeMembers: [user2, user1],
     listingMembers: [user2],
   }));
 
   await connection.manager.save(new Chat({
+    createdAt: moment().subtract(3, 'weeks').toDate(),
     name: 'Ethan\'s group',
     picture: 'https://randomuser.me/api/portraits/thumb/lego/1.jpg',
     allTimeMembers: [user1, user3, user4, user6],
@@ -281,6 +290,7 @@ export async function addSampleData(connection: Connection) {
   }));
 
   await connection.manager.save(new Chat({
+    createdAt: moment().subtract(2, 'weeks').toDate(),
     name: 'Ray\'s group',
     allTimeMembers: [user3, user6],
     listingMembers: [user3, user6],

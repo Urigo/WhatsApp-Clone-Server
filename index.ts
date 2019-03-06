@@ -1,14 +1,13 @@
+import "reflect-metadata"; // For TypeORM
 require('dotenv').config();
-
-import 'reflect-metadata';
-import bodyParser from 'body-parser';
+import bodyParser from "body-parser";
 import cors from 'cors';
 import express from 'express';
-import { ApolloServer } from 'apollo-server-express';
-import { createServer } from 'http';
-import { createConnection } from 'typeorm';
-import { addSampleData } from './db';
-import { AppModule } from './modules/app.module';
+import { ApolloServer } from "apollo-server-express";
+import { createServer } from "http";
+import { createConnection } from "typeorm";
+import { addSampleData } from "./db";
+import { AppModule } from "./modules/app.module";
 
 createConnection().then(async connection => {
   if (process.argv.includes('--add-sample-data')) {

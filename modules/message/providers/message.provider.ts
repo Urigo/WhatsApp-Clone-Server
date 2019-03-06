@@ -52,15 +52,15 @@ export class MessageProvider {
       }
 
       // Receiver's user
-      const user = chat.allTimeMembers.find(user => user.id !== this.currentUser.id);
+      const receiver = chat.allTimeMembers.find(user => user.id !== this.currentUser.id);
 
-      if (!user) {
+      if (!receiver) {
         throw new Error(`Cannot find receiver's user.`);
       }
 
-      if (!chat.listingMembers.find(listingMember => listingMember.id === user.id)) {
+      if (!chat.listingMembers.find(listingMember => listingMember.id === receiver.id)) {
         // Chat is not listed for the receiver user. Add him to the listingIds
-        chat.listingMembers.push(user);
+        chat.listingMembers.push(receiver);
 
         await this.chatProvider.repository.save(chat);
 
@@ -73,7 +73,7 @@ export class MessageProvider {
       holders = chat.listingMembers;
     } else {
       // Group
-      if (!chat.actualGroupMembers || !chat.actualGroupMembers.find(user => user.id === this.currentUser.id)) {
+      if (!chat.actualGroupMembers || !chat.actualGroupMembers.find(actualGroupMember => actualGroupMember.id === this.currentUser.id)) {
         throw new Error(`The user is not a member of the group ${chatId}. Cannot add message.`);
       }
 
@@ -263,6 +263,7 @@ export class MessageProvider {
   }
 
   async getChats() {
+    // TODO: make a proper query instead of this mess (see https://github.com/typeorm/typeorm/issues/2132)
     const chats = await this.chatProvider
       .createQueryBuilder()
       .leftJoin('chat.listingMembers', 'listingMembers')
@@ -300,27 +301,13 @@ export class MessageProvider {
   }
 
   async getChatLastMessage(chat: Chat) {
-    if (chat.messages) {
-      return chat.messages.length ? chat.messages[chat.messages.length - 1] : null;
-    }
-
     const messages = await this.getChatMessages(chat, 1);
 
     return messages && messages.length ? messages[0] : null;
   }
 
   async getChatUpdatedAt(chat: Chat) {
-    if (chat.messages) {
-      return chat.messages.length ? chat.messages[0].createdAt : null;
-    }
-
-    const latestMessage = await this.createQueryBuilder()
-      .innerJoin('message.chat', 'chat', 'chat.id = :chatId', { chatId: chat.id })
-      .innerJoin('message.holders', 'holders', 'holders.id = :userId', {
-        userId: this.currentUser.id,
-      })
-      .orderBy({ 'message.createdAt': 'DESC' })
-      .getOne();
+    const latestMessage = await this.getChatLastMessage(chat);
 
     return latestMessage ? latestMessage.createdAt : null;
   }
