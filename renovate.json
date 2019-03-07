@@ -3,6 +3,11 @@
     "config:base",
     ":rebaseStalePrs"
   ],
+  "baseBranches": [
+    "master",
+    "step-by-step-angular",
+    "step-by-step-react"
+  ],
   "recreateClosed": true,
   "rangeStrategy": "lockfile-update"
 }
