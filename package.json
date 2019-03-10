@@ -7,6 +7,11 @@
   },
   "private": true,
   "scripts": {
-    "start": "node index.js"
+    "start": "ts-node index.ts"
+  },
+  "devDependencies": {
+    "@types/node": "12.7.2",
+    "ts-node": "8.3.0",
+    "typescript": "3.5.3"
   }
 }
