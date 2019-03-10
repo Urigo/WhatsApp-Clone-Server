@@ -5,5 +5,8 @@
     "type": "git",
     "url": "https://github.com/Urigo/WhatsApp-Clone-Server.git"
   },
-  "private": true
+  "private": true,
+  "scripts": {
+    "start": "node index.js"
+  }
 }
