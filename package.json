@@ -23,6 +23,9 @@
     "apollo-server-express": "2.8.1",
     "cors": "2.8.5",
     "express": "4.17.1",
-    "graphql": "14.4.2"
+    "graphql": "14.4.2",
+    "graphql-import": "0.7.1",
+    "graphql-scalars": "1.0.0",
+    "graphql-tools": "4.0.5"
   }
 }
