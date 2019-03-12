@@ -14,8 +14,10 @@ jobs:
           name: Install Dependencies
           command: yarn
       - run:
-          name: Compile
-          command: yarn tsc
+          name: Test
+          command: yarn test
+      - store_test_results:
+          path: test-results
       - save_cache:
           name: Save Yarn Package Cache
           key: yarn-packages-{{ checksum "yarn.lock" }}
