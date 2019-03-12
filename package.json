@@ -7,7 +7,11 @@
   },
   "private": true,
   "scripts": {
-    "start": "ts-node index.ts"
+    "start": "ts-node index.ts",
+    "test": "jest"
+  },
+  "jest-junit": {
+    "outputDirectory": "./test-results"
   },
   "devDependencies": {
     "@types/body-parser": "1.17.0",
@@ -15,7 +19,11 @@
     "@types/express": "4.16.1",
     "@types/graphql": "14.2.0",
     "@types/graphql-iso-date": "3.3.1",
+    "@types/jest": "24.0.13",
     "@types/node": "12.0.4",
+    "jest": "24.8.0",
+    "jest-junit": "6.4.0",
+    "ts-jest": "24.0.2",
     "ts-node": "8.2.0",
     "typescript": "3.5.1"
   },
@@ -28,5 +36,19 @@
     "graphql-import": "0.7.1",
     "graphql-iso-date": "3.6.1",
     "graphql-tools": "4.0.4"
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.(js|jsx|ts|tsx)$": "<rootDir>/node_modules/ts-jest"
+    },
+    "globals": {
+      "ts-jest": {
+        "diagnostics": false
+      }
+    },
+    "reporters": [
+      "default",
+      "jest-junit"
+    ]
   }
 }
