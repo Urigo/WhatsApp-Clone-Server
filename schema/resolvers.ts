@@ -7,7 +7,7 @@ const resolvers = {
 
   Chat: {
     lastMessage(chat: any) {
-      return messages.find(m => m.id === chat.lastMessage);
+      return messages.find((m) => m.id === chat.lastMessage);
     },
   },
 
