@@ -8,14 +8,22 @@
   "private": true,
   "scripts": {
     "start": "ts-node index.ts",
+    "test": "TZ=\"Asia/Jerusalem\" jest",
     "format": "prettier \"**/*.ts\" --write"
+  },
+  "jest-junit": {
+    "outputDirectory": "./test-results"
   },
   "devDependencies": {
     "@types/cors": "2.8.6",
     "@types/express": "4.17.1",
     "@types/graphql": "14.5.0",
+    "@types/jest": "24.0.18",
     "@types/node": "12.7.2",
+    "jest": "24.9.0",
+    "jest-junit": "8.0.0",
     "prettier": "1.18.2",
+    "ts-jest": "24.0.2",
     "ts-node": "8.3.0",
     "typescript": "3.5.3"
   },
@@ -27,5 +35,19 @@
     "graphql-import": "0.7.1",
     "graphql-scalars": "1.0.1",
     "graphql-tools": "4.0.5"
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.(js|jsx|ts|tsx)$": "<rootDir>/node_modules/ts-jest"
+    },
+    "globals": {
+      "ts-jest": {
+        "diagnostics": false
+      }
+    },
+    "reporters": [
+      "default",
+      "jest-junit"
+    ]
   }
 }
