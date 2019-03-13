@@ -44,7 +44,7 @@
     "body-parser": "^1.18.3",
     "cloudinary": "^1.13.2",
     "cors": "^2.8.5",
-    "dotenv": "^6.2.0",
+    "dotenv": "^7.0.0",
     "express": "^4.16.4",
     "graphql": "^14.1.1",
     "graphql-code-generator": "^0.18.0",
