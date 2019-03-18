@@ -6,6 +6,10 @@ const resolvers = {
   URL: URLResolver,
 
   Chat: {
+    messages(chat: any) {
+      return messages.filter(m => chat.messages.includes(m.id));
+    },
+
     lastMessage(chat: any) {
       return messages.find(m => m.id === chat.lastMessage);
     },
