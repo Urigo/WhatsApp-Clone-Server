@@ -11,6 +11,7 @@ type Chat {
   name: String!
   picture: String
   lastMessage: Message
+  messages: [Message!]!
 }
 
 type Query {
