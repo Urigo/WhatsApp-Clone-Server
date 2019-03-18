@@ -21,6 +21,10 @@ const resolvers = {
     chats() {
       return chats;
     },
+
+    chat(root: any, { chatId }: any) {
+      return chats.find(c => c.id === chatId);
+    },
   },
 };
 
