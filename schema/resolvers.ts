@@ -34,7 +34,7 @@ const resolvers = {
       if (chatIndex === -1) return null;
 
       const chat = chats[chatIndex];
-      
+
       const messagesIds = messages.map(currentMessage => Number(currentMessage.id));
       const messageId = String(Math.max(...messagesIds) + 1);
       const message = {
