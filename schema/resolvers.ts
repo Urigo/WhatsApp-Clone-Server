@@ -33,8 +33,8 @@ const resolvers = {
       if (chatIndex === -1) return null
 
       const chat = chats[chatIndex]
-      const lastMessageId = chat.messages[chat.messages.length - 1]
-      const messageId = String(Number(lastMessageId) + 1)
+      const recentMessage = messages[messages.length - 1]
+      const messageId = String(Number(recentMessage.id) + 1)
       const message = {
         id: messageId,
         createdAt: new Date(),
