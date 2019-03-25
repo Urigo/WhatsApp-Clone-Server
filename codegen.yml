@@ -1,0 +1,17 @@
+schema: ./schema/typeDefs.graphql
+overwrite: true
+generates:
+  ./types/graphql.d.ts:
+    plugins:
+      - typescript
+      - typescript-resolvers
+    config:
+      mappers:
+        # import { Message } from '../db'
+        # The root types of Message resolvers
+        Message: ../db#Message
+        Chat: ../db#Chat
+      scalars:
+        # e.g. Message.createdAt will be of type Date
+        Date: Date
+        URL: string
