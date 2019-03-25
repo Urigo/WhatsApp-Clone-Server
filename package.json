@@ -7,13 +7,18 @@
   },
   "private": true,
   "scripts": {
+    "prestart": "yarn codegen",
     "start": "ts-node index.ts",
-    "test": "jest"
+    "test": "jest",
+    "codegen": "gql-gen"
   },
   "jest-junit": {
     "outputDirectory": "./test-results"
   },
   "devDependencies": {
+    "@graphql-codegen/cli": "1.2.1-alpha-3d654462.34",
+    "@graphql-codegen/typescript": "1.2.1-alpha-3d654462.34",
+    "@graphql-codegen/typescript-resolvers": "1.2.1-alpha-3d654462.34",
     "@types/body-parser": "1.17.0",
     "@types/cors": "2.8.5",
     "@types/express": "4.16.1",
