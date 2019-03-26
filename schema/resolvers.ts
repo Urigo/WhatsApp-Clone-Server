@@ -59,6 +59,13 @@ const resolvers: Resolvers = {
       return message;
     },
   },
+
+  Subscription: {
+    messageAdded: {
+      subscribe: (root, args, { pubsub }) =>
+        pubsub.asyncIterator('messageAdded'),
+    },
+  },
 };
 
 export default resolvers;
