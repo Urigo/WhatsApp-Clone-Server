@@ -5,6 +5,7 @@ type Message {
   id: ID!
   content: String!
   createdAt: Date!
+  chat: Chat
 }
 
 type Chat {
