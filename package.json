@@ -41,7 +41,7 @@
     "apollo-server-express": "2.4.8",
     "bcrypt-nodejs": "0.0.3",
     "body-parser": "1.18.3",
-    "cloudinary": "1.13.2",
+    "cloudinary": "1.14.0",
     "core-js": "3.0.0-beta.16",
     "cors": "2.8.5",
     "dotenv": "7.0.0",
