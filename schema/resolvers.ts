@@ -5,6 +5,12 @@ import { Resolvers } from '../types/graphql'
 const resolvers: Resolvers = {
   Date: GraphQLDateTime,
 
+  Message: {
+    chat(message) {
+      return chats.find(c => c.messages.some(m => m === message.id)) || null
+    },
+  },
+
   Chat: {
     messages(chat) {
       return messages.filter(m => chat.messages.includes(m.id))
