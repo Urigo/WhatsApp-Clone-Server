@@ -29,7 +29,7 @@ const resolvers: Resolvers = {
   },
 
   Mutation: {
-    addMessage(root, { chatId, content }) {
+    addMessage(root, { chatId, content }, { pubsub }) {
       const chatIndex = chats.findIndex(c => c.id === chatId);
 
       if (chatIndex === -1) return null;
@@ -49,6 +49,10 @@ const resolvers: Resolvers = {
       // The chat will appear at the top of the ChatsList component
       chats.splice(chatIndex, 1);
       chats.unshift(chat);
+
+      pubsub.publish('messageAdded', {
+        messageAdded: message,
+      });
 
       return message;
     },
