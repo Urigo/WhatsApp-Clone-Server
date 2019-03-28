@@ -1,19 +1,29 @@
 scalar Date
 scalar URL
 
+type User {
+  id: ID!
+  name: String!
+  picture: URL
+}
+
 type Message {
   id: ID!
   content: String!
   createdAt: Date!
   chat: Chat
+  sender: User
+  recipient: User
+  isMine: Boolean!
 }
 
 type Chat {
   id: ID!
-  name: String!
+  name: String
   picture: URL
   lastMessage: Message
   messages: [Message!]!
+  participants: [User!]!
 }
 
 type Query {
