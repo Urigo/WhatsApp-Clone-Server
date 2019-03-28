@@ -1,5 +1,5 @@
 import { DateTimeResolver, URLResolver } from 'graphql-scalars';
-import { Message, chats, messages } from '../db';
+import { User, Message, chats, messages, users } from '../db';
 import { Resolvers } from '../types/graphql';
 
 const resolvers: Resolvers = {
@@ -10,9 +10,27 @@ const resolvers: Resolvers = {
     chat(message) {
       return chats.find(c => c.messages.some(m => m === message.id)) || null;
     },
+
+    sender(message) {
+      return users.find(u => u.id === message.sender) || null;
+    },
+
+    recipient(message) {
+      return users.find(u => u.id === message.recipient) || null;
+    },
   },
 
   Chat: {
+    name() {
+      // TODO: Resolve in relation to current user
+      return null;
+    },
+
+    picture() {
+      // TODO: Resolve in relation to current user
+      return null;
+    },
+
     messages(chat) {
       return messages.filter(m => chat.messages.includes(m.id));
     },
@@ -21,6 +39,12 @@ const resolvers: Resolvers = {
       const lastMessage = chat.messages[chat.messages.length - 1];
 
       return messages.find(m => m.id === lastMessage) || null;
+    },
+
+    participants(chat) {
+      return chat.participants
+        .map(p => users.find(u => u.id === p))
+        .filter(Boolean) as User[];
     },
   },
 
@@ -47,6 +71,8 @@ const resolvers: Resolvers = {
       const message: Message = {
         id: messageId,
         createdAt: new Date(),
+        sender: '', // TODO: Fill-in
+        recipient: '', // TODO: Fill-in
         content,
       };
 
