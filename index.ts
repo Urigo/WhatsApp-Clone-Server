@@ -21,8 +21,8 @@ app.get('/_ping', (req, res) => {
 const pubsub = new PubSub()
 const server = new ApolloServer({
   schema,
-  context: () => ({
-    currentUser: users.find(u => u.id === '1'),
+  context: ({ req }) => ({
+    currentUser: users.find(u => u.id === req.cookies.currentUserId),
     pubsub,
   }),
 })
