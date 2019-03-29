@@ -1,5 +1,6 @@
 import { ApolloServer, gql, PubSub } from 'apollo-server-express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import express from 'express';
 import http from 'http';
 import { users } from './db';
@@ -10,6 +11,7 @@ const app = express();
 const origin = process.env.ORIGIN || 'http://localhost:3000';
 app.use(cors({ credentials: true, origin }));
 app.use(express.json());
+app.use(cookieParser());
 
 app.get('/_ping', (req, res) => {
   res.send('pong');
