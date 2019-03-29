@@ -1,3 +1,4 @@
+import { withFilter } from 'apollo-server-express'
 import { GraphQLDateTime } from 'graphql-iso-date'
 import { User, Message, chats, messages, users } from '../db'
 import { Resolvers } from '../types/graphql'
@@ -119,7 +120,17 @@ const resolvers: Resolvers = {
 
   Subscription: {
     messageAdded: {
-      subscribe: (root, args, { pubsub }) => pubsub.asyncIterator('messageAdded')
+      subscribe: withFilter(
+        (root, args, { pubsub }) => pubsub.asyncIterator('messageAdded'),
+        ({ messageAdded }, args, { currentUser }) => {
+          if (!currentUser) return false
+
+          return [
+            messageAdded.sender,
+            messageAdded.recipient,
+          ].includes(currentUser.id)
+        },
+      )
     }
   }
 }
