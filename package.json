@@ -27,7 +27,7 @@
     "@types/passport": "^1.0.0",
     "@types/passport-http": "^0.3.7",
     "@types/pg": "^7.4.13",
-    "@types/tmp": "^0.0.34",
+    "@types/tmp": "^0.1.0",
     "concurrently": "^4.1.0",
     "graphql-codegen-typescript-common": "^0.17.0",
     "graphql-codegen-typescript-resolvers": "^0.17.0",
@@ -55,7 +55,7 @@
     "passport-http": "^0.3.0",
     "pg": "^7.8.1",
     "reflect-metadata": "^0.1.13",
-    "tmp": "^0.0.33",
+    "tmp": "^0.1.0",
     "typeorm": "^0.2.14"
   }
 }
