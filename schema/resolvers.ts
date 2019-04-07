@@ -2,6 +2,9 @@ import { withFilter } from 'apollo-server-express';
 import { DateTimeResolver, URLResolver } from 'graphql-scalars';
 import { User, Message, Chat, chats, messages, users } from '../db';
 import { Resolvers } from '../types/graphql';
+import { secret, expiration } from '../env';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 
 const resolvers: Resolvers = {
   Date: DateTimeResolver,
@@ -89,11 +92,31 @@ const resolvers: Resolvers = {
     users(root, args, { currentUser }) {
       if (!currentUser) return [];
 
-      return users.filter(u => u.id !== currentUser.id);
+      return users.filter((u) => u.id !== currentUser.id);
     },
   },
 
   Mutation: {
+    signIn(root, { username, password }, { res }) {
+      const user = users.find((u) => u.username === username);
+
+      if (!user) {
+        throw new Error('user not found');
+      }
+
+      const passwordsMatch = bcrypt.compareSync(password, user.password);
+
+      if (!passwordsMatch) {
+        throw new Error('password is incorrect');
+      }
+
+      const authToken = jwt.sign(username, secret);
+
+      res.cookie('authToken', authToken, { maxAge: expiration });
+
+      return user;
+    },
+
     addMessage(root, { chatId, content }, { currentUser, pubsub }) {
       if (!currentUser) return null;
 
@@ -133,17 +156,17 @@ const resolvers: Resolvers = {
 
     addChat(root, { recipientId }, { currentUser, pubsub }) {
       if (!currentUser) return null;
-      if (!users.some(u => u.id === recipientId)) return null;
+      if (!users.some((u) => u.id === recipientId)) return null;
 
       let chat = chats.find(
-        c =>
+        (c) =>
           c.participants.includes(currentUser.id) &&
           c.participants.includes(recipientId)
       );
 
       if (chat) return chat;
 
-      const chatsIds = chats.map(c => Number(c.id));
+      const chatsIds = chats.map((c) => Number(c.id));
 
       chat = {
         id: String(Math.max(...chatsIds) + 1),
@@ -163,16 +186,18 @@ const resolvers: Resolvers = {
     removeChat(root, { chatId }, { currentUser, pubsub }) {
       if (!currentUser) return null;
 
-      const chatIndex = chats.findIndex(c => c.id === chatId);
+      const chatIndex = chats.findIndex((c) => c.id === chatId);
 
       if (chatIndex === -1) return null;
 
       const chat = chats[chatIndex];
 
-      if (!chat.participants.some(p => p === currentUser.id)) return null;
+      if (!chat.participants.some((p) => p === currentUser.id)) return null;
 
-      chat.messages.forEach(chatMessage => {
-        const chatMessageIndex = messages.findIndex(m => m.id === chatMessage);
+      chat.messages.forEach((chatMessage) => {
+        const chatMessageIndex = messages.findIndex(
+          (m) => m.id === chatMessage
+        );
 
         if (chatMessageIndex !== -1) {
           messages.splice(chatMessageIndex, 1);
@@ -210,7 +235,7 @@ const resolvers: Resolvers = {
         ({ chatAdded }: { chatAdded: Chat }, args, { currentUser }) => {
           if (!currentUser) return false;
 
-          return chatAdded.participants.some(p => p === currentUser.id);
+          return chatAdded.participants.some((p) => p === currentUser.id);
         }
       ),
     },
@@ -221,7 +246,7 @@ const resolvers: Resolvers = {
         ({ targetChat }: { targetChat: Chat }, args, { currentUser }) => {
           if (!currentUser) return false;
 
-          return targetChat.participants.some(p => p === currentUser.id);
+          return targetChat.participants.some((p) => p === currentUser.id);
         }
       ),
     },
