@@ -20,12 +20,14 @@
     "@graphql-codegen/cli": "1.6.1",
     "@graphql-codegen/typescript": "1.6.1",
     "@graphql-codegen/typescript-resolvers": "1.6.1",
+    "@types/bcrypt": "3.0.0",
     "@types/cors": "2.8.6",
     "@types/cookie": "0.3.3",
     "@types/cookie-parser": "1.4.2",
     "@types/express": "4.17.1",
     "@types/graphql": "14.5.0",
     "@types/jest": "24.0.18",
+    "@types/jsonwebtoken": "8.3.3",
     "@types/node": "12.7.2",
     "jest": "24.9.0",
     "jest-junit": "8.0.0",
@@ -37,6 +39,7 @@
   "dependencies": {
     "apollo-server-express": "2.9.0",
     "apollo-server-testing": "2.9.0",
+    "bcrypt": "3.0.6",
     "cookie": "0.4.0",
     "cors": "2.8.5",
     "cookie-parser": "1.4.4",
@@ -44,7 +47,8 @@
     "graphql": "14.5.3",
     "graphql-import": "0.7.1",
     "graphql-scalars": "1.0.1",
-    "graphql-tools": "4.0.5"
+    "graphql-tools": "4.0.5",
+    "jsonwebtoken": "8.5.1"
   },
   "jest": {
     "transform": {
