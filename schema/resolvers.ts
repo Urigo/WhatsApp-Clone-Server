@@ -83,6 +83,12 @@ const resolvers: Resolvers = {
 
       return chat.participants.includes(currentUser.id) ? chat : null;
     },
+
+    users(root, args, { currentUser }) {
+      if (!currentUser) return [];
+
+      return users.filter(u => u.id !== currentUser.id);
+    },
   },
 
   Mutation: {
