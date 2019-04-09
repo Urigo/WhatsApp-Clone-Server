@@ -38,4 +38,5 @@ type Mutation {
 
 type Subscription {
   messageAdded: Message!
+  chatAdded: Chat!
 }
