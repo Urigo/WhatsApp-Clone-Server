@@ -1,6 +1,6 @@
 import { withFilter } from 'apollo-server-express';
 import { DateTimeResolver, URLResolver } from 'graphql-scalars';
-import { User, Message, chats, messages, users } from '../db';
+import { User, Message, Chat, chats, messages, users } from '../db';
 import { Resolvers } from '../types/graphql';
 
 const resolvers: Resolvers = {
@@ -123,6 +123,31 @@ const resolvers: Resolvers = {
       });
 
       return message;
+    },
+
+    addChat(root, { recipientId }, { currentUser }) {
+      if (!currentUser) return null;
+      if (!users.some(u => u.id === recipientId)) return null;
+
+      let chat = chats.find(
+        c =>
+          c.participants.includes(currentUser.id) &&
+          c.participants.includes(recipientId)
+      );
+
+      if (chat) return chat;
+
+      const chatsIds = chats.map(c => Number(c.id));
+
+      chat = {
+        id: String(Math.max(...chatsIds) + 1),
+        participants: [currentUser.id, recipientId],
+        messages: [],
+      };
+
+      chats.push(chat);
+
+      return chat;
     },
   },
 
