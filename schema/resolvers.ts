@@ -123,7 +123,7 @@ const resolvers: Resolvers = {
       return message
     },
 
-    addChat(root, { recipientId }, { currentUser }) {
+    addChat(root, { recipientId }, { currentUser, pubsub }) {
       if (!currentUser) return null
       if (!users.some(u => u.id === recipientId)) return null
 
@@ -144,6 +144,10 @@ const resolvers: Resolvers = {
 
       chats.push(chat)
 
+      pubsub.publish('chatAdded', {
+        chatAdded: chat
+      })
+
       return chat
     },
   },
@@ -159,6 +163,17 @@ const resolvers: Resolvers = {
             messageAdded.sender,
             messageAdded.recipient,
           ].includes(currentUser.id)
+        },
+      )
+    },
+
+    chatAdded: {
+      subscribe: withFilter(
+        (root, args, { pubsub }) => pubsub.asyncIterator('chatAdded'),
+        ({ chatAdded }: { chatAdded: Chat }, args, { currentUser }) => {
+          if (!currentUser) return false
+
+          return chatAdded.participants.some(p => p === currentUser.id)
         },
       )
     }
