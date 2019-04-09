@@ -153,6 +153,30 @@ const resolvers: Resolvers = {
 
       return chat;
     },
+
+    removeChat(root, { chatId }, { currentUser }) {
+      if (!currentUser) return null;
+
+      const chatIndex = chats.findIndex(c => c.id === chatId);
+
+      if (chatIndex === -1) return null;
+
+      const chat = chats[chatIndex];
+
+      if (!chat.participants.some(p => p === currentUser.id)) return null;
+
+      chat.messages.forEach(chatMessage => {
+        const chatMessageIndex = messages.findIndex(m => m.id === chatMessage);
+
+        if (chatMessageIndex !== -1) {
+          messages.splice(chatMessageIndex, 1);
+        }
+      });
+
+      chats.splice(chatIndex, 1);
+
+      return chatId;
+    },
   },
 
   Subscription: {
