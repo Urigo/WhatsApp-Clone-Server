@@ -73,6 +73,10 @@ const resolvers: Resolvers = {
   },
 
   Query: {
+    me(root, args, { currentUser }) {
+      return currentUser || null;
+    },
+
     chats(root, args, { currentUser }) {
       if (!currentUser) return [];
 
