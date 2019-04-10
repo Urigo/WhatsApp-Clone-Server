@@ -27,6 +27,7 @@ type Chat {
 }
 
 type Query {
+  me: User
   chats: [Chat!]!
   chat(chatId: ID!): Chat
   users: [User!]!
