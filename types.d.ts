@@ -623,7 +623,7 @@ export interface DateScalarConfig extends GraphQLScalarTypeConfig<Date, any> {
   name: "Date";
 }
 
-export interface IResolvers<TContext = ModuleContext> {
+export type IResolvers<TContext = ModuleContext> = {
   Query?: QueryResolvers.Resolvers<TContext>;
   User?: UserResolvers.Resolvers<TContext>;
   Chat?: ChatResolvers.Resolvers<TContext>;
@@ -632,10 +632,10 @@ export interface IResolvers<TContext = ModuleContext> {
   Mutation?: MutationResolvers.Resolvers<TContext>;
   Subscription?: SubscriptionResolvers.Resolvers<TContext>;
   Date?: GraphQLScalarType;
-}
+} & { [typeName: string]: never };
 
-export interface IDirectiveResolvers<Result> {
+export type IDirectiveResolvers<Result> = {
   skip?: SkipDirectiveResolver<Result>;
   include?: IncludeDirectiveResolver<Result>;
   deprecated?: DeprecatedDirectiveResolver<Result>;
-}
+} & { [directiveName: string]: never };
