@@ -38,7 +38,7 @@
     "@graphql-modules/core": "0.6.1",
     "@graphql-modules/di": "0.6.1",
     "@graphql-modules/sonar": "0.4.0",
-    "apollo-server-express": "2.4.8",
+    "apollo-server-express": "2.5.0",
     "bcrypt-nodejs": "0.0.3",
     "body-parser": "1.18.3",
     "cloudinary": "1.13.2",
