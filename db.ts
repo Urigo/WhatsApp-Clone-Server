@@ -32,10 +32,6 @@ export const dbConfig = {
 
 export let pool: Pool = new Pool(dbConfig);
 
-export const users: User[] = [];
-export const messages: Message[] = [];
-export const chats: Chat[] = [];
-
 export async function initDb(): Promise<void> {
   // Clear tables
   await pool.query(sql`DROP TABLE IF EXISTS messages;`);
