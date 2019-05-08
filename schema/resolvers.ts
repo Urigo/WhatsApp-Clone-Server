@@ -131,7 +131,7 @@ const resolvers: Resolvers = {
         throw Error("req.password and req.passwordConfirm don't match");
       }
 
-      if (users.some(u => u.username === username)) {
+      if (users.some((u) => u.username === username)) {
         throw Error('username already exists');
       }
 
