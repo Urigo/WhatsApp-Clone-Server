@@ -1,18 +1,27 @@
 import { createTestClient } from 'apollo-server-testing';
 import { ApolloServer, PubSub, gql } from 'apollo-server-express';
 import schema from '../../schema';
-import { resetDb, users } from '../../db';
+import { resetDb, pool } from '../../db';
+import sql from 'sql-template-strings';
+import { MyContext } from '../../context';
 
 describe('Mutation.removeChat', () => {
   beforeEach(resetDb);
 
   it('removes chat by id', async () => {
+    const { rows } = await pool.query(sql`SELECT * FROM users WHERE id = 1`);
+    const currentUser = rows[0];
     const server = new ApolloServer({
       schema,
-      context: () => ({
+      context: async () => ({
         pubsub: new PubSub(),
-        currentUser: users[0],
+        currentUser,
+        db: await pool.connect(),
       }),
+      formatResponse: (res: any, { context }: { context: MyContext }) => {
+        context.db.release();
+        return res;
+      },
     });
 
     const { query, mutate } = createTestClient(server);
