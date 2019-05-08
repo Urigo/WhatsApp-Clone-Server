@@ -1,3 +1,5 @@
+import { Pool } from "pg";
+
 export type User = {
   id: string
   name: string
@@ -19,6 +21,14 @@ export type Chat = {
   messages: string[]
   participants: string[]
 }
+
+export const pool = new Pool({
+  host: 'localhost',
+  port: 5432,
+  user: 'testuser',
+  password: 'testpassword',
+  database: 'whatsapp'
+})
 
 export const users: User[] = []
 export const messages: Message[] = []
