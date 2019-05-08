@@ -17,7 +17,7 @@ jobs:
             - yarn-packages-{{ checksum "yarn.lock" }}
       - run:
           name: Install Dependencies
-          command: yarn 
+          command: yarn
       - run:
           name: Test
           command: yarn test
