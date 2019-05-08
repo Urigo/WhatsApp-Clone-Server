@@ -4,6 +4,11 @@ jobs:
     working_directory: ~/server/
     docker:
       - image: circleci/node:12.9.0
+      - image: postgres:11.5-alpine
+        environment:
+          POSTGRES_PASSWORD: testpassword
+          POSTGRES_USER: testuser
+          POSTGRES_DB: whatsapp
     steps:
       - checkout
       - restore_cache:
@@ -12,7 +17,7 @@ jobs:
             - yarn-packages-{{ checksum "yarn.lock" }}
       - run:
           name: Install Dependencies
-          command: yarn
+          command: yarn 
       - run:
           name: Test
           command: yarn test
