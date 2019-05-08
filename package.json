@@ -8,7 +8,7 @@
   "private": true,
   "scripts": {
     "start": "ts-node index.ts",
-    "test": "jest",
+    "test": "jest --runInBand",
     "codegen": "gql-gen"
   },
   "devDependencies": {
