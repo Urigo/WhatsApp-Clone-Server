@@ -1,4 +1,6 @@
 import { Pool } from "pg";
+import sql from 'sql-template-strings'
+import { resetDb as envResetDb } from './env'
 
 export type User = {
   id: string
@@ -34,8 +36,11 @@ export const users: User[] = []
 export const messages: Message[] = []
 export const chats: Chat[] = []
 
-export const resetDb = () => {
-  users.splice(0, Infinity, ...[
+export const resetDb = async () => {
+
+  await pool.query(sql`DELETE FROM users`)
+
+  const sampleUsers = [
     {
       id: '1',
       name: 'Ray Edwards',
@@ -71,61 +76,133 @@ export const resetDb = () => {
       password: '$2a$08$6.mbXqsDX82ZZ7q5d8Osb..JrGSsNp4R3IKj7mxgF6YGT0OmMw242', // 555
       picture: 'https://randomuser.me/api/portraits/thumb/women/2.jpg',
     },
-  ])
+  ]
+  
+  for (const sampleUser of sampleUsers) {
+    await pool.query(sql`
+      INSERT INTO users(id, name, username, password, picture)
+      VALUES(${sampleUser.id}, ${sampleUser.name}, ${sampleUser.username}, ${sampleUser.password}, ${sampleUser.picture})
+    `)
+  }
+  
+  await pool.query(sql`SELECT setval('users_id_seq', (SELECT max(id) FROM users))`)
 
-  messages.splice(0, Infinity, ...[
+  await pool.query(sql`DELETE FROM chats`)
+
+  const sampleChats = [
+    {
+      id: '1',
+    },
+    {
+      id: '2',
+    },
+    {
+      id: '3',
+    },
+    {
+      id: '4',
+    },
+  ]
+
+  for (const sampleChat of sampleChats) {
+    await pool.query(sql`
+      INSERT INTO chats(id)
+      VALUES(${sampleChat.id})
+    `)
+  }
+
+  await pool.query(sql`SELECT setval('chats_id_seq', (SELECT max(id) FROM chats))`)
+
+  await pool.query(sql`DELETE FROM chats_users`)
+
+  const sampleChatsUsers = [
+    {
+      chat_id: '1',
+      user_id: '1',
+    },
+    {
+      chat_id: '1',
+      user_id: '2',
+    },
+    {
+      chat_id: '2',
+      user_id: '1',
+    },
+    {
+      chat_id: '2',
+      user_id: '3',
+    },
+    {
+      chat_id: '3',
+      user_id: '1',
+    },
+    {
+      chat_id: '3',
+      user_id: '4',
+    },
+    {
+      chat_id: '4',
+      user_id: '1',
+    },
+    {
+      chat_id: '4',
+      user_id: '5',
+    },
+  ]
+
+  for (const sampleChatUser of sampleChatsUsers) {
+    await pool.query(sql`
+      INSERT INTO chats_users(chat_id, user_id)
+      VALUES(${sampleChatUser.chat_id}, ${sampleChatUser.user_id})
+    `)
+  }
+
+  await pool.query(sql`DELETE FROM messages`)
+
+  const baseTime = new Date('1 Jan 2019 GMT').getTime();
+
+  const sampleMessages = [
     {
       id: '1',
       content: "You on your way?",
-      createdAt: new Date(new Date('1-1-2019').getTime() - 60 * 1000 * 1000),
-      sender: '1',
-      recipient: '2',
+      created_at: new Date(baseTime - 60 * 1000 * 1000),
+      chat_id: '1',
+      sender_user_id: '1',
     },
     {
       id: '2',
       content: "Hey, it's me",
-      createdAt: new Date(new Date('1-1-2019').getTime() - 2 * 60 * 1000 * 1000),
-      sender: '1',
-      recipient: '3',
+      created_at: new Date(baseTime - 2 * 60 * 1000 * 1000),
+      chat_id: '2',
+      sender_user_id: '1',
     },
     {
       id: '3',
       content: "I should buy a boat",
-      createdAt: new Date(new Date('1-1-2019').getTime() - 24 * 60 * 1000 * 1000),
-      sender: '1',
-      recipient: '4',
+      created_at: new Date(baseTime - 24 * 60 * 1000 * 1000),
+      chat_id: '3',
+      sender_user_id: '1',
     },
     {
       id: '4',
       content: "This is wicked good ice cream.",
-      createdAt: new Date(new Date('1-1-2019').getTime() - 14 * 24 * 60 * 1000 * 1000),
-      sender: '1',
-      recipient: '5',
+      created_at: new Date(baseTime - 14 * 24 * 60 * 1000 * 1000),
+      chat_id: '4',
+      sender_user_id: '1',
     },
-  ])
+  ]
 
-  chats.splice(0, Infinity, ...[
-    {
-      id: '1',
-      participants: ['1', '2'],
-      messages: ['1'],
-    },
-    {
-      id: '2',
-      participants: ['1', '3'],
-      messages: ['2'],
-    },
-    {
-      id: '3',
-      participants: ['1', '4'],
-      messages: ['3'],
-    },
-    {
-      id: '4',
-      participants: ['1', '5'],
-      messages: ['4'],
-    },
-  ])
+  for (const sampleMessage of sampleMessages) {
+    await pool.query(sql`
+      INSERT INTO messages(id, content, created_at, chat_id, sender_user_id)
+      VALUES(${sampleMessage.id}, ${sampleMessage.content}, ${sampleMessage.created_at}, ${sampleMessage.chat_id}, ${sampleMessage.sender_user_id})
+    `)
+  }
+
+  await pool.query(sql`SELECT setval('messages_id_seq', (SELECT max(id) FROM messages))`)
+
 }
 
-resetDb()
+if (envResetDb) {
+  resetDb()
+}
