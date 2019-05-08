@@ -1,3 +1,5 @@
+import { Pool } from 'pg';
+
 export type User = {
   id: string;
   name: string;
@@ -19,6 +21,16 @@ export type Chat = {
   messages: string[];
   participants: string[];
 };
+
+export const dbConfig = {
+  host: 'localhost',
+  port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 5432,
+  user: 'testuser',
+  password: 'testpassword',
+  database: 'whatsapp',
+};
+
+export let pool: Pool = new Pool(dbConfig);
 
 export const users: User[] = [];
 export const messages: Message[] = [];
