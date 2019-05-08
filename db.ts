@@ -30,10 +30,6 @@ export const pool = new Pool({
   database: 'whatsapp'
 })
 
-export const users: User[] = []
-export const messages: Message[] = []
-export const chats: Chat[] = []
-
 export const resetDb = async () => {
 
   await pool.query(sql`DELETE FROM users`)
