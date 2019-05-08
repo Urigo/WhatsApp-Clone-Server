@@ -44,28 +44,28 @@ const server = new ApolloServer({
       currentUser,
       pubsub,
       db,
-      res: session.res,
+      res: session.res
     };
   },
   subscriptions: {
     onConnect(params, ws, ctx) {
       // pass the request object to context
       return {
-        request: ctx.request,
+        request: ctx.request
       };
-    },
+    }
   },
-  formatResponse: (res: any, { context }: { context: MyContext }) => {
+  formatResponse: (res: any, { context }: any) => {
     context.db.release();
 
     return res;
-  },
+  }
 });
 
 server.applyMiddleware({
   app,
   path: '/graphql',
-  cors: { credentials: true, origin },
+  cors: { credentials: true, origin }
 });
 
 const httpServer = http.createServer(app);
