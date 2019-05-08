@@ -29,6 +29,7 @@
     "@types/jest": "24.0.18",
     "@types/jsonwebtoken": "8.3.3",
     "@types/node": "12.7.2",
+    "@types/pg": "7.11.0",
     "jest": "24.9.0",
     "jest-junit": "8.0.0",
     "prettier": "1.18.2",
@@ -48,7 +49,9 @@
     "graphql-import": "0.7.1",
     "graphql-scalars": "1.0.1",
     "graphql-tools": "4.0.5",
-    "jsonwebtoken": "8.5.1"
+    "jsonwebtoken": "8.5.1",
+    "pg": "7.12.1",
+    "sql-template-strings": "2.2.2"
   },
   "jest": {
     "transform": {
