@@ -80,9 +80,7 @@ export const resetDb = async () => {
   for (const sampleUser of sampleUsers) {
     await pool.query(sql`
       INSERT INTO users(id, name, username, password, picture)
-      VALUES(${sampleUser.id}, ${sampleUser.name}, ${sampleUser.username}, ${
-      sampleUser.password
-    }, ${sampleUser.picture})
+      VALUES(${sampleUser.id}, ${sampleUser.name}, ${sampleUser.username}, ${sampleUser.password}, ${sampleUser.picture})
     `);
   }
 
@@ -200,9 +198,7 @@ export const resetDb = async () => {
   for (const sampleMessage of sampleMessages) {
     await pool.query(sql`
       INSERT INTO messages(id, content, created_at, chat_id, sender_user_id)
-      VALUES(${sampleMessage.id}, ${sampleMessage.content}, ${
-      sampleMessage.created_at
-    }, ${sampleMessage.chat_id}, ${sampleMessage.sender_user_id})
+      VALUES(${sampleMessage.id}, ${sampleMessage.content}, ${sampleMessage.created_at}, ${sampleMessage.chat_id}, ${sampleMessage.sender_user_id})
     `);
   }
 
