@@ -9,7 +9,7 @@
   "scripts": {
     "prestart": "yarn codegen",
     "start": "ts-node index.ts",
-    "test": "TZ=\"Asia/Jerusalem\" jest",
+    "test": "TZ=\"Asia/Jerusalem\" jest --runInBand --forceExit",
     "codegen": "gql-gen",
     "format": "prettier \"**/*.ts\" --write"
   },
