@@ -11,15 +11,13 @@ export type User = {
 export type Message = {
   id: string;
   content: string;
-  createdAt: Date;
-  sender: string;
-  recipient: string;
+  created_at: Date;
+  chat_id: string;
+  sender_user_id: string;
 };
 
 export type Chat = {
   id: string;
-  messages: string[];
-  participants: string[];
 };
 
 export const dbConfig = {
