@@ -24,7 +24,7 @@
     "@types/node": "11.11.3",
     "@types/passport": "1.0.0",
     "@types/passport-http": "0.3.7",
-    "@types/pg": "7.4.13",
+    "@types/pg": "7.4.14",
     "@types/tmp": "0.0.34",
     "concurrently": "4.1.0",
     "graphql-code-generator": "0.18.0",
@@ -52,7 +52,7 @@
     "multer": "1.4.1",
     "passport": "0.4.0",
     "passport-http": "0.3.0",
-    "pg": "7.9.0",
+    "pg": "7.11.0",
     "reflect-metadata": "0.1.13",
     "tmp": "0.0.33",
     "typeorm": "0.2.15"
