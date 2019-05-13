@@ -8,6 +8,7 @@ import { origin, port, secret } from './env'
 import schema from './schema'
 import { MyContext } from './context';
 import sql from 'sql-template-strings'
+import { UnsplashApi } from "./schema/unsplash.api";
 const { PostgresPubSub } = require('graphql-postgres-subscriptions')
 
 const pubsub = new PostgresPubSub({
@@ -62,7 +63,10 @@ const server = new ApolloServer({
     context.db.release()
 
     return res
-  }
+  },
+  dataSources: () => ({
+    unsplashApi: new UnsplashApi(),
+  }),
 })
 
 server.applyMiddleware({
