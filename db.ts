@@ -40,7 +40,7 @@ export const resetDb = async () => {
       name: 'Ray Edwards',
       username: 'ray',
       password: '$2a$08$NO9tkFLCoSqX1c5wk3s7z.JfxaVMKA.m7zUDdDwEquo4rvzimQeJm', // 111
-      picture: 'https://randomuser.me/api/portraits/thumb/lego/1.jpg',
+      picture: '',
     },
     {
       id: '2',
@@ -71,14 +71,14 @@ export const resetDb = async () => {
       picture: 'https://randomuser.me/api/portraits/thumb/women/2.jpg',
     },
   ]
-  
+
   for (const sampleUser of sampleUsers) {
     await pool.query(sql`
       INSERT INTO users(id, name, username, password, picture)
       VALUES(${sampleUser.id}, ${sampleUser.name}, ${sampleUser.username}, ${sampleUser.password}, ${sampleUser.picture})
     `)
   }
-  
+
   await pool.query(sql`SELECT setval('users_id_seq', (SELECT max(id) FROM users))`)
 
   await pool.query(sql`DELETE FROM chats`)
