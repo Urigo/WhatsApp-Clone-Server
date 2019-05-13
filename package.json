@@ -33,6 +33,7 @@
     "typescript": "3.3.3333"
   },
   "dependencies": {
+    "@safe-api/middleware": "^0.0.2",
     "apollo-server-express": "2.4.8",
     "apollo-server-testing": "2.4.8",
     "axios": "^0.18.0",
