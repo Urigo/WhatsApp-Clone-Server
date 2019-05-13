@@ -20,7 +20,6 @@
     "@graphql-codegen/cli": "1.13.2",
     "@graphql-codegen/typescript": "1.13.2",
     "@graphql-codegen/typescript-resolvers": "1.13.2",
-    "@types/axios": "0.14.0",
     "@types/bcrypt": "3.0.0",
     "@types/cors": "2.8.6",
     "@types/cookie": "0.3.3",
@@ -40,9 +39,9 @@
   },
   "dependencies": {
     "@safe-api/middleware": "0.0.2",
+    "apollo-datasource-rest": "0.8.1",
     "apollo-server-express": "2.12.0",
     "apollo-server-testing": "2.12.0",
-    "axios": "0.19.2",
     "bcrypt": "4.0.1",
     "cookie": "0.4.0",
     "cors": "2.8.5",
