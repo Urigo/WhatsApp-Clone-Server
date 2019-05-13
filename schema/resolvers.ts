@@ -9,6 +9,8 @@ import { validateLength, validatePassword } from '../validators';
 import sql from 'sql-template-strings';
 import axios from 'axios';
 import { RandomPhoto } from '../types/unsplash';
+import { trackProvider } from '@safe-api/middleware';
+import { resolve } from 'path';
 
 const resolvers: Resolvers = {
   Date: DateTimeResolver,
@@ -75,20 +77,38 @@ const resolvers: Resolvers = {
 
       if (participant && participant.picture) return participant.picture;
 
+      interface RandomPhotoInput {
+        query: string;
+        orientation: 'landscape' | 'portrait' | 'squarish';
+      }
+
+      const trackedRandomPhoto = await trackProvider(
+        async ({ query, orientation }: RandomPhotoInput) =>
+          (await axios.get<RandomPhoto>(
+            'https://api.unsplash.com/photos/random',
+            {
+              params: {
+                query,
+                orientation,
+              },
+              headers: {
+                Authorization:
+                  'Client-ID 4d048cfb4383b407eff92e4a2a5ec36c0a866be85e64caafa588c110efad350d',
+              },
+            }
+          )).data,
+        {
+          provider: 'Unsplash',
+          method: 'RandomPhoto',
+          location: resolve(__dirname, '../logs/main'),
+        }
+      );
+
       try {
-        return (await axios.get<RandomPhoto>(
-          'https://api.unsplash.com/photos/random',
-          {
-            params: {
-              query: 'portrait',
-              orientation: 'squarish',
-            },
-            headers: {
-              Authorization:
-                'Client-ID 4d048cfb4383b407eff92e4a2a5ec36c0a866be85e64caafa588c110efad350d',
-            },
-          }
-        )).data.urls.small;
+        return (await trackedRandomPhoto({
+          query: 'portrait',
+          orientation: 'squarish',
+        })).urls.small;
       } catch (err) {
         console.error('Cannot retrieve random photo:', err);
         return null;
