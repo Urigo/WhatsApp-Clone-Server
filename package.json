@@ -39,6 +39,7 @@
     "typescript": "3.5.3"
   },
   "dependencies": {
+    "@safe-api/middleware": "0.0.2",
     "apollo-server-express": "2.9.0",
     "apollo-server-testing": "2.9.0",
     "axios": "0.19.0",
