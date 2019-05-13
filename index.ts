@@ -7,6 +7,7 @@ import { origin, port, secret } from './env'
 import schema from './schema'
 import { MyContext } from './context';
 import sql from 'sql-template-strings'
+import { UnsplashApi } from "./schema/unsplash.api";
 const { PostgresPubSub } = require('graphql-postgres-subscriptions')
 
 const pubsub = new PostgresPubSub({
@@ -24,7 +25,7 @@ const server = new ApolloServer({
     if(!connection) {
       db = await pool.connect();
     }
-    
+
     let currentUser
     if (req.cookies.authToken) {
       const username = jwt.verify(req.cookies.authToken, secret) as string
@@ -44,7 +45,10 @@ const server = new ApolloServer({
     context.db.release()
 
     return res
-  }
+  },
+  dataSources: () => ({
+    unsplashApi: new UnsplashApi(),
+  }),
 })
 
 server.applyMiddleware({
