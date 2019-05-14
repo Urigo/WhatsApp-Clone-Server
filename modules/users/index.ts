@@ -1,12 +1,15 @@
+import { GraphQLModule } from '@graphql-modules/core';
 import { gql } from 'apollo-server-express';
 import sql from 'sql-template-strings';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import commonModule from '../common';
 import { secret, expiration } from '../../env';
+import { pool } from '../../db';
 import { validateLength, validatePassword } from '../../validators';
 import { Resolvers } from '../../types/graphql';
 
-export const typeDefs = gql`
+const typeDefs = gql`
   type User {
     id: ID!
     name: String!
@@ -29,7 +32,7 @@ export const typeDefs = gql`
   }
 `;
 
-export const resolvers: Resolvers = {
+const resolvers: Resolvers = {
   Query: {
     me(root, args, { currentUser }) {
       return currentUser || null;
@@ -98,3 +101,28 @@ export const resolvers: Resolvers = {
     },
   },
 };
+
+export default new GraphQLModule({
+  name: 'users',
+  typeDefs,
+  resolvers,
+  imports: () => [commonModule],
+  async context({ req }) {
+    let currentUser;
+    
+    if (req.cookies.authToken) {
+      const username = jwt.verify(req.cookies.authToken, secret) as string;
+      
+      if (username) {
+        const { rows } = await pool.query(
+          sql`SELECT * FROM users WHERE username = ${username}`,
+        );
+        currentUser = rows[0];
+      }
+    }
+
+    return {
+      currentUser,
+    };
+  },
+});
