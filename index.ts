@@ -5,11 +5,14 @@ import jwt from 'jsonwebtoken';
 import { app } from './app';
 import { pool } from './db';
 import { origin, port, secret } from './env';
-import schema from './schema';
 import { MyContext } from './context';
 import sql from 'sql-template-strings';
 import { UnsplashApi } from './schema/unsplash.api';
 const { PostgresPubSub } = require('graphql-postgres-subscriptions');
+
+import * as commonModule from './modules/common';
+import * as usersModule from './modules/users';
+import * as chatsModule from './modules/chats';
 
 const pubsub = new PostgresPubSub({
   host: 'localhost',
@@ -19,7 +22,7 @@ const pubsub = new PostgresPubSub({
   database: 'whatsapp',
 });
 const server = new ApolloServer({
-  schema,
+  modules: [commonModule, usersModule, chatsModule],
   context: async (session: any) => {
     // Access the request object
     let req = session.connection
