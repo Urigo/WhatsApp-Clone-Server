@@ -30,6 +30,7 @@
     "@types/graphql-iso-date": "3.3.1",
     "@types/jest": "24.0.15",
     "@types/jsonwebtoken": "8.3.2",
+    "@types/lodash": "4.14.136",
     "@types/node": "12.6.4",
     "@types/pg": "7.4.14",
     "jest": "24.8.0",
@@ -56,6 +57,7 @@
     "graphql-postgres-subscriptions": "1.0.5",
     "graphql-tools": "4.0.5",
     "jsonwebtoken": "8.5.1",
+    "lodash": "4.17.14",
     "pg": "7.11.0",
     "sql-template-strings": "2.2.2"
   },
