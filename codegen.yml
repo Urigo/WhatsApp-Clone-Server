@@ -6,6 +6,7 @@ generates:
       - typescript
       - typescript-resolvers
     config:
+      useIndexSignature: true
       contextType: ../context#MyContext
       mappers:
         # import { Message } from '../db'
