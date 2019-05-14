@@ -41,6 +41,7 @@
     "typescript": "3.5.3"
   },
   "dependencies": {
+    "@graphql-modules/core": "0.7.8",
     "@safe-api/middleware": "0.0.2",
     "apollo-datasource-rest": "0.6.1",
     "apollo-server-express": "2.7.2",
