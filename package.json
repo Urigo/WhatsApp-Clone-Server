@@ -40,6 +40,7 @@
   },
   "dependencies": {
     "@graphql-modules/core": "0.7.10",
+    "@graphql-modules/di": "0.7.10",
     "@safe-api/middleware": "0.0.2",
     "apollo-datasource-rest": "0.6.1",
     "apollo-server-express": "2.9.0",
@@ -58,6 +59,7 @@
     "jsonwebtoken": "8.5.1",
     "lodash": "4.17.15",
     "pg": "7.12.1",
+    "reflect-metadata": "0.1.13",
     "sql-template-strings": "2.2.2"
   },
   "jest": {
