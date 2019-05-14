@@ -4,7 +4,6 @@ import http from 'http';
 import { app } from './app';
 import { origin, port } from './env';
 import { MyContext } from './context';
-import { UnsplashApi } from './schema/unsplash.api';
 
 import usersModule from './modules/users';
 import chatsModule from './modules/chats';
@@ -23,9 +22,6 @@ const server = new ApolloServer({
 
     return res;
   },
-  dataSources: () => ({
-    unsplashApi: new UnsplashApi(),
-  }),
 });
 
 server.applyMiddleware({
