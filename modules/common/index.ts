@@ -7,7 +7,7 @@ import { Resolvers } from '../../types/graphql';
 const { PostgresPubSub } = require('graphql-postgres-subscriptions');
 
 const typeDefs = gql`
-  scalar Date
+  scalar DateTime
   scalar URL
 
   type Query {
@@ -24,7 +24,7 @@ const typeDefs = gql`
 `;
 
 const resolvers: Resolvers = {
-  Date: DateTimeResolver,
+  DateTime: DateTimeResolver,
   URL: URLResolver,
 };
 
