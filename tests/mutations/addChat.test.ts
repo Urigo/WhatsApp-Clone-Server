@@ -1,6 +1,6 @@
 import { createTestClient } from 'apollo-server-testing';
 import { ApolloServer, PubSub, gql } from 'apollo-server-express';
-import schema from '../../schema';
+import { rootModule } from '../../index';
 import { resetDb, pool } from '../../db';
 import sql from 'sql-template-strings';
 import { MyContext } from '../../context';
@@ -12,13 +12,13 @@ describe('Mutation.addChat', () => {
     const { rows } = await pool.query(sql`SELECT * FROM users WHERE id = 2`);
     const currentUser = rows[0];
     const server = new ApolloServer({
-      schema,
+      schema: rootModule.schema,
       context: async () => ({
         pubsub: new PubSub(),
         currentUser,
         db: await pool.connect(),
       }),
-      formatResponse: (res: any, { context }: { context: MyContext }) => {
+      formatResponse: (res: any, { context }: any) => {
         context.db.release();
         return res;
       },
@@ -69,13 +69,13 @@ describe('Mutation.addChat', () => {
     const { rows } = await pool.query(sql`SELECT * FROM users WHERE id = 1`);
     const currentUser = rows[0];
     const server = new ApolloServer({
-      schema,
+      schema: rootModule.schema,
       context: async () => ({
         pubsub: new PubSub(),
         currentUser,
         db: await pool.connect(),
       }),
-      formatResponse: (res: any, { context }: { context: MyContext }) => {
+      formatResponse: (res: any, { context }: any) => {
         context.db.release();
         return res;
       },
