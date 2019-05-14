@@ -1,6 +1,6 @@
 import { createTestClient } from 'apollo-server-testing';
 import { ApolloServer, gql } from 'apollo-server-express';
-import schema from '../../schema';
+import { rootModule } from '../../index';
 import { pool } from '../../db';
 import sql from 'sql-template-strings';
 import { MyContext } from '../../context';
@@ -13,7 +13,7 @@ describe('Query.getUsers', () => {
     let currentUser = firstUserQuery.rows[0];
     const db = await pool.connect();
     const server = new ApolloServer({
-      schema,
+      schema: rootModule.schema,
       context: async () => ({
         currentUser,
         db: await pool.connect(),
