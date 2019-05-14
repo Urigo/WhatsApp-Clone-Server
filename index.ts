@@ -1,49 +1,22 @@
 import { ApolloServer } from 'apollo-server-express'
+import { GraphQLModule } from '@graphql-modules/core'
 import http from 'http'
-import jwt from 'jsonwebtoken'
 import { app } from './app'
-import { pool } from './db'
-import { origin, port, secret } from './env'
+import { origin, port } from './env'
 import { MyContext } from './context';
-import sql from 'sql-template-strings'
 import { UnsplashApi } from "./schema/unsplash.api";
-const { PostgresPubSub } = require('graphql-postgres-subscriptions')
 
-import * as commonModule from './modules/common'
-import * as usersModule from './modules/users'
-import * as chatsModule from './modules/chats'
+import usersModule from './modules/users'
+import chatsModule from './modules/chats'
 
-const pubsub = new PostgresPubSub({
-  host: 'localhost',
-  port: 5432,
-  user: 'testuser',
-  password: 'testpassword',
-  database: 'whatsapp'
+export const rootModule = new GraphQLModule({
+  name: 'root',
+  imports: [usersModule, chatsModule]
 })
+
 const server = new ApolloServer({
-  modules: [commonModule, usersModule, chatsModule],
-  context: async ({ req, res, connection }: any) => {
-    let db;
-
-    if(!connection) {
-      db = await pool.connect();
-    }
-
-    let currentUser
-    if (req.cookies.authToken) {
-      const username = jwt.verify(req.cookies.authToken, secret) as string
-      if (username) {
-        const { rows } =  await pool.query(sql`SELECT * FROM users WHERE username = ${username}`)
-        currentUser = rows[0]
-      }
-    }
-    return {
-      currentUser,
-      pubsub,
-      res,
-      db,
-    }
-  },
+  schema: rootModule.schema,
+  context: rootModule.context,
   formatResponse: (res: any, { context }: { context: MyContext }) => {
     context.db.release()
 
