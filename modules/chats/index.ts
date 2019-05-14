@@ -11,7 +11,7 @@ const typeDefs = gql`
   type Message {
     id: ID!
     content: String!
-    createdAt: Date!
+    createdAt: DateTime!
     chat: Chat
     sender: User
     recipient: User
@@ -94,7 +94,7 @@ const resolvers: Resolvers = {
       return participant ? participant.name : null;
     },
 
-    async picture(chat, args, { currentUser, db, unsplashApi }) {
+    async picture(chat, args, { currentUser, db, injector }) {
       if (!currentUser) return null;
 
       const { rows } = await db.query(sql`
@@ -107,7 +107,7 @@ const resolvers: Resolvers = {
 
       return participant && participant.picture
         ? participant.picture
-        : unsplashApi.getRandomPhoto();
+        : injector.get(UnsplashApi).getRandomPhoto();
     },
 
     async messages(chat, args, { db }) {
@@ -335,9 +335,5 @@ export default new GraphQLModule({
   typeDefs,
   resolvers,
   imports: () => [commonModule, usersModule],
-  context() {
-    return {
-      unsplashApi: new UnsplashApi(),
-    };
-  },
+  providers: () => [UnsplashApi],
 });
