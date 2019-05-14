@@ -28,6 +28,7 @@
     "@types/graphql": "14.5.0",
     "@types/jest": "25.2.1",
     "@types/jsonwebtoken": "8.3.9",
+    "@types/lodash": "4.14.149",
     "@types/node": "13.11.1",
     "@types/pg": "7.14.3",
     "jest": "25.3.0",
@@ -53,6 +54,7 @@
     "graphql-postgres-subscriptions": "1.0.5",
     "graphql-tools": "4.0.7",
     "jsonwebtoken": "8.5.1",
+    "lodash": "4.17.15",
     "pg": "8.0.0",
     "sql-template-strings": "2.2.2"
   },
