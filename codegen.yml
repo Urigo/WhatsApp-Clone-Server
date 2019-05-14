@@ -1,7 +1,7 @@
 overwrite: true
 generates:
   ./types/graphql.d.ts:
-    schema: ./schema/typeDefs.graphql
+    schema: ./modules/*/index.ts
     plugins:
       - typescript
       - typescript-resolvers
