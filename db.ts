@@ -78,7 +78,7 @@ export const resetDb = async () => {
       name: 'Ray Edwards',
       username: 'ray',
       password: '$2a$08$NO9tkFLCoSqX1c5wk3s7z.JfxaVMKA.m7zUDdDwEquo4rvzimQeJm', // 111
-      picture: '',
+      picture: 'https://randomuser.me/api/portraits/thumb/lego/1.jpg',
     },
     {
       id: '2',
