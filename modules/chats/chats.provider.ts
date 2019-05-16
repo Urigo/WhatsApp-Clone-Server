@@ -31,4 +31,12 @@ export class Chats {
 
     return rows[0] || null;
   }
+
+  async findChatById(chatId: string) {
+    const db = await this.db.getClient();
+    const { rows } = await db.query(sql`
+      SELECT * FROM chats WHERE id = ${chatId}
+    `);
+    return rows[0] || null;
+  }
 }
