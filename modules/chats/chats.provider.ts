@@ -121,4 +121,58 @@ export class Chats {
 
     return messageAdded;
   }
+
+  async addChat({
+    userId,
+    recipientId,
+  }: {
+    userId: string;
+    recipientId: string;
+  }) {
+    const db = await this.db.getClient();
+    const { rows } = await db.query(sql`
+      SELECT chats.* FROM chats, (SELECT * FROM chats_users WHERE user_id = ${userId}) AS chats_of_current_user, chats_users
+      WHERE chats_users.chat_id = chats_of_current_user.chat_id
+      AND chats.id = chats_users.chat_id
+      AND chats_users.user_id = ${recipientId}
+    `);
+
+    // If there is already a chat between these two users, return it
+    if (rows[0]) {
+      return rows[0];
+    }
+
+    try {
+      await db.query('BEGIN');
+
+      const { rows } = await db.query(sql`
+        INSERT INTO chats
+        DEFAULT VALUES
+        RETURNING *
+      `);
+
+      const chatAdded = rows[0];
+
+      await db.query(sql`
+        INSERT INTO chats_users(chat_id, user_id)
+        VALUES(${chatAdded.id}, ${userId})
+      `);
+
+      await db.query(sql`
+        INSERT INTO chats_users(chat_id, user_id)
+        VALUES(${chatAdded.id}, ${recipientId})
+      `);
+
+      await db.query('COMMIT');
+
+      this.pubsub.publish('chatAdded', {
+        chatAdded,
+      });
+
+      return chatAdded;
+    } catch (e) {
+      await db.query('ROLLBACK');
+      throw e;
+    }
+  }
 }
