@@ -1,11 +1,9 @@
 import { GraphQLModule } from '@graphql-modules/core';
 import { gql } from 'apollo-server-express';
-import sql from 'sql-template-strings';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import commonModule from '../common';
 import { secret, expiration } from '../../env';
-import { pool } from '../../db';
 import { validateLength, validatePassword } from '../../validators';
 import { Resolvers } from '../../types/graphql';
 import { Users } from './users.provider';
