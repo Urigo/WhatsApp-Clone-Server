@@ -1,0 +1,34 @@
+import { Injectable, Inject, ProviderScope } from '@graphql-modules/di';
+import sql from 'sql-template-strings';
+import { Database } from '../common/database.provider';
+
+@Injectable({
+  scope: ProviderScope.Session,
+})
+export class Chats {
+  @Inject() private db: Database;
+
+  async findChatsByUser(userId: string) {
+    const db = await this.db.getClient();
+
+    const { rows } = await db.query(sql`
+      SELECT chats.* FROM chats, chats_users
+      WHERE chats.id = chats_users.chat_id
+      AND chats_users.user_id = ${userId}
+    `);
+
+    return rows;
+  }
+
+  async findChatByUser({ chatId, userId }: { chatId: string; userId: string }) {
+    const db = await this.db.getClient();
+    const { rows } = await db.query(sql`
+      SELECT chats.* FROM chats, chats_users
+      WHERE chats_users.chat_id = ${chatId}
+      AND chats.id = chats_users.chat_id
+      AND chats_users.user_id = ${userId}
+    `);
+
+    return rows[0] || null;
+  }
+}
