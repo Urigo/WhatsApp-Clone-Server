@@ -4,7 +4,6 @@ import { GraphQLModule } from '@graphql-modules/core'
 import http from 'http'
 import { app } from './app'
 import { origin, port } from './env'
-import { MyContext } from './context';
 
 import usersModule from './modules/users'
 import chatsModule from './modules/chats'
@@ -16,12 +15,7 @@ export const rootModule = new GraphQLModule({
 
 const server = new ApolloServer({
   schema: rootModule.schema,
-  context: rootModule.context,
-  formatResponse: (res: any, { context }: { context: MyContext }) => {
-    context.db.release()
-
-    return res
-  },
+  context: rootModule.context
 })
 
 server.applyMiddleware({
