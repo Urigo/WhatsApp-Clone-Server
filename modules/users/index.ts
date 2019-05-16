@@ -46,11 +46,8 @@ const resolvers: Resolvers = {
     },
   },
   Mutation: {
-    async signIn(root, { username, password }, { db, res }) {
-      const { rows } = await db.query(
-        sql`SELECT * FROM users WHERE username = ${username}`
-      );
-      const user = rows[0];
+    async signIn(root, { username, password }, { injector, res }) {
+      const user = await injector.get(Users).findByUsername(username);
 
       if (!user) {
         throw new Error('user not found');
@@ -69,7 +66,11 @@ const resolvers: Resolvers = {
       return user;
     },
 
-    async signUp(root, { name, username, password, passwordConfirm }, { db }) {
+    async signUp(
+      root,
+      { name, username, password, passwordConfirm },
+      { injector }
+    ) {
       validateLength('req.name', name, 3, 50);
       validateLength('req.username', username, 3, 18);
       validatePassword('req.password', password);
@@ -78,24 +79,18 @@ const resolvers: Resolvers = {
         throw Error("req.password and req.passwordConfirm don't match");
       }
 
-      const existingUserQuery = await db.query(
-        sql`SELECT * FROM users WHERE username = ${username}`
-      );
-      if (existingUserQuery.rows[0]) {
+      const existingUser = await injector.get(Users).findByUsername(username);
+      if (existingUser) {
         throw Error('username already exists');
       }
 
-      const passwordHash = bcrypt.hashSync(password, bcrypt.genSaltSync(8));
+      const createdUser = await injector.get(Users).newUser({
+        username,
+        password,
+        name,
+      });
 
-      const createdUserQuery = await db.query(sql`
-        INSERT INTO users(password, picture, username, name)
-        VALUES(${passwordHash}, '', ${username}, ${name})
-        RETURNING *
-      `);
-
-      const user = createdUserQuery.rows[0];
-
-      return user;
+      return createdUser;
     },
   },
 };
