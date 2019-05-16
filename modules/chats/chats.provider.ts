@@ -39,4 +39,25 @@ export class Chats {
     `);
     return rows[0] || null;
   }
+
+  async findMessagesByChat(chatId: string) {
+    const db = await this.db.getClient();
+    const { rows } = await db.query(
+      sql`SELECT * FROM messages WHERE chat_id = ${chatId}`
+    );
+
+    return rows;
+  }
+
+  async lastMessage(chatId: string) {
+    const db = await this.db.getClient();
+    const { rows } = await db.query(sql`
+      SELECT * FROM messages 
+      WHERE chat_id = ${chatId} 
+      ORDER BY created_at DESC 
+      LIMIT 1
+    `);
+
+    return rows[0];
+  }
 }
