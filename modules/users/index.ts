@@ -9,6 +9,7 @@ import { secret, expiration } from '../../env';
 import { pool } from '../../db';
 import { validateLength, validatePassword } from '../../validators';
 import { Resolvers } from '../../types/graphql';
+import { Users } from './users.provider';
 
 const typeDefs = gql`
   type User {
@@ -38,14 +39,10 @@ const resolvers: Resolvers = {
     me(root, args, { currentUser }) {
       return currentUser || null;
     },
-    async users(root, args, { currentUser, db }) {
+    async users(root, args, { currentUser, injector }) {
       if (!currentUser) return [];
 
-      const { rows } = await db.query(sql`
-        SELECT * FROM users WHERE users.id != ${currentUser.id}
-      `);
-
-      return rows;
+      return injector.get(Users).findAllExcept(currentUser.id);
     },
   },
   Mutation: {
@@ -108,6 +105,7 @@ export default new GraphQLModule({
   typeDefs,
   resolvers,
   imports: () => [commonModule],
+  providers: () => [Users],
   async context(session) {
     let currentUser;
 
