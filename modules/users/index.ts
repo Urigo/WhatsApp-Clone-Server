@@ -1,9 +1,6 @@
 import { GraphQLModule } from '@graphql-modules/core';
 import { gql } from 'apollo-server-express';
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
 import commonModule from '../common';
-import { secret, expiration } from '../../env';
 import { Resolvers } from '../../types/graphql';
 import { Users } from './users.provider';
 import { Auth } from './auth.provider';
@@ -45,24 +42,8 @@ const resolvers: Resolvers = {
     },
   },
   Mutation: {
-    async signIn(root, { username, password }, { injector, res }) {
-      const user = await injector.get(Users).findByUsername(username);
-
-      if (!user) {
-        throw new Error('user not found');
-      }
-
-      const passwordsMatch = bcrypt.compareSync(password, user.password);
-
-      if (!passwordsMatch) {
-        throw new Error('password is incorrect');
-      }
-
-      const authToken = jwt.sign(username, secret);
-
-      res.cookie('authToken', authToken, { maxAge: expiration });
-
-      return user;
+    async signIn(root, { username, password }, { injector }) {
+      return injector.get(Auth).signIn({ username, password });
     },
 
     async signUp(
