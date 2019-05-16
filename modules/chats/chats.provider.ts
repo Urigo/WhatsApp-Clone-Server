@@ -72,4 +72,15 @@ export class Chats {
 
     return rows[0] || null;
   }
+
+  async participants(chatId: string) {
+    const db = await this.db.getClient();
+    const { rows } = await db.query(sql`
+      SELECT users.* FROM users, chats_users
+      WHERE chats_users.chat_id = ${chatId}
+      AND chats_users.user_id = users.id
+    `);
+
+    return rows;
+  }
 }
