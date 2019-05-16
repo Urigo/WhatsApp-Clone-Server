@@ -129,22 +129,12 @@ const resolvers: Resolvers = {
   },
 
   Mutation: {
-    async addMessage(root, { chatId, content }, { currentUser, injector, db }) {
+    async addMessage(root, { chatId, content }, { currentUser, injector }) {
       if (!currentUser) return null;
 
-      const { rows } = await db.query(sql`
-        INSERT INTO messages(chat_id, sender_user_id, content)
-        VALUES(${chatId}, ${currentUser.id}, ${content})
-        RETURNING *
-      `);
-
-      const messageAdded = rows[0];
-
-      injector.get(PubSub).publish('messageAdded', {
-        messageAdded,
-      });
-
-      return messageAdded;
+      return injector
+        .get(Chats)
+        .addMessage({ chatId, content, userId: currentUser.id });
     },
 
     async addChat(root, { recipientId }, { currentUser, injector, db }) {
