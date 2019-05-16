@@ -1,8 +1,6 @@
 import { ModuleContext } from '@graphql-modules/core';
-import { Response } from 'express'
-import { PoolClient } from 'pg';
+import { Response } from 'express';
 
 export type MyContext = {
-  res: Response,
-  db: PoolClient,
-} & ModuleContext
+  res: Response;
+} & ModuleContext;
