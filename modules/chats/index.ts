@@ -6,6 +6,7 @@ import usersModule from '../users';
 import { Message, Chat, pool } from '../../db';
 import { Resolvers } from '../../types/graphql';
 import { UnsplashApi } from './unsplash.api';
+import { Users } from './../users/users.provider';
 
 const typeDefs = gql`
   type Message {
@@ -58,11 +59,8 @@ const resolvers: Resolvers = {
       return rows[0] || null;
     },
 
-    async sender(message, args, { db }) {
-      const { rows } = await db.query(sql`
-        SELECT * FROM users WHERE id = ${message.sender_user_id}
-      `);
-      return rows[0] || null;
+    async sender(message, args, { injector }) {
+      return injector.get(Users).findById(message.sender_user_id);
     },
 
     async recipient(message, args, { db }) {
