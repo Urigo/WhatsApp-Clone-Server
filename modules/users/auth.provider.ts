@@ -1,7 +1,9 @@
 import { Injectable, Inject, ProviderScope } from '@graphql-modules/di';
 import { ModuleSessionInfo } from '@graphql-modules/core';
+import { Response } from 'express';
+import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { secret } from '../../env';
+import { secret, expiration } from '../../env';
 import { validateLength, validatePassword } from '../../validators';
 import { Users } from './users.provider';
 import { User } from '../../db';
@@ -15,6 +17,30 @@ export class Auth {
 
   private get req() {
     return this.module.session.req || this.module.session.request;
+  }
+
+  private get res(): Response {
+    return this.module.session.res;
+  }
+
+  async signIn({ username, password }: { username: string; password: string }) {
+    const user = await this.users.findByUsername(username);
+
+    if (!user) {
+      throw new Error('user not found');
+    }
+
+    const passwordsMatch = bcrypt.compareSync(password, user.password);
+
+    if (!passwordsMatch) {
+      throw new Error('password is incorrect');
+    }
+
+    const authToken = jwt.sign(username, secret);
+
+    this.res.cookie('authToken', authToken, { maxAge: expiration });
+
+    return user;
   }
 
   async signUp({
