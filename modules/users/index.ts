@@ -1,6 +1,5 @@
 import { GraphQLModule } from '@graphql-modules/core';
 import { gql } from 'apollo-server-express';
-import cookie from 'cookie';
 import sql from 'sql-template-strings';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
@@ -10,6 +9,7 @@ import { pool } from '../../db';
 import { validateLength, validatePassword } from '../../validators';
 import { Resolvers } from '../../types/graphql';
 import { Users } from './users.provider';
+import { Auth } from './auth.provider';
 
 const typeDefs = gql`
   type User {
@@ -36,10 +36,12 @@ const typeDefs = gql`
 
 const resolvers: Resolvers = {
   Query: {
-    me(root, args, { currentUser }) {
-      return currentUser || null;
+    me(root, args, { injector }) {
+      return injector.get(Auth).currentUser();
     },
-    async users(root, args, { currentUser, injector }) {
+    async users(root, args, { injector }) {
+      const currentUser = await injector.get(Auth).currentUser();
+
       if (!currentUser) return [];
 
       return injector.get(Users).findAllExcept(currentUser.id);
@@ -100,33 +102,5 @@ export default new GraphQLModule({
   typeDefs,
   resolvers,
   imports: () => [commonModule],
-  providers: () => [Users],
-  async context(session) {
-    let currentUser;
-
-    // Access the request object
-    let req = session.connection
-      ? session.connection.context.request
-      : session.req;
-
-    // It's subscription
-    if (session.connection) {
-      req.cookies = cookie.parse(req.headers.cookie || '');
-    }
-
-    if (req.cookies.authToken) {
-      const username = jwt.verify(req.cookies.authToken, secret) as string;
-
-      if (username) {
-        const { rows } = await pool.query(
-          sql`SELECT * FROM users WHERE username = ${username}`
-        );
-        currentUser = rows[0];
-      }
-    }
-
-    return {
-      currentUser,
-    };
-  },
+  providers: () => [Users, Auth],
 });
