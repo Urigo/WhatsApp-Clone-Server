@@ -83,4 +83,15 @@ export class Chats {
 
     return rows;
   }
+
+  async isParticipant({ chatId, userId }: { chatId: string; userId: string }) {
+    const db = await this.db.getClient();
+    const { rows } = await db.query(sql`
+      SELECT * FROM chats_users 
+      WHERE chat_id = ${chatId} 
+      AND user_id = ${userId}
+    `);
+
+    return !!rows.length;
+  }
 }
