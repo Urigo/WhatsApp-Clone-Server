@@ -53,11 +53,8 @@ const resolvers: Resolvers = {
       return new Date(message.created_at);
     },
 
-    async chat(message, args, { db }) {
-      const { rows } = await db.query(sql`
-        SELECT * FROM chats WHERE id = ${message.chat_id}
-      `);
-      return rows[0] || null;
+    async chat(message, args, { injector }) {
+      return injector.get(Chats).findChatById(message.chat_id);
     },
 
     async sender(message, args, { injector }) {
