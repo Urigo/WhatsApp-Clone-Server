@@ -61,13 +61,11 @@ const resolvers: Resolvers = {
       return injector.get(Users).findById(message.sender_user_id);
     },
 
-    async recipient(message, args, { db }) {
-      const { rows } = await db.query(sql`
-        SELECT users.* FROM users, chats_users
-        WHERE chats_users.user_id != ${message.sender_user_id}
-        AND chats_users.chat_id = ${message.chat_id}
-      `);
-      return rows[0] || null;
+    async recipient(message, args, { injector }) {
+      return injector.get(Chats).firstRecipient({
+        chatId: message.chat_id,
+        userId: message.sender_user_id,
+      });
     },
 
     isMine(message, args, { currentUser }) {
@@ -76,16 +74,13 @@ const resolvers: Resolvers = {
   },
 
   Chat: {
-    async name(chat, args, { currentUser, db }) {
+    async name(chat, args, { currentUser, injector }) {
       if (!currentUser) return null;
 
-      const { rows } = await db.query(sql`
-        SELECT users.* FROM users, chats_users
-        WHERE users.id != ${currentUser.id}
-        AND users.id = chats_users.user_id
-        AND chats_users.chat_id = ${chat.id}`);
-
-      const participant = rows[0];
+      const participant = await injector.get(Chats).firstRecipient({
+        chatId: chat.id,
+        userId: currentUser.id,
+      });
 
       return participant ? participant.name : null;
     },
@@ -93,13 +88,10 @@ const resolvers: Resolvers = {
     async picture(chat, args, { currentUser, db, injector }) {
       if (!currentUser) return null;
 
-      const { rows } = await db.query(sql`
-        SELECT users.* FROM users, chats_users
-        WHERE users.id != ${currentUser.id}
-        AND users.id = chats_users.user_id
-        AND chats_users.chat_id = ${chat.id}`);
-
-      const participant = rows[0];
+      const participant = await injector.get(Chats).firstRecipient({
+        chatId: chat.id,
+        userId: currentUser.id,
+      });
 
       return participant && participant.picture
         ? participant.picture
