@@ -1,9 +1,8 @@
 import { GraphQLModule } from '@graphql-modules/core';
 import { gql, withFilter } from 'apollo-server-express';
-import sql from 'sql-template-strings';
 import commonModule from '../common';
 import usersModule from '../users';
-import { Message, Chat, pool } from '../../db';
+import { Message, Chat } from '../../db';
 import { Resolvers } from '../../types/graphql';
 import { UnsplashApi } from './unsplash.api';
 import { Users } from './../users/users.provider';
