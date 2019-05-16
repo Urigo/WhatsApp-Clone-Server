@@ -8,6 +8,7 @@ import { Resolvers } from '../../types/graphql';
 import { UnsplashApi } from './unsplash.api';
 import { Users } from './../users/users.provider';
 import { Chats } from './chats.provider';
+import { PubSub } from '../common/pubsub.provider';
 
 const typeDefs = gql`
   type Message {
@@ -128,7 +129,7 @@ const resolvers: Resolvers = {
   },
 
   Mutation: {
-    async addMessage(root, { chatId, content }, { currentUser, pubsub, db }) {
+    async addMessage(root, { chatId, content }, { currentUser, injector, db }) {
       if (!currentUser) return null;
 
       const { rows } = await db.query(sql`
@@ -139,14 +140,14 @@ const resolvers: Resolvers = {
 
       const messageAdded = rows[0];
 
-      pubsub.publish('messageAdded', {
+      injector.get(PubSub).publish('messageAdded', {
         messageAdded,
       });
 
       return messageAdded;
     },
 
-    async addChat(root, { recipientId }, { currentUser, pubsub, db }) {
+    async addChat(root, { recipientId }, { currentUser, injector, db }) {
       if (!currentUser) return null;
 
       const { rows } = await db.query(sql`
@@ -186,7 +187,7 @@ const resolvers: Resolvers = {
 
         await db.query('COMMIT');
 
-        pubsub.publish('chatAdded', {
+        injector.get(PubSub).publish('chatAdded', {
           chatAdded,
         });
 
@@ -197,7 +198,7 @@ const resolvers: Resolvers = {
       }
     },
 
-    async removeChat(root, { chatId }, { currentUser, pubsub, db }) {
+    async removeChat(root, { chatId }, { currentUser, injector, db }) {
       if (!currentUser) return null;
 
       try {
@@ -221,7 +222,7 @@ const resolvers: Resolvers = {
           DELETE FROM chats WHERE chats.id = ${chatId}
         `);
 
-        pubsub.publish('chatRemoved', {
+        injector.get(PubSub).publish('chatRemoved', {
           chatRemoved: chat.id,
           targetChat: chat,
         });
@@ -239,7 +240,8 @@ const resolvers: Resolvers = {
   Subscription: {
     messageAdded: {
       subscribe: withFilter(
-        (root, args, { pubsub }) => pubsub.asyncIterator('messageAdded'),
+        (root, args, { injector }) =>
+          injector.get(PubSub).asyncIterator('messageAdded'),
         async (
           { messageAdded }: { messageAdded: Message },
           args,
@@ -257,7 +259,8 @@ const resolvers: Resolvers = {
 
     chatAdded: {
       subscribe: withFilter(
-        (root, args, { pubsub }) => pubsub.asyncIterator('chatAdded'),
+        (root, args, { injector }) =>
+          injector.get(PubSub).asyncIterator('chatAdded'),
         async (
           { chatAdded }: { chatAdded: Chat },
           args,
@@ -275,7 +278,8 @@ const resolvers: Resolvers = {
 
     chatRemoved: {
       subscribe: withFilter(
-        (root, args, { pubsub }) => pubsub.asyncIterator('chatRemoved'),
+        (root, args, { injector }) =>
+          injector.get(PubSub).asyncIterator('chatRemoved'),
         async (
           { targetChat }: { targetChat: Chat },
           args,
