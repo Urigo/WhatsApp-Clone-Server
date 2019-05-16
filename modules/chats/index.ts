@@ -106,22 +106,12 @@ const resolvers: Resolvers = {
         : injector.get(UnsplashApi).getRandomPhoto();
     },
 
-    async messages(chat, args, { db }) {
-      const { rows } = await db.query(
-        sql`SELECT * FROM messages WHERE chat_id = ${chat.id}`
-      );
-
-      return rows;
+    async messages(chat, args, { injector }) {
+      return injector.get(Chats).findMessagesByChat(chat.id);
     },
 
-    async lastMessage(chat, args, { db }) {
-      const { rows } = await db.query(sql`
-        SELECT * FROM messages 
-        WHERE chat_id = ${chat.id} 
-        ORDER BY created_at DESC 
-        LIMIT 1`);
-
-      return rows[0];
+    async lastMessage(chat, args, { injector }) {
+      return injector.get(Chats).lastMessage(chat.id);
     },
 
     async participants(chat, args, { db }) {
