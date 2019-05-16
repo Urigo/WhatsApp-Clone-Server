@@ -9,6 +9,7 @@ import { pool } from '../../db';
 import { validateLength, validatePassword } from '../../validators';
 import { Resolvers } from '../../types/graphql';
 import { Users } from './users.provider';
+import { Auth } from './auth.provider';
 
 const typeDefs = gql`
   type User {
@@ -35,10 +36,12 @@ const typeDefs = gql`
 
 const resolvers: Resolvers = {
   Query: {
-    me(root, args, { currentUser }) {
-      return currentUser || null;
+    me(root, args, { injector }) {
+      return injector.get(Auth).currentUser();
     },
-    async users(root, args, { currentUser, injector }) {
+    async users(root, args, { injector }) {
+      const currentUser = await injector.get(Auth).currentUser();
+      
       if (!currentUser) return [];
 
       return injector.get(Users).findAllExcept(currentUser.id);
@@ -95,23 +98,5 @@ export default new GraphQLModule({
   typeDefs,
   resolvers,
   imports: () => [commonModule],
-  providers: () => [Users],
-  async context({ req }) {
-    let currentUser;
-    
-    if (req.cookies.authToken) {
-      const username = jwt.verify(req.cookies.authToken, secret) as string;
-      
-      if (username) {
-        const { rows } = await pool.query(
-          sql`SELECT * FROM users WHERE username = ${username}`,
-        );
-        currentUser = rows[0];
-      }
-    }
-
-    return {
-      currentUser,
-    };
-  },
+  providers: () => [Users, Auth]
 });
