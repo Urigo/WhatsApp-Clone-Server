@@ -1,12 +1,14 @@
 import { Injectable, Inject, ProviderScope } from '@graphql-modules/di';
 import sql from 'sql-template-strings';
 import { Database } from '../common/database.provider';
+import { PubSub } from '../common/pubsub.provider';
 
 @Injectable({
   scope: ProviderScope.Session,
 })
 export class Chats {
   @Inject() private db: Database;
+  @Inject() private pubsub: PubSub;
 
   async findChatsByUser(userId: string) {
     const db = await this.db.getClient();
@@ -93,5 +95,30 @@ export class Chats {
     `);
 
     return !!rows.length;
+  }
+
+  async addMessage({
+    chatId,
+    userId,
+    content,
+  }: {
+    chatId: string;
+    userId: string;
+    content: string;
+  }) {
+    const db = await this.db.getClient();
+    const { rows } = await db.query(sql`
+      INSERT INTO messages(chat_id, sender_user_id, content)
+      VALUES(${chatId}, ${userId}, ${content})
+      RETURNING *
+    `);
+
+    const messageAdded = rows[0];
+
+    this.pubsub.publish('messageAdded', {
+      messageAdded,
+    });
+
+    return messageAdded;
   }
 }
