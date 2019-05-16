@@ -175,4 +175,42 @@ export class Chats {
       throw e;
     }
   }
+
+  async removeChat({ chatId, userId }: { chatId: string; userId: string }) {
+    const db = await this.db.getClient();
+
+    try {
+      await db.query('BEGIN');
+
+      const { rows } = await db.query(sql`
+        SELECT chats.* FROM chats, chats_users
+        WHERE id = ${chatId}
+        AND chats.id = chats_users.chat_id
+        AND chats_users.user_id = ${userId}
+      `);
+
+      const chat = rows[0];
+
+      if (!chat) {
+        await db.query('ROLLBACK');
+        return null;
+      }
+
+      await db.query(sql`
+        DELETE FROM chats WHERE chats.id = ${chatId}
+      `);
+
+      this.pubsub.publish('chatRemoved', {
+        chatRemoved: chat.id,
+        targetChat: chat,
+      });
+
+      await db.query('COMMIT');
+
+      return chatId;
+    } catch (e) {
+      await db.query('ROLLBACK');
+      throw e;
+    }
+  }
 }
