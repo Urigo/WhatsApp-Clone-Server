@@ -10,7 +10,7 @@ export const rootModule = new GraphQLModule({
   imports: [usersModule, chatsModule]
 })
 
-const server = new ApolloServer({
+export const server = new ApolloServer({
   schema: rootModule.schema,
   context: rootModule.context
 })
