@@ -145,42 +145,10 @@ const resolvers: Resolvers = {
         .addChat({ recipientId, userId: currentUser.id });
     },
 
-    async removeChat(root, { chatId }, { currentUser, injector, db }) {
+    async removeChat(root, { chatId }, { currentUser, injector }) {
       if (!currentUser) return null;
 
-      try {
-        await db.query('BEGIN');
-
-        const { rows } = await db.query(sql`
-          SELECT chats.* FROM chats, chats_users
-          WHERE id = ${chatId}
-          AND chats.id = chats_users.chat_id
-          AND chats_users.user_id = ${currentUser.id}
-        `);
-
-        const chat = rows[0];
-
-        if (!chat) {
-          await db.query('ROLLBACK');
-          return null;
-        }
-
-        await db.query(sql`
-          DELETE FROM chats WHERE chats.id = ${chatId}
-        `);
-
-        injector.get(PubSub).publish('chatRemoved', {
-          chatRemoved: chat.id,
-          targetChat: chat,
-        });
-
-        await db.query('COMMIT');
-
-        return chatId;
-      } catch (e) {
-        await db.query('ROLLBACK');
-        throw e;
-      }
+      return injector.get(Chats).removeChat({ chatId, userId: currentUser.id });
     },
   },
 
