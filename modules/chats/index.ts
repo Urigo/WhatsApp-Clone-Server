@@ -106,14 +106,8 @@ const resolvers: Resolvers = {
       return injector.get(Chats).lastMessage(chat.id);
     },
 
-    async participants(chat, args, { db }) {
-      const { rows } = await db.query(sql`
-        SELECT users.* FROM users, chats_users
-        WHERE chats_users.chat_id = ${chat.id}
-        AND chats_users.user_id = users.id
-      `);
-
-      return rows;
+    async participants(chat, args, { injector }) {
+      return injector.get(Chats).participants(chat.id);
     },
   },
 
