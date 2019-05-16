@@ -11,7 +11,7 @@ export const rootModule = new GraphQLModule({
   imports: [usersModule, chatsModule],
 });
 
-const server = new ApolloServer({
+export const server = new ApolloServer({
   schema: rootModule.schema,
   context: (session: any) => {
     if (session.connection) {
