@@ -4,7 +4,6 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import commonModule from '../common';
 import { secret, expiration } from '../../env';
-import { validateLength, validatePassword } from '../../validators';
 import { Resolvers } from '../../types/graphql';
 import { Users } from './users.provider';
 import { Auth } from './auth.provider';
@@ -71,26 +70,9 @@ const resolvers: Resolvers = {
       { name, username, password, passwordConfirm },
       { injector }
     ) {
-      validateLength('req.name', name, 3, 50);
-      validateLength('req.username', username, 3, 18);
-      validatePassword('req.password', password);
-
-      if (password !== passwordConfirm) {
-        throw Error("req.password and req.passwordConfirm don't match");
-      }
-
-      const existingUser = await injector.get(Users).findByUsername(username);
-      if (existingUser) {
-        throw Error('username already exists');
-      }
-
-      const createdUser = await injector.get(Users).newUser({
-        username,
-        password,
-        name,
-      });
-
-      return createdUser;
+      return injector
+        .get(Auth)
+        .signUp({ name, username, password, passwordConfirm });
     },
   },
 };
