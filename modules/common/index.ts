@@ -1,10 +1,12 @@
 import { GraphQLModule } from '@graphql-modules/core';
+import { ProviderScope } from '@graphql-modules/di';
 import { gql } from 'apollo-server-express';
 import { GraphQLDateTime } from 'graphql-iso-date';
 import { Pool } from 'pg';
 import { pool } from '../../db';
 import { Resolvers } from '../../types/graphql';
 import { Database } from './database.provider';
+import { PubSub } from './pubsub.provider';
 
 const { PostgresPubSub } = require('graphql-postgres-subscriptions');
 
@@ -45,6 +47,11 @@ export default new GraphQLModule({
       provide: Pool,
       useValue: pool,
     },
+    {
+      provide: PubSub,
+      scope: ProviderScope.Application,
+      useValue: pubsub,
+    },
     Database,
   ],
   async context({ res, connection }) {
@@ -55,7 +62,6 @@ export default new GraphQLModule({
     }
 
     return {
-      pubsub,
       res,
       db,
     };
