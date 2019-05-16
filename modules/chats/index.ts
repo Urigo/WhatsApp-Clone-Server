@@ -243,16 +243,14 @@ const resolvers: Resolvers = {
         async (
           { messageAdded }: { messageAdded: Message },
           args,
-          { currentUser }
+          { currentUser, injector }
         ) => {
           if (!currentUser) return false;
 
-          const { rows } = await pool.query(sql`
-            SELECT * FROM chats_users 
-            WHERE chat_id = ${messageAdded.chat_id} 
-            AND user_id = ${currentUser.id}`);
-
-          return !!rows.length;
+          return injector.get(Chats).isParticipant({
+            chatId: messageAdded.chat_id,
+            userId: currentUser.id,
+          });
         }
       ),
     },
@@ -260,15 +258,17 @@ const resolvers: Resolvers = {
     chatAdded: {
       subscribe: withFilter(
         (root, args, { pubsub }) => pubsub.asyncIterator('chatAdded'),
-        async ({ chatAdded }: { chatAdded: Chat }, args, { currentUser }) => {
+        async (
+          { chatAdded }: { chatAdded: Chat },
+          args,
+          { currentUser, injector }
+        ) => {
           if (!currentUser) return false;
 
-          const { rows } = await pool.query(sql`
-            SELECT * FROM chats_users 
-            WHERE chat_id = ${chatAdded.id} 
-            AND user_id = ${currentUser.id}`);
-
-          return !!rows.length;
+          return injector.get(Chats).isParticipant({
+            chatId: chatAdded.id,
+            userId: currentUser.id,
+          });
         }
       ),
     },
@@ -276,15 +276,17 @@ const resolvers: Resolvers = {
     chatRemoved: {
       subscribe: withFilter(
         (root, args, { pubsub }) => pubsub.asyncIterator('chatRemoved'),
-        async ({ targetChat }: { targetChat: Chat }, args, { currentUser }) => {
+        async (
+          { targetChat }: { targetChat: Chat },
+          args,
+          { currentUser, injector }
+        ) => {
           if (!currentUser) return false;
 
-          const { rows } = await pool.query(sql`
-            SELECT * FROM chats_users 
-            WHERE chat_id = ${targetChat.id} 
-            AND user_id = ${currentUser.id}`);
-
-          return !!rows.length;
+          return injector.get(Chats).isParticipant({
+            chatId: targetChat.id,
+            userId: currentUser.id,
+          });
         }
       ),
     },
