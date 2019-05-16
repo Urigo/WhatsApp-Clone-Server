@@ -54,9 +54,4 @@ export default new GraphQLModule({
     },
     Database,
   ],
-  async context({ res }) {
-    return {
-      res,
-    };
-  },
 });
