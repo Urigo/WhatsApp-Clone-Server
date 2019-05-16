@@ -11,6 +11,15 @@ const DEFAULT_PROFILE_PIC = 'https://raw.githubusercontent.com/Urigo/WhatsApp-Cl
 export class Users {
   @Inject() private db: Database;
 
+  async findById(userId: string) {
+    const db = await this.db.getClient();
+    const { rows } = await db.query(
+      sql`SELECT * FROM users WHERE id = ${userId}`
+    );
+
+    return rows[0] || null;
+  }
+
   async findAllExcept(userId: string) {
     const db = await this.db.getClient();
     const { rows } = await db.query(
