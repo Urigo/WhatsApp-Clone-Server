@@ -1,22 +1,7 @@
-import 'reflect-metadata';
-import { ApolloServer } from 'apollo-server-express'
-import { GraphQLModule } from '@graphql-modules/core'
 import http from 'http'
 import { app } from './app'
 import { origin, port } from './env'
-
-import usersModule from './modules/users'
-import chatsModule from './modules/chats'
-
-export const rootModule = new GraphQLModule({
-  name: 'root',
-  imports: [usersModule, chatsModule]
-})
-
-const server = new ApolloServer({
-  schema: rootModule.schema,
-  context: rootModule.context
-})
+import { server } from './server';
 
 server.applyMiddleware({
   app,
