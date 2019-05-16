@@ -60,4 +60,16 @@ export class Chats {
 
     return rows[0];
   }
+
+  async firstRecipient({ chatId, userId }: { chatId: string; userId: string }) {
+    const db = await this.db.getClient();
+    const { rows } = await db.query(sql`
+      SELECT users.* FROM users, chats_users
+      WHERE users.id != ${userId}
+      AND users.id = chats_users.user_id
+      AND chats_users.chat_id = ${chatId}
+    `);
+
+    return rows[0] || null;
+  }
 }
