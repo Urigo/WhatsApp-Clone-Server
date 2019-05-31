@@ -34,7 +34,7 @@
     "body-parser": "1.18.3",
     "cors": "2.8.5",
     "cookie-parser": "1.4.4",
-    "express": "4.16.4",
+    "express": "4.17.1",
     "graphql": "14.1.1",
     "graphql-import": "0.7.1",
     "graphql-iso-date": "3.6.1",
