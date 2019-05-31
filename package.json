@@ -15,7 +15,7 @@
     "@types/express": "4.16.1",
     "@types/graphql": "14.0.7",
     "@types/graphql-iso-date": "3.3.1",
-    "@types/node": "11.11.0",
+    "@types/node": "11.13.13",
     "ts-node": "8.0.3",
     "typescript": "3.3.3333"
   },
