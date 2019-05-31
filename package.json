@@ -17,7 +17,7 @@
     "@types/graphql": "14.0.7",
     "@types/graphql-iso-date": "3.3.1",
     "@types/jest": "24.0.11",
-    "@types/node": "11.11.0",
+    "@types/node": "11.13.13",
     "ts-jest": "24.0.0",
     "jest": "24.5.0",
     "ts-node": "8.0.3",
