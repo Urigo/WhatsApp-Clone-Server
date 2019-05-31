@@ -34,7 +34,7 @@
   "dependencies": {
     "apollo-server-express": "2.4.8",
     "apollo-server-testing": "2.4.8",
-    "bcrypt": "3.0.5",
+    "bcrypt": "3.0.6",
     "body-parser": "1.18.3",
     "cookie-parser": "1.4.4",
     "cors": "2.8.5",
