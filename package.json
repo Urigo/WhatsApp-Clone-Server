@@ -37,7 +37,7 @@
     "apollo-server-express": "2.4.8",
     "apollo-server-testing": "2.4.8",
     "bcrypt": "3.0.5",
-    "body-parser": "1.18.3",
+    "body-parser": "1.19.0",
     "cookie-parser": "1.4.4",
     "cors": "2.8.5",
     "express": "4.16.4",
