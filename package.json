@@ -14,7 +14,9 @@
     "build": "tsc",
     "test": "TZ=\"Asia/Jerusalem\" jest --runInBand --forceExit",
     "codegen": "graphql-codegen",
-    "format": "prettier \"**/*.ts\" --write"
+    "format": "prettier \"**/*.ts\" --write",
+    "loadtest": "yarn artillery run artillery.yml > loadtest.log",
+    "loadtest:limit": "yarn artillery run artillery-limit.yml > loadtest.log"
   },
   "jest-junit": {
     "outputDirectory": "./test-results"
