@@ -145,7 +145,9 @@ export class Chats {
     messages.reverse();
 
     // cursor is a number representation of created_at
-    const cursor = messages.length ? new Date(messages[0].created_at).getTime() : 0;
+    const cursor = messages.length
+      ? new Date(messages[0].created_at).getTime()
+      : 0;
     const { rows: next } = await this.db.query(
       sql`SELECT * FROM messages WHERE chat_id = ${chatId} AND created_at < ${cursorToDate(
         cursor
