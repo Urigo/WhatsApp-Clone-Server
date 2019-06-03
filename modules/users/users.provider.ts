@@ -13,8 +13,7 @@ export class Users {
   @Inject() private db: Database;
 
   async findById(userId: string) {
-    const db = await this.db.getClient();
-    const { rows } = await db.query(
+    const { rows } = await this.db.query(
       sql`SELECT * FROM users WHERE id = ${userId}`
     );
 
@@ -22,8 +21,7 @@ export class Users {
   }
 
   async findAllExcept(userId: string) {
-    const db = await this.db.getClient();
-    const { rows } = await db.query(
+    const { rows } = await this.db.query(
       sql`SELECT * FROM users WHERE id != ${userId}`
     );
 
@@ -31,8 +29,7 @@ export class Users {
   }
 
   async findByUsername(username: string) {
-    const db = await this.db.getClient();
-    const { rows } = await db.query(
+    const { rows } = await this.db.query(
       sql`SELECT * FROM users WHERE username = ${username}`
     );
 
@@ -48,9 +45,8 @@ export class Users {
     name: string;
     password: string;
   }) {
-    const db = await this.db.getClient();
     const passwordHash = bcrypt.hashSync(password, bcrypt.genSaltSync(8));
-    const createdUserQuery = await db.query(sql`
+    const createdUserQuery = await this.db.query(sql`
         INSERT INTO users(password, picture, username, name)
         VALUES(${passwordHash}, ${DEFAULT_PROFILE_PIC}, ${username}, ${name})
         RETURNING *
