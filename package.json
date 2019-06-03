@@ -13,7 +13,9 @@
     "prod": "node dist/index.js",
     "build": "tsc",
     "test": "jest --runInBand --forceExit",
-    "codegen": "gql-gen"
+    "codegen": "gql-gen",
+    "loadtest": "yarn artillery run artillery.yml > loadtest.log",
+    "loadtest:limit": "yarn artillery run artillery-limit.yml > loadtest.log"
   },
   "jest-junit": {
     "outputDirectory": "./test-results"
