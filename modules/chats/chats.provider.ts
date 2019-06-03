@@ -25,6 +25,18 @@ export class Chats {
   }
 
   async findChatByUser({ chatId, userId }: { chatId: string; userId: string }) {
+    const rows = await this._findChatByUser({ chatId, userId });
+
+    return rows[0] || null;
+  }
+
+  private async _findChatByUser({
+    chatId,
+    userId,
+  }: {
+    chatId: string;
+    userId: string;
+  }) {
     const { rows } = await this.db.query(sql`
       SELECT chats.* FROM chats, chats_users
       WHERE chats_users.chat_id = ${chatId}
@@ -32,7 +44,7 @@ export class Chats {
       AND chats_users.user_id = ${userId}
     `);
 
-    return rows[0] || null;
+    return rows;
   }
 
   async findChatById(chatId: string) {
