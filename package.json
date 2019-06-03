@@ -10,6 +10,7 @@
     "prestart": "yarn codegen",
     "start": "ts-node index.ts",
     "prebuild": "yarn codegen",
+    "prod": "node dist/index.js",
     "build": "tsc",
     "test": "TZ=\"Asia/Jerusalem\" jest --runInBand --forceExit",
     "codegen": "graphql-codegen",
