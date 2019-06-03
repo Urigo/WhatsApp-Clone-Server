@@ -21,12 +21,18 @@ const typeDefs = gql`
     isMine: Boolean!
   }
 
+  type MessagesResult {
+    cursor: Float
+    hasMore: Boolean!
+    messages: [Message!]!
+  }
+
   type Chat {
     id: ID!
     name: String
     picture: URL
     lastMessage: Message
-    messages: [Message!]!
+    messages(limit: Int!, after: Float): MessagesResult!
     participants: [User!]!
   }
 
