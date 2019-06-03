@@ -11,7 +11,9 @@
     "prod": "node dist/index.js",
     "build": "tsc",
     "test": "jest --runInBand",
-    "codegen": "gql-gen"
+    "codegen": "gql-gen",
+    "loadtest": "yarn artillery run artillery.yml > loadtest.log",
+    "loadtest:limit": "yarn artillery run artillery-limit.yml > loadtest.log"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "1.2.1-alpha-3d654462.34",
