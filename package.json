@@ -31,6 +31,7 @@
     "@types/lodash": "4.14.133",
     "@types/node": "12.0.4",
     "@types/pg": "7.4.14",
+    "artillery": "1.6.0-28",
     "jest": "24.8.0",
     "ts-jest": "24.0.2",
     "ts-node": "8.2.0",
