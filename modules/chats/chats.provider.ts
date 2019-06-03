@@ -28,9 +28,9 @@ export class Chats {
 
   private chatsCache = new Map<string, Chat>();
   private loaders = {
-    chats: new DataLoader<ChatsKey, QueryResult['rows']>(keys => {
+    chats: new DataLoader<ChatsKey, QueryResult['rows']>((keys) => {
       return Promise.all(
-        keys.map(async query => {
+        keys.map(async (query) => {
           if (isChatsByUser(query)) {
             return this._findChatsByUser(query.userId);
           }
@@ -60,7 +60,7 @@ export class Chats {
       AND chats_users.user_id = ${userId}
     `);
 
-    rows.forEach(row => {
+    rows.forEach((row) => {
       this._writeChatToCache(row);
     });
 
