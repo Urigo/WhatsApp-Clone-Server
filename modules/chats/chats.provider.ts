@@ -48,10 +48,15 @@ export class Chats {
   }
 
   async findChatById(chatId: string) {
+    const rows = await this._findChatById(chatId);
+    return rows[0] || null;
+  }
+
+  private async _findChatById(chatId: string) {
     const { rows } = await this.db.query(sql`
       SELECT * FROM chats WHERE id = ${chatId}
     `);
-    return rows[0] || null;
+    return rows;
   }
 
   async findMessagesByChat(chatId: string) {
