@@ -111,7 +111,11 @@ const resolvers: Resolvers = {
     },
 
     async messages(chat, args, { injector }) {
-      return injector.get(Chats).findMessagesByChat(chat.id);
+      return injector.get(Chats).findMessagesByChat({
+        chatId: chat.id,
+        limit: args.limit,
+        after: args.after,
+      });
     },
 
     async lastMessage(chat, args, { injector }) {
