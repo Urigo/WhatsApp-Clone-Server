@@ -1,7 +1,22 @@
 import { Injectable, Inject, ProviderScope } from '@graphql-modules/di';
+import { QueryResult } from 'pg';
 import sql from 'sql-template-strings';
+import DataLoader from 'dataloader';
 import { Database } from '../common/database.provider';
 import { PubSub } from '../common/pubsub.provider';
+
+type ChatsByUser = { userId: string };
+type ChatByUser = { userId: string; chatId: string };
+type ChatById = { chatId: string };
+type ChatsKey = ChatById | ChatByUser | ChatsByUser;
+
+function isChatsByUser(query: any): query is ChatsByUser {
+  return query.userId && !query.chatId;
+}
+
+function isChatByUser(query: any): query is ChatByUser {
+  return query.userId && query.chatId;
+}
 
 @Injectable({
   scope: ProviderScope.Session,
@@ -10,8 +25,26 @@ export class Chats {
   @Inject() private db: Database;
   @Inject() private pubsub: PubSub;
 
+  private loaders = {
+    chats: new DataLoader<ChatsKey, QueryResult['rows']>(keys => {
+      return Promise.all(
+        keys.map(async query => {
+          if (isChatsByUser(query)) {
+            return this._findChatsByUser(query.userId);
+          }
+
+          if (isChatByUser(query)) {
+            return this._findChatByUser(query);
+          }
+
+          return this._findChatById(query.chatId);
+        })
+      );
+    }),
+  };
+
   async findChatsByUser(userId: string) {
-    return this._findChatsByUser(userId);
+    return this.loaders.chats.load({ userId });
   }
 
   private async _findChatsByUser(userId: string) {
@@ -25,7 +58,7 @@ export class Chats {
   }
 
   async findChatByUser({ chatId, userId }: { chatId: string; userId: string }) {
-    const rows = await this._findChatByUser({ chatId, userId });
+    const rows = await this.loaders.chats.load({ chatId, userId });
 
     return rows[0] || null;
   }
@@ -48,7 +81,7 @@ export class Chats {
   }
 
   async findChatById(chatId: string) {
-    const rows = await this._findChatById(chatId);
+    const rows = await this.loaders.chats.load({ chatId });
     return rows[0] || null;
   }
 
