@@ -1,6 +1,8 @@
 import { Pool } from "pg";
 import sql from 'sql-template-strings'
-import { resetDb as envResetDb } from './env'
+import faker from 'faker';
+import addMinutes from 'date-fns/add_minutes';
+import { resetDb as envResetDb, fakedDb } from './env'
 
 export type User = {
   id: string
@@ -184,6 +186,10 @@ export const resetDb = async () => {
     },
   ]
 
+  if (fakedDb) {
+    addFakedMessages(sampleMessages, 42)
+  }
+
   for (const sampleMessage of sampleMessages) {
     await pool.query(sql`
       INSERT INTO messages(id, content, created_at, chat_id, sender_user_id)
@@ -193,6 +199,21 @@ export const resetDb = async () => {
 
   await pool.query(sql`SELECT setval('messages_id_seq', (SELECT max(id) FROM messages))`)
 
+}
+
+function addFakedMessages(messages: Message[], count: number) {
+  const message = messages[0];
+  const date = message.created_at;
+  const id = messages.length + 1;
+
+  new Array(count).fill(0).forEach((_, i) => {
+    messages.push({
+      ...message,
+      id: `${id + i}`,
+      content: faker.lorem.sentence(4),
+      created_at: addMinutes(date, i + 1),
+    });
+  });
 }
 
 if (envResetDb) {
