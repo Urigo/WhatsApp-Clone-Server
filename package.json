@@ -9,6 +9,8 @@
   "scripts": {
     "prestart": "yarn codegen",
     "start": "ts-node index.ts",
+    "prebuild": "yarn codegen",
+    "build": "tsc",
     "test": "TZ=\"Asia/Jerusalem\" jest --runInBand --forceExit",
     "codegen": "graphql-codegen",
     "format": "prettier \"**/*.ts\" --write"
