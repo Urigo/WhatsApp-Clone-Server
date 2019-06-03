@@ -60,6 +60,10 @@ export class Chats {
       AND chats_users.user_id = ${userId}
     `);
 
+    rows.forEach(row => {
+      this._writeChatToCache(row);
+    });
+
     return rows;
   }
 
@@ -78,6 +82,8 @@ export class Chats {
       AND chats_users.user_id = ${userId}
     `);
 
+    this._writeChatToCache(rows[0]);
+
     return rows;
   }
 
@@ -90,6 +96,9 @@ export class Chats {
     const { rows } = await this.db.query(sql`
       SELECT * FROM chats WHERE id = ${chatId}
     `);
+
+    this._writeChatToCache(rows[0]);
+
     return rows;
   }
 
