@@ -11,6 +11,10 @@ export class Chats {
   @Inject() private pubsub: PubSub;
 
   async findChatsByUser(userId: string) {
+    return this._findChatsByUser(userId);
+  }
+
+  private async _findChatsByUser(userId: string) {
     const { rows } = await this.db.query(sql`
       SELECT chats.* FROM chats, chats_users
       WHERE chats.id = chats_users.chat_id
