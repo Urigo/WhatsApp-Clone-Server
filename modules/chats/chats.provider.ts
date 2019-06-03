@@ -4,6 +4,7 @@ import sql from 'sql-template-strings';
 import DataLoader from 'dataloader';
 import { Database } from '../common/database.provider';
 import { PubSub } from '../common/pubsub.provider';
+import { Chat } from '../../db';
 
 type ChatsByUser = { userId: string };
 type ChatByUser = { userId: string; chatId: string };
@@ -25,12 +26,17 @@ export class Chats {
   @Inject() private db: Database;
   @Inject() private pubsub: PubSub;
 
+  private chatsCache = new Map<string, Chat>();
   private loaders = {
     chats: new DataLoader<ChatsKey, QueryResult['rows']>(keys => {
       return Promise.all(
         keys.map(async query => {
           if (isChatsByUser(query)) {
             return this._findChatsByUser(query.userId);
+          }
+
+          if (this.chatsCache.has(query.chatId)) {
+            return [this._readChatFromCache(query.chatId)];
           }
 
           if (isChatByUser(query)) {
@@ -252,6 +258,16 @@ export class Chats {
     } catch (e) {
       await this.db.query('ROLLBACK');
       throw e;
+    }
+  }
+
+  private _readChatFromCache(chatId: string) {
+    return this.chatsCache.get(chatId);
+  }
+
+  private _writeChatToCache(chat?: Chat) {
+    if (chat) {
+      this.chatsCache.set(chat.id, chat);
     }
   }
 }
