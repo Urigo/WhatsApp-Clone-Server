@@ -7,6 +7,8 @@
   },
   "private": true,
   "scripts": {
+    "prestart": "yarn generate",
+    "prebuild": "yarn generate",
     "build": "tsc",
     "start": "ts-node index.ts",
     "test": "jest --runInBand --forceExit",
