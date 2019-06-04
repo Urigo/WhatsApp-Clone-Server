@@ -199,8 +199,7 @@ export const resetDb = async () => {
 
   await pool.query(sql`DELETE FROM messages`);
 
-  const baseTime =
-    new Date('01.01.2019').getTime() + new Date().getTimezoneOffset() * 60000;
+  const baseTime = new Date('1 Jan 2019 GMT').getTime();
 
   const sampleMessages = [
     {
