@@ -7,9 +7,13 @@
   },
   "private": true,
   "scripts": {
+    "build": "tsc",
     "start": "ts-node index.ts",
-    "test": "jest --runInBand",
+    "test": "jest --runInBand --forceExit",
     "codegen": "gql-gen"
+  },
+  "jest-junit": {
+    "outputDirectory": "./test-results"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "1.1.3",
@@ -29,6 +33,7 @@
     "@types/node": "12.0.4",
     "@types/pg": "7.4.14",
     "jest": "24.8.0",
+    "jest-junit": "6.4.0",
     "ts-jest": "24.0.2",
     "ts-node": "8.2.0",
     "typescript": "3.5.1"
@@ -63,6 +68,15 @@
   "jest": {
     "transform": {
       "^.+\\.(js|jsx|ts|tsx)$": "<rootDir>/node_modules/ts-jest"
-    }
+    },
+    "globals": {
+      "ts-jest": {
+        "diagnostics": false
+      }
+    },
+    "reporters": [
+      "default",
+      "jest-junit"
+    ]
   }
 }

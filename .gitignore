@@ -2,3 +2,6 @@ node_modules
 npm-debug.log
 types/graphql.d.ts
 types/unsplash.d.ts
+test-results/
+dist
+build
