@@ -199,38 +199,35 @@ export const resetDb = async () => {
 
   await pool.query(sql`DELETE FROM messages`);
 
+  const baseTime =
+    new Date('01.01.2019').getTime() + new Date().getTimezoneOffset() * 60000;
+
   const sampleMessages = [
     {
       id: '1',
       content: 'You on your way?',
-      created_at: new Date(new Date('1-1-2019').getTime() - 60 * 1000 * 1000),
+      created_at: new Date(baseTime - 60 * 1000 * 1000),
       chat_id: '1',
       sender_user_id: '1'
     },
     {
       id: '2',
       content: "Hey, it's me",
-      created_at: new Date(
-        new Date('1-1-2019').getTime() - 2 * 60 * 1000 * 1000
-      ),
+      created_at: new Date(baseTime - 2 * 60 * 1000 * 1000),
       chat_id: '2',
       sender_user_id: '1'
     },
     {
       id: '3',
       content: 'I should buy a boat',
-      created_at: new Date(
-        new Date('1-1-2019').getTime() - 24 * 60 * 1000 * 1000
-      ),
+      created_at: new Date(baseTime - 24 * 60 * 1000 * 1000),
       chat_id: '3',
       sender_user_id: '1'
     },
     {
       id: '4',
       content: 'This is wicked good ice cream.',
-      created_at: new Date(
-        new Date('1-1-2019').getTime() - 14 * 24 * 60 * 1000 * 1000
-      ),
+      created_at: new Date(baseTime - 14 * 24 * 60 * 1000 * 1000),
       chat_id: '4',
       sender_user_id: '1'
     }
