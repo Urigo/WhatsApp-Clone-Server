@@ -17,9 +17,9 @@
     "outputDirectory": "./test-results"
   },
   "devDependencies": {
-    "@graphql-codegen/cli": "1.2.1-alpha-3d654462.34",
-    "@graphql-codegen/typescript": "1.2.1-alpha-3d654462.34",
-    "@graphql-codegen/typescript-resolvers": "1.2.1-alpha-3d654462.34",
+    "@graphql-codegen/cli": "1.2.1",
+    "@graphql-codegen/typescript": "1.2.1",
+    "@graphql-codegen/typescript-resolvers": "1.2.1",
     "@types/bcrypt": "3.0.0",
     "@types/body-parser": "1.17.0",
     "@types/cookie": "0.3.3",
