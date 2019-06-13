@@ -38,7 +38,7 @@
     "prettier": "1.18.2",
     "ts-jest": "24.0.2",
     "ts-node": "8.2.0",
-    "typescript": "3.5.1"
+    "typescript": "3.5.2"
   },
   "dependencies": {
     "@graphql-modules/core": "0.7.5",
