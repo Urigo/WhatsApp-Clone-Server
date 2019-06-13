@@ -37,7 +37,7 @@
     "prettier": "1.18.2",
     "ts-jest": "24.0.2",
     "ts-node": "8.2.0",
-    "typescript": "3.5.1"
+    "typescript": "3.5.2"
   },
   "dependencies": {
     "@safe-api/middleware": "0.0.2",
