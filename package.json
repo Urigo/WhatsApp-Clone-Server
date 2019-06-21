@@ -58,7 +58,7 @@
     "graphql-import": "0.7.1",
     "graphql-iso-date": "3.6.1",
     "graphql-postgres-subscriptions": "1.0.5",
-    "graphql-tools": "4.0.4",
+    "graphql-tools": "4.0.5",
     "jsonwebtoken": "8.5.1",
     "lodash": "4.17.11",
     "pg": "7.11.0",
