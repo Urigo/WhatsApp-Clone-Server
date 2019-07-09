@@ -40,8 +40,8 @@
     "typescript": "3.5.2"
   },
   "dependencies": {
-    "apollo-server-express": "2.6.7",
-    "apollo-server-testing": "2.6.7",
+    "apollo-server-express": "2.6.8",
+    "apollo-server-testing": "2.6.8",
     "bcrypt": "3.0.6",
     "body-parser": "1.19.0",
     "cookie": "0.4.0",
