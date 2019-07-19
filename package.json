@@ -60,7 +60,7 @@
     "graphql-postgres-subscriptions": "1.0.5",
     "graphql-tools": "4.0.5",
     "jsonwebtoken": "8.5.1",
-    "lodash": "4.17.14",
+    "lodash": "4.17.15",
     "pg": "7.11.0",
     "reflect-metadata": "0.1.13",
     "sql-template-strings": "2.2.2"
