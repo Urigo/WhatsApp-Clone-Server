@@ -55,7 +55,7 @@ export class Auth {
     username: string;
   }) {
     validateLength('req.name', name, 3, 50);
-    validateLength('req.username', name, 3, 18);
+    validateLength('req.username', username, 3, 18);
     validatePassword('req.password', password);
 
     if (password !== passwordConfirm) {
