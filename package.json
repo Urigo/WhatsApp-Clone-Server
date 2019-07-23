@@ -28,7 +28,7 @@
     "@types/jest": "24.0.15",
     "@types/node": "12.6.8",
     "jest": "24.8.0",
-    "jest-junit": "6.4.0",
+    "jest-junit": "7.0.0",
     "prettier": "1.18.2",
     "ts-jest": "24.0.2",
     "ts-node": "8.3.0",
