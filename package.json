@@ -41,9 +41,9 @@
   },
   "dependencies": {
     "@safe-api/middleware": "0.0.2",
-    "apollo-datasource-rest": "0.6.0",
-    "apollo-server-express": "2.7.0",
-    "apollo-server-testing": "2.7.0",
+    "apollo-datasource-rest": "0.6.1",
+    "apollo-server-express": "2.7.2",
+    "apollo-server-testing": "2.7.2",
     "bcrypt": "3.0.6",
     "body-parser": "1.19.0",
     "cookie": "0.4.0",
