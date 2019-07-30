@@ -42,7 +42,11 @@ $ yarn codegen
 
 Install PostgreSQL and initialize a database by following the instructions on [this chapter](https://www.tortilla.academy/Urigo/WhatsApp-Clone-Tutorial/master/next/step/14) (without the code diffs):
 
-* PostgreSQL commands to seed the test user with the following details:
+* With docker - PosgreSQL
+```
+docker run --name whatsapp-postgres -e POSTGRES_DB=whatsapp -e POSTGRES_USER=testuser -e POSTGRES_PASSWORD=testpassword --rm -p5432:5432 postgres
+```
+* Without docker - PostgreSQL commands to seed the test user with the following details:
 ```
 user: 'testuser',
 password: 'testpassword',
