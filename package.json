@@ -30,7 +30,7 @@
     "@types/graphql-iso-date": "3.3.1",
     "@types/jest": "24.0.16",
     "@types/jsonwebtoken": "8.3.2",
-    "@types/node": "12.6.8",
+    "@types/node": "12.7.1",
     "@types/pg": "7.4.14",
     "jest": "24.8.0",
     "jest-junit": "7.0.0",
