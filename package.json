@@ -61,7 +61,7 @@
     "date-fns": "2.0.1",
     "express": "4.17.1",
     "faker": "4.1.0",
-    "graphql": "14.5.3",
+    "graphql": "14.6.0",
     "graphql-import": "0.7.1",
     "graphql-scalars": "1.0.1",
     "graphql-postgres-subscriptions": "1.0.5",
