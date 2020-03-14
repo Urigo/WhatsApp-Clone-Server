@@ -35,8 +35,8 @@
     "typescript": "3.5.3"
   },
   "dependencies": {
-    "apollo-server-express": "2.9.0",
-    "apollo-server-testing": "2.9.0",
+    "apollo-server-express": "2.11.0",
+    "apollo-server-testing": "2.11.0",
     "cookie": "0.4.0",
     "cors": "2.8.5",
     "cookie-parser": "1.4.4",
@@ -44,7 +44,7 @@
     "graphql": "14.5.3",
     "graphql-import": "0.7.1",
     "graphql-scalars": "1.0.1",
-    "graphql-tools": "4.0.5"
+    "graphql-tools": "4.0.7"
   },
   "jest": {
     "transform": {
