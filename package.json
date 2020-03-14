@@ -30,7 +30,7 @@
     "@types/jsonwebtoken": "8.3.3",
     "@types/lodash": "4.14.137",
     "@types/node": "12.7.2",
-    "@types/pg": "7.11.0",
+    "@types/pg": "7.14.3",
     "jest": "24.9.0",
     "jest-junit": "8.0.0",
     "prettier": "1.18.2",
@@ -58,7 +58,7 @@
     "graphql-tools": "4.0.5",
     "jsonwebtoken": "8.5.1",
     "lodash": "4.17.15",
-    "pg": "7.12.1",
+    "pg": "7.18.2",
     "reflect-metadata": "0.1.13",
     "sql-template-strings": "2.2.2"
   },
