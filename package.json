@@ -42,7 +42,7 @@
     "apollo-datasource-rest": "0.6.1",
     "apollo-server-express": "2.9.0",
     "apollo-server-testing": "2.9.0",
-    "bcrypt": "3.0.6",
+    "bcrypt": "4.0.1",
     "cookie": "0.4.0",
     "cors": "2.8.5",
     "cookie-parser": "1.4.4",
