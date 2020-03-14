@@ -29,7 +29,7 @@
     "@types/jest": "24.0.18",
     "@types/jsonwebtoken": "8.3.3",
     "@types/node": "12.7.2",
-    "@types/pg": "7.11.0",
+    "@types/pg": "7.14.3",
     "jest": "24.9.0",
     "jest-junit": "8.0.0",
     "prettier": "1.18.2",
@@ -51,7 +51,7 @@
     "graphql-postgres-subscriptions": "1.0.5",
     "graphql-tools": "4.0.5",
     "jsonwebtoken": "8.5.1",
-    "pg": "7.12.1",
+    "pg": "7.18.2",
     "sql-template-strings": "2.2.2"
   },
   "jest": {
