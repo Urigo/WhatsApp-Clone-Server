@@ -17,9 +17,9 @@
     "outputDirectory": "./test-results"
   },
   "devDependencies": {
-    "@graphql-codegen/cli": "1.6.1",
-    "@graphql-codegen/typescript": "1.6.1",
-    "@graphql-codegen/typescript-resolvers": "1.6.1",
+    "@graphql-codegen/cli": "1.13.0",
+    "@graphql-codegen/typescript": "1.13.0",
+    "@graphql-codegen/typescript-resolvers": "1.13.0",
     "@types/cors": "2.8.6",
     "@types/express": "4.17.1",
     "@types/graphql": "14.5.0",
