@@ -39,9 +39,9 @@
   },
   "dependencies": {
     "@safe-api/middleware": "0.0.2",
-    "apollo-datasource-rest": "0.6.1",
-    "apollo-server-express": "2.9.0",
-    "apollo-server-testing": "2.9.0",
+    "apollo-datasource-rest": "0.8.0",
+    "apollo-server-express": "2.11.0",
+    "apollo-server-testing": "2.11.0",
     "bcrypt": "3.0.6",
     "cookie": "0.4.0",
     "cors": "2.8.5",
@@ -51,7 +51,7 @@
     "graphql-import": "0.7.1",
     "graphql-scalars": "1.0.1",
     "graphql-postgres-subscriptions": "1.0.5",
-    "graphql-tools": "4.0.5",
+    "graphql-tools": "4.0.7",
     "jsonwebtoken": "8.5.1",
     "pg": "7.12.1",
     "sql-template-strings": "2.2.2"
