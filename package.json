@@ -30,7 +30,7 @@
     "@types/jsonwebtoken": "8.3.8",
     "@types/node": "13.9.5",
     "@types/pg": "7.14.3",
-    "jest": "25.2.3",
+    "jest": "25.2.4",
     "jest-junit": "10.0.0",
     "prettier": "2.0.2",
     "ts-jest": "25.2.1",
