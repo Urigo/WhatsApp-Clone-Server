@@ -29,7 +29,7 @@
     "@types/jest": "25.1.4",
     "@types/jsonwebtoken": "8.3.8",
     "@types/lodash": "4.14.149",
-    "@types/node": "13.9.5",
+    "@types/node": "13.9.8",
     "@types/pg": "7.14.3",
     "jest": "25.2.3",
     "jest-junit": "10.0.0",
