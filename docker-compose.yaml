@@ -1,0 +1,18 @@
+version: "3.4"
+networks:
+  tortilla:
+services:
+  postgresql:
+    restart: always
+    image: postgres:10.6
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=testuser
+      - POSTGRES_PASSWORD=testpassword
+      - POSTGRES_DB=whatsapp 
+    volumes:
+      - /var/lib/postgresql/data
+    networks:
+      - tortilla
+
