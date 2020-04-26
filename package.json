@@ -68,7 +68,7 @@
     "graphql-tools": "4.0.7",
     "jsonwebtoken": "8.5.1",
     "lodash": "4.17.15",
-    "pg": "8.0.0",
+    "pg": "8.0.3",
     "reflect-metadata": "0.1.13",
     "sql-template-strings": "2.2.2"
   },
