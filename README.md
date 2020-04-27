@@ -44,7 +44,7 @@ Install PostgreSQL and initialize a database by following the instructions on [t
 
 * With docker - PosgreSQL
 ```
-docker run --name whatsapp-postgres -e POSTGRES_DB=whatsapp -e POSTGRES_USER=testuser -e POSTGRES_PASSWORD=testpassword --rm -p5432:5432 postgres
+docker-compose up -d
 ```
 * Without docker - PostgreSQL commands to seed the test user with the following details:
 ```
