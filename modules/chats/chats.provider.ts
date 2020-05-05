@@ -328,5 +328,5 @@ export class Chats {
 }
 
 function cursorToDate(cursor: number) {
-  return `'${format(cursor, 'YYYY-MM-DD HH:mm:ss')}'`;
+  return `'${format(cursor, 'yyyy-MM-dd HH:mm:ss')}'`;
 }
