@@ -38,7 +38,7 @@
     "@types/node": "13.11.1",
     "@types/pg": "7.14.3",
     "artillery": "1.6.0",
-    "jest": "25.3.0",
+    "jest": "25.5.4",
     "jest-junit": "10.0.0",
     "prettier": "2.0.4",
     "ts-jest": "25.3.1",
