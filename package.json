@@ -35,7 +35,7 @@
     "typescript": "3.9.3"
   },
   "dependencies": {
-    "apollo-server-express": "2.13.1",
+    "apollo-server-express": "2.14.2",
     "apollo-server-testing": "2.13.1",
     "cookie": "0.4.1",
     "cors": "2.8.5",
