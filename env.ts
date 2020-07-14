@@ -8,3 +8,4 @@ export const resetDb = process.env.RESET_DB || false;
 export const fakedDb = process.env.FAKED_DB
   ? parseInt(process.env.FAKED_DB, 10)
   : 0;
+process.env.TZ = process.env.TZ ? process.env.TZ : 'UTC';
