@@ -39,7 +39,7 @@
     "@types/pg": "7.14.3",
     "artillery": "1.6.0",
     "jest": "26.0.1",
-    "jest-junit": "10.0.0",
+    "jest-junit": "11.1.0",
     "prettier": "2.0.5",
     "ts-jest": "26.0.0",
     "ts-node": "8.10.1",
