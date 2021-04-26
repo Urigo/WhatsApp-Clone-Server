@@ -4,7 +4,7 @@ networks:
 services:
   postgresql:
     restart: always
-    image: postgres:12.2-alpine
+    image: postgres:12.6-alpine
     ports:
       - "5432:5432"
     environment:
