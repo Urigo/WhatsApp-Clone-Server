@@ -37,7 +37,7 @@
     "@types/lodash": "4.14.152",
     "@types/node": "14.0.4",
     "@types/pg": "7.14.3",
-    "artillery": "1.6.0",
+    "artillery": "1.7.9",
     "jest": "26.0.1",
     "jest-junit": "10.0.0",
     "prettier": "2.0.5",
