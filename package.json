@@ -52,7 +52,7 @@
     "apollo-datasource-rest": "0.9.0",
     "apollo-server-express": "2.13.1",
     "apollo-server-testing": "2.13.1",
-    "axios": "0.19.2",
+    "axios": "0.21.1",
     "bcrypt": "4.0.1",
     "cookie": "0.4.1",
     "cors": "2.8.5",
