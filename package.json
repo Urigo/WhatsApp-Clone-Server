@@ -40,7 +40,7 @@
     "cookie": "0.4.1",
     "cors": "2.8.5",
     "cookie-parser": "1.4.5",
-    "express": "4.17.1",
+    "express": "4.19.2",
     "graphql": "15.0.0",
     "graphql-import": "1.0.2",
     "graphql-scalars": "1.1.2",
